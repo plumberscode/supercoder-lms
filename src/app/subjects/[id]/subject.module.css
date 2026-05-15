@@ -1,0 +1,25 @@
+.lessonItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-radius: var(--radius);
+  color: var(--secondary);
+  transition: all 0.2s ease;
+}
+
+.lessonItem:hover {
+  background-color: #F1F5F9;
+  transform: translateX(4px);
+}
+
+.playIcon {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: var(--primary);
+  font-size: 0.875rem;
+}
+
+.lessonItem:hover .playIcon {
+  opacity: 1;
+}

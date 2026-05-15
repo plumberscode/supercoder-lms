@@ -1,0 +1,110 @@
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-template-rows: auto auto;
+  gap: 24px;
+  padding: 40px 0;
+}
+
+@media (max-width: 1024px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.statCard {
+  grid-column: span 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.xpCircle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+
+.subjectGrid {
+  grid-column: span 8;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.subjectCard {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.3s ease;
+}
+
+.subjectCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.subjectIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background-color: #FEF2F2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.leaderboardCard {
+  grid-column: span 4;
+}
+
+.welcomeCard {
+  grid-column: span 12;
+  background: linear-gradient(135deg, var(--secondary) 0%, #1E293B 100%);
+  color: white;
+  padding: 48px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.welcomeCard h1 {
+  font-size: 2.25rem;
+  margin-bottom: 8px;
+}
+
+.welcomeCard p {
+  color: #94A3B8;
+}
+
+@media (max-width: 1024px) {
+  .statCard, .subjectGrid, .leaderboardCard {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 768px) {
+  .welcomeCard {
+    flex-direction: column;
+    text-align: center;
+    padding: 32px 24px;
+    gap: 24px;
+  }
+  
+  .welcomeCard h1 {
+    font-size: 1.75rem;
+  }
+}

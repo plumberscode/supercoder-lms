@@ -1,66 +1,65 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from 'next/link'
+import styles from './page.module.css'
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className={styles.hero}>
+      <nav className={styles.nav}>
+        <div className={styles.logo}>
+          Super<span>coder</span>
+        </div>
+        <div>
+          <Link href="/login" className="btn btn-secondary" style={{ padding: '8px 20px', fontSize: '0.875rem' }}>
+            Masuk
+          </Link>
+        </div>
+      </nav>
+
+      <div className={styles.badge}>🚀 TINGKATKAN SKILL CODING ANDA</div>
+      <h1 className={styles.title}>
+        Belajar membangun aplikasi <span>nyata</span> dari nol.
+      </h1>
+      <p className={styles.subtitle}>
+        Platform pembelajaran terbaik untuk generasi Supercoder masa depan. 
+        Pantau progres Anda, kumpulkan XP, dan jadilah yang terbaik.
+      </p>
+
+      <div className={styles.ctaGroup}>
+        <Link href="/login" className="btn btn-primary" style={{ padding: '16px 40px', fontSize: '1.125rem' }}>
+          Mulai Sekarang
+        </Link>
+        <Link href="/login" className="btn btn-secondary" style={{ padding: '16px 40px', fontSize: '1.125rem', backgroundColor: 'white', color: 'var(--secondary)', border: '1px solid var(--border)' }}>
+          Lihat Kursus
+        </Link>
+      </div>
+
+      <div className={styles.features}>
+        <div className={styles.featureCard}>
+          <div className={styles.featureIcon}>🎯</div>
+          <h3>Belajar Sambil Bermain</h3>
+          <p style={{ color: '#64748B', fontSize: '0.9375rem', marginTop: '8px' }}>
+            Dapatkan XP dan naik level setiap kali Anda menyelesaikan kuis dan proyek.
           </p>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className={styles.featureCard}>
+          <div className={styles.featureIcon}>👨‍🏫</div>
+          <h3>Masukan dari Ahli</h3>
+          <p style={{ color: '#64748B', fontSize: '0.9375rem', marginTop: '8px' }}>
+            Kirim proyek Anda dan dapatkan ulasan langsung dari instruktur kami.
+          </p>
         </div>
-      </main>
-    </div>
-  );
+        <div className={styles.featureCard}>
+          <div className={styles.featureIcon}>📈</div>
+          <h3>Papan Peringkat</h3>
+          <p style={{ color: '#64748B', fontSize: '0.9375rem', marginTop: '8px' }}>
+            Bersaing dengan siswa lain dan raih peringkat tertinggi di Supercoder.
+          </p>
+        </div>
+      </div>
+
+      <footer style={{ marginTop: '100px', color: '#94A3B8', fontSize: '0.875rem' }}>
+        © 2026 Supercoder Coding Class. Hak Cipta Dilindungi Undang-Undang.
+      </footer>
+    </main>
+  )
 }
