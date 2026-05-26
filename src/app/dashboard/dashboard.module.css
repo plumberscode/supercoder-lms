@@ -1,7 +1,6 @@
 .dashboardGrid {
   display: grid;
-  grid-template-columns: 1fr 300px;
-  grid-template-rows: auto auto;
+  grid-template-columns: repeat(12, 1fr);
   gap: 24px;
   padding: 40px 0;
 }
@@ -12,31 +11,114 @@
   }
 }
 
-.statCard {
-  grid-column: span 4;
+.welcomeCard {
+  grid-column: span 12;
+  background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%);
+  color: white;
+  padding: 48px;
+  border-radius: var(--radius-lg);
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.xpCircle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 4px solid var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.welcomeCard::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.welcomeCard h1 {
+  font-size: 2.25rem;
+  margin-bottom: 8px;
   font-weight: 800;
-  font-size: 1.25rem;
-  margin-bottom: 16px;
+  letter-spacing: -0.025em;
+  position: relative;
+  z-index: 1;
+}
+
+.welcomeCard p {
+  color: #C7D2FE;
+  font-size: 1.125rem;
+  position: relative;
+  z-index: 1;
 }
 
 .subjectGrid {
   grid-column: span 8;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 24px;
+  align-content: start;
+}
+
+.sidebar {
+  grid-column: span 4;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+}
+
+.xpCircle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: conic-gradient(var(--primary) calc(var(--xp-percent, 50) * 1%), #E2E8F0 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  position: relative;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.xpCircle::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.xpCircleContent {
+  position: relative;
+  z-index: 1;
+  font-weight: 800;
+  font-size: 2rem;
+  color: var(--primary);
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.xpCircleContent span {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748B;
+  margin-top: 4px;
 }
 
 .subjectCard {
@@ -47,51 +129,55 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.subjectCard::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4F46E5, #06B6D4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .subjectCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: transparent;
+}
+
+.subjectCard:hover::after {
+  opacity: 1;
 }
 
 .subjectIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background-color: #FEF2F2;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  color: #4F46E5;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
 }
 
 .leaderboardCard {
-  grid-column: span 4;
-}
-
-.welcomeCard {
-  grid-column: span 12;
-  background: linear-gradient(135deg, var(--secondary) 0%, #1E293B 100%);
-  color: white;
-  padding: 48px;
+  background: white;
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.welcomeCard h1 {
-  font-size: 2.25rem;
-  margin-bottom: 8px;
-}
-
-.welcomeCard p {
-  color: #94A3B8;
+  padding: 32px;
 }
 
 @media (max-width: 1024px) {
-  .statCard, .subjectGrid, .leaderboardCard {
+  .subjectGrid, .sidebar {
     grid-column: span 12;
   }
 }

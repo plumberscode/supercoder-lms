@@ -25,6 +25,8 @@ export default async function DashboardPage() {
     .select('*')
     .eq('is_active', true)
 
+  const xpPercent = Math.min((profile.xp / 1000) * 100, 100)
+
   return (
     <div className="container">
       <div className={styles.dashboardGrid}>
@@ -41,7 +43,7 @@ export default async function DashboardPage() {
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '0.875rem', color: '#94A3B8', marginBottom: '4px' }}>LEVEL SAAT INI</div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--primary)' }}>Lvl {profile.level}</div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white' }}>Lvl {profile.level}</div>
             <form action={signOut} style={{ marginTop: '12px' }}>
               <button type="submit" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', cursor: 'pointer' }}>
                 Log Out 🚪
@@ -50,24 +52,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Stats Section */}
-        <div className={`${styles.statCard} card`}>
-          <div>
-            <h3 style={{ marginBottom: '24px' }}>Progres Saya</h3>
-            <div className={styles.xpCircle}>
-              {profile.xp}
-            </div>
-            <p style={{ fontWeight: 600 }}>{profile.xp} XP Didapat</p>
-            <p style={{ fontSize: '0.875rem', color: '#64748B' }}>Selesaikan kuis untuk dapat lebih banyak!</p>
-          </div>
-          <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
-            <Link href="/leaderboard" style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '0.875rem' }}>
-              Lihat Papan Peringkat →
-            </Link>
-          </div>
-        </div>
-
-        {/* Subjects Section */}
+        {/* Subjects Section (Left Side - 8 Columns) */}
         <div className={styles.subjectGrid}>
           {subjects?.map((subject) => (
             <Link href={`/subjects/${subject.id}`} key={subject.id} className={styles.subjectCard}>
@@ -80,7 +65,7 @@ export default async function DashboardPage() {
               </div>
               <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="badge badge-xp">Coding</span>
-                <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>Mulai Belajar →</span>
+                <span style={{ fontSize: '0.75rem', color: '#6366F1', fontWeight: 600 }}>Mulai Belajar →</span>
               </div>
             </Link>
           ))}
@@ -91,17 +76,43 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Achievements / Notifications */}
-        <div className={`${styles.leaderboardCard} card`}>
-          <h3 style={{ marginBottom: '20px' }}>Lencana Terbaru</h3>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }} title="Pemula">
-              🌱
+        {/* Sidebar (Right Side - 4 Columns) */}
+        <div className={styles.sidebar}>
+          {/* Stats Section */}
+          <div className={styles.statCard}>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <h3 style={{ marginBottom: '24px', alignSelf: 'flex-start' }}>Progres Saya</h3>
+              
+              <div className={styles.xpCircle} style={{ '--xp-percent': xpPercent } as React.CSSProperties}>
+                <div className={styles.xpCircleContent}>
+                  {profile.xp}
+                  <span>XP</span>
+                </div>
+              </div>
+              
+              <p style={{ fontWeight: 600, marginTop: '8px' }}>Terus kumpulkan XP!</p>
+              <p style={{ fontSize: '0.875rem', color: '#64748B', marginTop: '4px' }}>Selesaikan modul dan kuis untuk dapat lebih banyak XP.</p>
+            </div>
+            
+            <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border)', width: '100%' }}>
+              <Link href="/leaderboard" style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '0.875rem' }}>
+                Lihat Papan Peringkat →
+              </Link>
             </div>
           </div>
-          <p style={{ marginTop: '24px', fontSize: '0.875rem', color: '#64748B' }}>
-            Buka lebih banyak lencana dengan menyelesaikan modul!
-          </p>
+
+          {/* Achievements / Notifications */}
+          <div className={styles.leaderboardCard}>
+            <h3 style={{ marginBottom: '20px' }}>Lencana Terbaru</h3>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }} title="Pemula">
+                🌱
+              </div>
+            </div>
+            <p style={{ marginTop: '24px', fontSize: '0.875rem', color: '#64748B' }}>
+              Buka lebih banyak lencana dengan menyelesaikan modul!
+            </p>
+          </div>
         </div>
       </div>
     </div>
