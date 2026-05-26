@@ -17,9 +17,9 @@ export default async function LessonScoresPage({
     .select('id, title')
     .order('order_index')
 
-  let modules = []
-  let lessons = []
-  let students = []
+  let modules: any[] = []
+  let lessons: any[] = []
+  let students: any[] = []
   let scoresMap: Record<string, any> = {}
 
   if (params.subject_id) {
