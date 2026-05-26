@@ -40,13 +40,6 @@ export async function submitLessonScore(formData: FormData) {
       console.error('Error updating score:', error)
       throw new Error('Gagal memperbarui nilai')
     }
-
-    const oldScore = existing.score || 0
-    const xpDiff = score - oldScore
-    if (xpDiff !== 0) {
-      const { error: rpcError } = await supabase.rpc('increment_xp', { user_id: studentId, amount: xpDiff })
-      if (rpcError) console.error('Error incrementing XP diff:', rpcError)
-    }
   } else {
     // Insert
     const { error } = await supabase
@@ -66,11 +59,6 @@ export async function submitLessonScore(formData: FormData) {
     if (error) {
       console.error('Error inserting score:', error)
       throw new Error(`Gagal menyimpan nilai baru: ${error.message} (${error.details || ''})`)
-    }
-
-    if (score > 0) {
-      const { error: rpcError } = await supabase.rpc('increment_xp', { user_id: studentId, amount: score })
-      if (rpcError) console.error('Error incrementing XP:', rpcError)
     }
   }
 
