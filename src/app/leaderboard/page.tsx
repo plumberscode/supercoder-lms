@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function LeaderboardPage() {
   const supabase = await createClient()
 

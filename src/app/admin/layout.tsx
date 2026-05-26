@@ -41,6 +41,9 @@ export default async function AdminLayout({
           <Link href="/admin/submissions" className={styles.navLink}>
             <span>📝</span> Tugas & Proyek
           </Link>
+          <Link href="/admin/lesson-scores" className={styles.navLink}>
+            <span>💯</span> Penilaian Materi
+          </Link>
           <Link href="/admin/question-bank" className={styles.navLink}>
             <span>🧠</span> Bank Soal
           </Link>

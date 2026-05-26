@@ -7,6 +7,8 @@ export default async function LessonPage({ params }: { params: { id: string } })
   const { id } = await params
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+
   const { data: lesson } = await supabase
     .from('lessons')
     .select('*, module_id(subject_id, title)')
@@ -14,6 +16,18 @@ export default async function LessonPage({ params }: { params: { id: string } })
     .single()
 
   if (!lesson) return <div>Materi tidak ditemukan</div>
+
+  let lessonScore = null
+  if (user) {
+    const { data } = await supabase
+      .from('submissions')
+      .select('score, feedback, graded_at')
+      .eq('student_id', user.id)
+      .eq('content_id', id)
+      .eq('type', 'lesson')
+      .maybeSingle()
+    if (data) lessonScore = data
+  }
 
   const subjectId = (lesson.module_id as any).subject_id
 
@@ -32,6 +46,27 @@ export default async function LessonPage({ params }: { params: { id: string } })
         <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.25rem)', marginBottom: '32px' }}>{lesson.title}</h1>
 
         <div className="card" style={{ marginBottom: '40px' }}>
+          {lessonScore && (
+            <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', padding: '20px', borderRadius: '12px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <h3 style={{ color: '#166534', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>🏆</span> Nilai Materi
+                </h3>
+                <p style={{ margin: 0, color: '#15803D', fontSize: '0.9rem' }}>
+                  Dinilai pada {new Date(lessonScore.graded_at).toLocaleDateString()}
+                  {lessonScore.feedback && (
+                    <span style={{ display: 'block', marginTop: '8px', fontStyle: 'italic', color: '#166534' }}>
+                      " {lessonScore.feedback} "
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div style={{ fontSize: '2rem', fontWeight: 800, color: '#166534', backgroundColor: 'white', padding: '12px 24px', borderRadius: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                {lessonScore.score} <span style={{ fontSize: '1rem', color: '#86EFAC', fontWeight: 600 }}>/ 100</span>
+              </div>
+            </div>
+          )}
+
           {/* Material Viewer */}
           {lesson.type === 'video' && (
             <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px', backgroundColor: 'black' }}>
