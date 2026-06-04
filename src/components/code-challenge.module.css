@@ -3,9 +3,9 @@
 }
 
 .splitLayout {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
@@ -13,9 +13,12 @@
   background: white;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 32px;
+  padding: 24px 32px;
   overflow-y: auto;
-  max-height: 75vh;
+  min-height: 150px;
+  height: 250px;
+  max-height: 80vh;
+  resize: vertical;
 }
 
 .editorPanel {
@@ -433,11 +436,10 @@
 }
 
 @media (max-width: 768px) {
-  .splitLayout {
-    grid-template-columns: 1fr;
-  }
   .descriptionPanel {
     max-height: none;
+    height: auto;
+    resize: none;
   }
   .testDetails {
     grid-template-columns: 1fr;
