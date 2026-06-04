@@ -547,6 +547,18 @@ export default function ModuleList({
                                           Kelola Soal
                                         </Link>
                                       )}
+                                      {lesson.type === "code" && (
+                                        <Link
+                                          href={`/admin/coding-challenges/${lesson.id}`}
+                                          className="btn btn-secondary"
+                                          style={{
+                                            padding: "6px 12px",
+                                            fontSize: "0.75rem",
+                                          }}
+                                        >
+                                          💻 Kelola Soal Coding
+                                        </Link>
+                                      )}
                                       <form
                                         action={deleteLesson.bind(
                                           null,
@@ -690,6 +702,36 @@ export default function ModuleList({
                           }}
                         >
                           🧠 Kuis
+                        </button>
+                        <button
+                          onClick={() =>
+                            setActiveAddForm(
+                              activeAddForm?.moduleId === module.id &&
+                                activeAddForm?.type === "code"
+                                ? null
+                                : { moduleId: module.id, type: "code" },
+                            )
+                          }
+                          className="btn"
+                          style={{
+                            padding: "8px 16px",
+                            fontSize: "0.875rem",
+                            backgroundColor:
+                              activeAddForm?.moduleId === module.id &&
+                              activeAddForm?.type === "code"
+                                ? "var(--primary)"
+                                : "#F1F5F9",
+                            color:
+                              activeAddForm?.moduleId === module.id &&
+                              activeAddForm?.type === "code"
+                                ? "white"
+                                : "var(--secondary)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          💻 Soal Coding
                         </button>
                       </div>
 

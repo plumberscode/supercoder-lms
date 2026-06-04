@@ -82,14 +82,14 @@ export default function LessonForm({ moduleId, subjectId, orderIndex, initialTyp
     <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', marginTop: '16px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
       <div style={{ backgroundColor: '#F8FAFC', padding: '16px 24px', borderBottom: '1px solid #E2E8F0', borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}>
         <h4 style={{ margin: 0, color: '#0F172A' }}>
-          {type === 'quiz' ? 'Konfigurasi Kuis Baru' : type === 'project' ? 'Konfigurasi Tugas Baru' : 'Konfigurasi Materi Baru'}
+          {type === 'quiz' ? 'Konfigurasi Kuis Baru' : type === 'project' ? 'Konfigurasi Tugas Baru' : type === 'code' ? 'Konfigurasi Soal Coding Baru' : 'Konfigurasi Materi Baru'}
         </h4>
       </div>
 
       <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: (type === 'quiz' || type === 'project') ? '1fr' : '1fr 1fr', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: (type === 'quiz' || type === 'project' || type === 'code') ? '1fr' : '1fr 1fr', gap: '24px' }}>
           <div style={inputGroupStyle}>
-            <label style={labelStyle}>Judul {type === 'quiz' ? 'Kuis' : type === 'project' ? 'Tugas' : 'Materi'}</label>
+            <label style={labelStyle}>Judul {type === 'quiz' ? 'Kuis' : type === 'project' ? 'Tugas' : type === 'code' ? 'Soal Coding' : 'Materi'}</label>
             <input 
               name="title" 
               type="text" 
@@ -98,7 +98,7 @@ export default function LessonForm({ moduleId, subjectId, orderIndex, initialTyp
               style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1' }}
             />
           </div>
-          {type !== 'quiz' && type !== 'project' && (
+          {type !== 'quiz' && type !== 'project' && type !== 'code' && (
             <div style={inputGroupStyle}>
               <label style={labelStyle}>Tipe Materi</label>
               <select 
@@ -111,6 +111,7 @@ export default function LessonForm({ moduleId, subjectId, orderIndex, initialTyp
                 <option value="video">📹 Link Video</option>
                 <option value="pdf">📄 Unggah PDF</option>
                 <option value="link">🔗 Link Eksternal</option>
+                <option value="code">💻 Soal Coding</option>
               </select>
             </div>
           )}
@@ -211,12 +212,26 @@ export default function LessonForm({ moduleId, subjectId, orderIndex, initialTyp
               Siswa akan diminta untuk mengunggah atau mengirimkan link hasil pekerjaan mereka.
             </p>
           )}
+
+          {type === 'code' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                <span style={{ fontSize: '2rem' }}>💻</span>
+                <div>
+                  <p style={{ margin: 0, fontWeight: 600, color: '#1E293B' }}>Soal Coding Interaktif</p>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.875rem', color: '#64748B' }}>
+                    Siswa akan mengerjakan soal coding langsung di built-in IDE. Setelah membuat lesson ini, Anda bisa mengatur soal, starter code, dan test cases dari halaman detail materi.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #E2E8F0' }}>
 
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ minWidth: '160px' }}>
-            {loading ? 'Menyimpan...' : `Simpan ${type === 'quiz' ? 'Kuis' : type === 'project' ? 'Tugas' : 'Materi'}`}
+            {loading ? 'Menyimpan...' : `Simpan ${type === 'quiz' ? 'Kuis' : type === 'project' ? 'Tugas' : type === 'code' ? 'Soal Coding' : 'Materi'}`}
           </button>
         </div>
       </form>

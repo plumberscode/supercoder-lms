@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import QuizView from './quiz-view'
 import ProjectSubmission from './project-submission'
+import CodeChallenge from '@/components/CodeChallenge'
 
 export default async function LessonPage({ params }: { params: { id: string } }) {
   const { id } = await params
@@ -18,6 +19,7 @@ export default async function LessonPage({ params }: { params: { id: string } })
   if (!lesson) return <div>Materi tidak ditemukan</div>
 
   let lessonScore = null
+  let codeSubmission = null
   if (user) {
     const { data } = await supabase
       .from('submissions')
@@ -27,6 +29,35 @@ export default async function LessonPage({ params }: { params: { id: string } })
       .eq('type', 'lesson')
       .maybeSingle()
     if (data) lessonScore = data
+
+    const { data: codeSub } = await supabase
+      .from('submissions')
+      .select('score, data')
+      .eq('student_id', user.id)
+      .eq('content_id', id)
+      .eq('type', 'code')
+      .maybeSingle()
+    if (codeSub) codeSubmission = codeSub
+  }
+
+  // Fetch coding challenge if lesson type is 'code'
+  let codingChallenge = null
+  let testCases: any[] = []
+  if (lesson.type === 'code') {
+    const { data: challenge } = await supabase
+      .from('coding_challenges')
+      .select('*')
+      .eq('lesson_id', id)
+      .single()
+    if (challenge) {
+      codingChallenge = challenge
+      const { data: cases } = await supabase
+        .from('test_cases')
+        .select('*')
+        .eq('challenge_id', challenge.id)
+        .order('order_index')
+      testCases = cases || []
+    }
   }
 
   const subjectId = (lesson.module_id as any).subject_id
@@ -107,6 +138,22 @@ export default async function LessonPage({ params }: { params: { id: string } })
 
           {lesson.type === 'quiz' && (
              <QuizView lessonId={lesson.id} />
+          )}
+
+          {lesson.type === 'code' && codingChallenge && (
+            <CodeChallenge
+              challenge={codingChallenge}
+              testCases={testCases}
+              existingSubmission={codeSubmission}
+            />
+          )}
+
+          {lesson.type === 'code' && !codingChallenge && (
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+              <span style={{ fontSize: '4rem', marginBottom: '16px', display: 'block' }}>💻</span>
+              <h3>Soal Coding</h3>
+              <p style={{ color: '#64748B' }}>Soal coding untuk materi ini belum dibuat oleh guru.</p>
+            </div>
           )}
         </div>
 
