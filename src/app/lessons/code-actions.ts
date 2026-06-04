@@ -45,6 +45,9 @@ export async function submitCodeSolution(params: {
       graded_at: new Date().toISOString()
     })
     if (error) throw new Error('Gagal menyimpan: ' + error.message)
+
+    // Award 50 XP for completing a coding challenge
+    await supabase.rpc('increment_xp', { user_id: user.id, amount: 50 })
   }
 
   revalidatePath(`/lessons/${params.lessonId}`)
