@@ -84,7 +84,7 @@ export function createSandboxedIframe(
 ): Promise<HTMLIFrameElement> {
   return new Promise((resolve, reject) => {
     const iframe = document.createElement('iframe')
-    iframe.setAttribute('sandbox', 'allow-scripts')
+    iframe.setAttribute('sandbox', 'allow-scripts allow-forms')
     iframe.style.width = '100%'
     iframe.style.height = visible ? '100%' : '0'
     iframe.style.border = 'none'
