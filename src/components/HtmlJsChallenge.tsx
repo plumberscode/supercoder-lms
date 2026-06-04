@@ -111,6 +111,10 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
   }
 
   const handleSubmit = async () => {
+    if (testCases.length === 0) {
+      setOutputError('Tidak ada test case untuk soal ini. Hubungi guru Anda.')
+      return
+    }
     setIsSubmitting(true)
     setTestResults(null)
     clearPreview()
