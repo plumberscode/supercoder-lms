@@ -39,12 +39,23 @@ console.error = function() {
 
 window.addEventListener('message', function(e) {
   if (e.data && e.data.type === 'exec-js') {
+    let caughtErr = null;
+    const onErr = function(ev) { 
+      caughtErr = ev.message; 
+    };
+    window.addEventListener('error', onErr);
+    
     try {
-      new Function(e.data.code)();
-      parent.postMessage({ type: 'exec-result', output: _output.join('\\n'), error: null }, '*');
+      const script = document.createElement('script');
+      script.textContent = e.data.code;
+      document.body.appendChild(script);
     } catch(err) {
-      parent.postMessage({ type: 'exec-result', output: _output.join('\\n'), error: err.message }, '*');
+      if (!caughtErr) caughtErr = err.message;
     }
+    
+    window.removeEventListener('error', onErr);
+    
+    parent.postMessage({ type: 'exec-result', output: _output.join('\\n'), error: caughtErr }, '*');
   }
   if (e.data && e.data.type === 'run-test') {
     try {
