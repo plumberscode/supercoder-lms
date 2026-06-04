@@ -12,6 +12,7 @@ export async function saveChallenge(lessonId: string, formData: FormData) {
   const description = formData.get('description') as string
   const language = formData.get('language') as string
   const starterCode = formData.get('starterCode') as string
+  const starterHtml = formData.get('starterHtml') as string || ''
   const solutionCode = formData.get('solutionCode') as string
   const hintsRaw = formData.get('hints') as string
 
@@ -32,7 +33,7 @@ export async function saveChallenge(lessonId: string, formData: FormData) {
   if (existing) {
     const { error } = await supabase
       .from('coding_challenges')
-      .update({ title, description, language, starter_code: starterCode, solution_code: solutionCode, hints })
+      .update({ title, description, language, starter_code: starterCode, starter_html: starterHtml, solution_code: solutionCode, hints })
       .eq('id', existing.id)
     if (error) throw new Error('Gagal memperbarui soal: ' + error.message)
   } else {
@@ -44,6 +45,7 @@ export async function saveChallenge(lessonId: string, formData: FormData) {
         description,
         language,
         starter_code: starterCode,
+        starter_html: starterHtml,
         solution_code: solutionCode,
         hints,
         created_by: user.id

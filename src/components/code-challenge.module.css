@@ -345,6 +345,93 @@
   font-weight: 600;
 }
 
+/* HTML/JS Mode — Tab Bar */
+.tabBar {
+  display: flex;
+  gap: 0;
+  background: #161B22;
+  border-bottom: 1px solid #333;
+}
+
+.tab {
+  padding: 10px 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6B7280;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab:hover {
+  color: #D1D5DB;
+  background: rgba(255,255,255,0.03);
+}
+
+.tabActive {
+  color: #F8FAFC;
+  border-bottom-color: var(--primary);
+  background: rgba(255,255,255,0.05);
+}
+
+/* HTML/JS Mode — Preview Panel */
+.previewPanel {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #F8FAFC;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.previewFrame {
+  width: 100%;
+  min-height: 200px;
+  height: 250px;
+  border: none;
+  display: block;
+}
+
+.previewPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #94A3B8;
+  font-size: 0.875rem;
+  padding: 24px;
+  text-align: center;
+}
+
+/* HTML/JS Mode — Editor + Preview vertical split */
+.editorAndPreview {
+  display: flex;
+  flex-direction: column;
+}
+
+.languageBadgeHtmlJs {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
 @media (max-width: 768px) {
   .splitLayout {
     grid-template-columns: 1fr;
@@ -356,3 +443,4 @@
     grid-template-columns: 1fr;
   }
 }
+

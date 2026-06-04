@@ -13,6 +13,7 @@ interface Props {
 export default function ChallengeEditor({ lessonId, existingChallenge, existingTestCases }: Props) {
   const [saving, setSaving] = useState(false)
   const [addingTest, setAddingTest] = useState(false)
+  const [language, setLanguage] = useState(existingChallenge?.language || 'python')
   const { showToast } = useToast()
 
   const handleSaveChallenge = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -122,10 +123,12 @@ export default function ChallengeEditor({ lessonId, existingChallenge, existingT
               <select
                 name="language"
                 defaultValue={existingChallenge?.language || 'python'}
+                onChange={(e) => setLanguage(e.target.value)}
                 style={{ ...inputStyle, backgroundColor: 'white' }}
               >
                 <option value="python">🐍 Python</option>
                 <option value="javascript">⚡ JavaScript</option>
+                <option value="html-js">🌐 HTML + JavaScript</option>
               </select>
             </div>
           </div>
@@ -142,11 +145,26 @@ export default function ChallengeEditor({ lessonId, existingChallenge, existingT
             />
           </div>
 
+          {language === 'html-js' && (
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Starter HTML (Struktur HTML awal yang diberikan ke siswa)</label>
+              <textarea
+                name="starterHtml"
+                placeholder={'<div id="app">\n  <h1 id="title">Halo Dunia</h1>\n  <button id="btn">Klik Saya</button>\n  <p id="output"></p>\n</div>'}
+                defaultValue={existingChallenge?.starter_html || ''}
+                rows={8}
+                style={monoInputStyle}
+              />
+            </div>
+          )}
+
           <div style={inputGroupStyle}>
-            <label style={labelStyle}>Starter Code (Kode awal yang diberikan ke siswa)</label>
+            <label style={labelStyle}>{language === 'html-js' ? 'Starter JavaScript (Kode JS awal)' : 'Starter Code (Kode awal yang diberikan ke siswa)'}</label>
             <textarea
               name="starterCode"
-              placeholder={"# Tulis fungsi di sini\ndef tambah(a, b):\n    # kode kamu di sini\n    pass"}
+              placeholder={language === 'html-js'
+                ? '// Tulis kode JavaScript di sini\nconst btn = document.getElementById("btn");\n// Tambahkan event listener...'
+                : "# Tulis fungsi di sini\ndef tambah(a, b):\n    # kode kamu di sini\n    pass"}
               defaultValue={existingChallenge?.starter_code || ''}
               rows={8}
               style={monoInputStyle}
@@ -270,10 +288,12 @@ export default function ChallengeEditor({ lessonId, existingChallenge, existingT
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Input (kode yang dijalankan setelah kode siswa)</label>
+                    <label style={labelStyle}>{language === 'html-js' ? 'DOM Assertion (JavaScript yang return string)' : 'Input (kode yang dijalankan setelah kode siswa)'}</label>
                     <textarea
                       name="input"
-                      placeholder={"print(tambah(2, 3))"}
+                      placeholder={language === 'html-js'
+                        ? 'return document.getElementById("btn").textContent;'
+                        : "print(tambah(2, 3))"}
                       rows={3}
                       style={monoInputStyle}
                     />

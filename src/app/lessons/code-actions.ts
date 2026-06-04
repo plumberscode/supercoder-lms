@@ -9,6 +9,7 @@ export async function submitCodeSolution(params: {
   lessonId: string
   code: string
   score: number
+  html?: string
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -25,7 +26,7 @@ export async function submitCodeSolution(params: {
   if (existing) {
     if (params.score > (existing.score || 0)) {
       const { error } = await supabase.from('submissions').update({
-        data: { code: params.code },
+        data: { code: params.code, ...(params.html !== undefined && { html: params.html }) },
         score: params.score,
         status: 'graded',
         graded_at: new Date().toISOString()
@@ -37,7 +38,7 @@ export async function submitCodeSolution(params: {
       student_id: user.id,
       content_id: params.lessonId,
       type: 'code',
-      data: { code: params.code },
+      data: { code: params.code, ...(params.html !== undefined && { html: params.html }) },
       score: params.score,
       status: 'graded',
       submitted_at: new Date().toISOString(),

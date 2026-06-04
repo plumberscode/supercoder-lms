@@ -1,19 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import CodeEditor from './CodeEditor'
 import styles from './code-challenge.module.css'
 import { submitCodeSolution, getCodeHint } from '@/app/lessons/code-actions'
-import { runCode } from '@/lib/code-runner'
-import { runTestCases, type GradingResult } from '@/lib/test-runner'
-import HtmlJsChallenge from './HtmlJsChallenge'
+import {
+  createSandboxedIframe,
+  executeJsInIframe,
+  runDomTest,
+  destroyIframe
+} from '@/lib/iframe-runner'
 
 interface CodingChallenge {
   id: string
   lesson_id: string
   title: string
   description: string
-  language: 'python' | 'javascript' | 'html-js'
+  language: 'html-js'
   starter_code: string
   starter_html?: string
   hints: string[]
@@ -29,27 +32,33 @@ interface TestCase {
   order_index: number
 }
 
+interface TestResult {
+  testCase: TestCase
+  passed: boolean
+  actual_output: string
+  error: string | null
+}
+
+interface GradingResult {
+  results: TestResult[]
+  totalPassed: number
+  totalTests: number
+  score: number
+}
+
 interface Props {
   challenge: CodingChallenge
   testCases: TestCase[]
   existingSubmission?: { score: number; data: any } | null
 }
 
-export default function CodeChallenge({ challenge, testCases, existingSubmission }: Props) {
-  // Delegate to HtmlJsChallenge for html-js mode
-  if (challenge.language === 'html-js') {
-    return (
-      <HtmlJsChallenge
-        challenge={{ ...challenge, language: 'html-js' }}
-        testCases={testCases}
-        existingSubmission={existingSubmission}
-      />
-    )
-  }
+export default function HtmlJsChallenge({ challenge, testCases, existingSubmission }: Props) {
+  const initialHtml = existingSubmission?.data?.html || challenge.starter_html || ''
+  const initialJs = existingSubmission?.data?.code || challenge.starter_code || ''
 
-  const initialCode = existingSubmission?.data?.code || challenge.starter_code || ''
-  
-  const [code, setCode] = useState(initialCode)
+  const [htmlCode, setHtmlCode] = useState(initialHtml)
+  const [jsCode, setJsCode] = useState(initialJs)
+  const [activeTab, setActiveTab] = useState<'html' | 'js'>('html')
   const [output, setOutput] = useState('')
   const [outputError, setOutputError] = useState<string | null>(null)
   const [isRunning, setIsRunning] = useState(false)
@@ -59,45 +68,100 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
   const [isLoadingHint, setIsLoadingHint] = useState(false)
   const [attemptCount, setAttemptCount] = useState(0)
   const [finalScore, setFinalScore] = useState<number | null>(existingSubmission?.score ?? null)
-  const [pyodideLoading, setPyodideLoading] = useState(false)
+  const [previewActive, setPreviewActive] = useState(false)
+
+  const previewContainerRef = useRef<HTMLDivElement>(null)
+  const currentIframeRef = useRef<HTMLIFrameElement | null>(null)
 
   const visibleTests = testCases.filter(tc => !tc.is_hidden)
+
+  const clearPreview = useCallback(() => {
+    if (currentIframeRef.current) {
+      destroyIframe(currentIframeRef.current)
+      currentIframeRef.current = null
+    }
+  }, [])
 
   const handleRun = async () => {
     setIsRunning(true)
     setOutput('')
     setOutputError(null)
-    
-    if (challenge.language === 'python') setPyodideLoading(true)
+    clearPreview()
 
     try {
-      const result = await runCode(challenge.language, code)
+      if (!previewContainerRef.current) throw new Error('Preview container not found')
+
+      const iframe = await createSandboxedIframe(
+        previewContainerRef.current,
+        htmlCode,
+        true
+      )
+      currentIframeRef.current = iframe
+      setPreviewActive(true)
+
+      // Execute JS
+      const result = await executeJsInIframe(iframe, jsCode)
       setOutput(result.output)
       setOutputError(result.error)
     } catch (err: any) {
       setOutputError(err.message || 'Terjadi kesalahan')
     } finally {
       setIsRunning(false)
-      setPyodideLoading(false)
     }
   }
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
     setTestResults(null)
+    clearPreview()
 
     try {
-      const result = await runTestCases(challenge.language, code, testCases)
-      setTestResults(result)
+      if (!previewContainerRef.current) throw new Error('Preview container not found')
+
+      // Create a fresh iframe for testing
+      const iframe = await createSandboxedIframe(
+        previewContainerRef.current,
+        htmlCode,
+        true
+      )
+      currentIframeRef.current = iframe
+      setPreviewActive(true)
+
+      // Execute student JS first
+      await executeJsInIframe(iframe, jsCode)
+
+      // Run DOM assertion tests
+      const results: TestResult[] = []
+      for (const tc of testCases) {
+        const testResult = await runDomTest(iframe, tc.id, tc.input)
+        const actualTrimmed = (testResult.result || '').trim()
+        const expectedTrimmed = (tc.expected_output || '').trim()
+        const passed = !testResult.error && actualTrimmed === expectedTrimmed
+
+        results.push({
+          testCase: tc,
+          passed,
+          actual_output: testResult.result || '',
+          error: testResult.error
+        })
+      }
+
+      const totalPassed = results.filter(r => r.passed).length
+      const totalTests = results.length
+      const score = totalTests > 0 ? Math.round((totalPassed / totalTests) * 100) : 0
+      const gradingResult: GradingResult = { results, totalPassed, totalTests, score }
+
+      setTestResults(gradingResult)
       setAttemptCount(prev => prev + 1)
 
-      if (result.score >= 70) {
-        setFinalScore(result.score)
+      if (score >= 70) {
+        setFinalScore(score)
         await submitCodeSolution({
           challengeId: challenge.id,
           lessonId: challenge.lesson_id,
-          code,
-          score: result.score
+          code: jsCode,
+          score,
+          html: htmlCode
         })
       }
     } catch (err: any) {
@@ -114,8 +178,8 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
     try {
       const hintText = await getCodeHint({
         challengeDescription: challenge.description,
-        language: challenge.language,
-        studentCode: code,
+        language: 'html-js',
+        studentCode: `<!-- HTML -->\n${htmlCode}\n\n/* JavaScript */\n${jsCode}`,
         testResults: testResults.results.map(r => ({
           title: r.testCase.title,
           passed: r.passed,
@@ -125,7 +189,7 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
         attemptNumber: attemptCount
       })
       setHint(hintText)
-    } catch (err: any) {
+    } catch {
       setHint('Maaf, tidak dapat memuat hint saat ini.')
     } finally {
       setIsLoadingHint(false)
@@ -133,15 +197,15 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
   }
 
   const handleReset = () => {
-    setCode(challenge.starter_code || '')
+    setHtmlCode(challenge.starter_html || '')
+    setJsCode(challenge.starter_code || '')
     setOutput('')
     setOutputError(null)
     setTestResults(null)
     setHint('')
+    clearPreview()
+    setPreviewActive(false)
   }
-
-  const langIcon = challenge.language === 'python' ? '🐍' : '⚡'
-  const langLabel = challenge.language === 'python' ? 'Python' : 'JavaScript'
 
   return (
     <div className={styles.container}>
@@ -155,8 +219,8 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
         {/* Left Panel: Description */}
         <div className={styles.descriptionPanel}>
           <h2 className={styles.challengeTitle}>{challenge.title}</h2>
-          <span className={`${styles.languageBadge} ${challenge.language === 'python' ? styles.languageBadgePython : styles.languageBadgeJavascript}`}>
-            {langIcon} {langLabel}
+          <span className={`${styles.languageBadge} ${styles.languageBadgeHtmlJs}`}>
+            🌐 HTML + JavaScript
           </span>
           <div className={styles.description}>{challenge.description}</div>
 
@@ -170,11 +234,11 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
                   <h4>Test {i + 1}: {tc.title}</h4>
                   {tc.input && (
                     <>
-                      <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px' }}>Input:</div>
+                      <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px' }}>DOM Assertion:</div>
                       <code>{tc.input}</code>
                     </>
                   )}
-                  <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px', marginTop: tc.input ? '8px' : 0 }}>Expected Output:</div>
+                  <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px', marginTop: tc.input ? '8px' : 0 }}>Expected:</div>
                   <code>{tc.expected_output}</code>
                 </div>
               ))}
@@ -182,12 +246,11 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
           )}
         </div>
 
-        {/* Right Panel: Editor */}
+        {/* Right Panel: Editor + Preview */}
         <div className={styles.editorPanel}>
+          {/* Header with buttons */}
           <div className={styles.editorHeader}>
-            <span className={styles.editorLabel}>
-              {langIcon} {langLabel} Editor
-            </span>
+            <span className={styles.editorLabel}>🌐 HTML + JS Editor</span>
             <div className={styles.buttonGroup}>
               <button onClick={handleRun} disabled={isRunning || isSubmitting} className={styles.runButton}>
                 {isRunning ? '⏳ Menjalankan...' : '▶ Jalankan'}
@@ -201,23 +264,65 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
             </div>
           </div>
 
-          <CodeEditor
-            language={challenge.language}
-            value={code}
-            onChange={setCode}
-            height="350px"
-          />
-
-          <div className={styles.consolePanel}>
-            <span className={styles.consoleLabel}>
-              {isRunning ? '⏳ Menjalankan kode...' : pyodideLoading ? '📦 Memuat Python runtime...' : '📟 Console Output'}
-            </span>
-            {outputError && <div className={styles.errorText}>{outputError}</div>}
-            {output && <div>{output}</div>}
-            {!output && !outputError && !isRunning && (
-              <span style={{ color: '#4B5563' }}>Klik &quot;Jalankan&quot; untuk melihat output...</span>
-            )}
+          {/* Tab Bar */}
+          <div className={styles.tabBar}>
+            <button
+              className={`${styles.tab} ${activeTab === 'html' ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab('html')}
+            >
+              📄 HTML
+            </button>
+            <button
+              className={`${styles.tab} ${activeTab === 'js' ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab('js')}
+            >
+              ⚡ JavaScript
+            </button>
           </div>
+
+          {/* Editors (show/hide based on tab) */}
+          <div style={{ display: activeTab === 'html' ? 'block' : 'none' }}>
+            <CodeEditor
+              language="html"
+              value={htmlCode}
+              onChange={setHtmlCode}
+              height="280px"
+            />
+          </div>
+          <div style={{ display: activeTab === 'js' ? 'block' : 'none' }}>
+            <CodeEditor
+              language="javascript"
+              value={jsCode}
+              onChange={setJsCode}
+              height="280px"
+            />
+          </div>
+
+          {/* Live Preview */}
+          <div className={styles.previewPanel}>
+            <div className={styles.previewHeader}>
+              <span>🖥️ Preview</span>
+              {previewActive && (
+                <span style={{ color: '#10B981', fontSize: '0.6875rem' }}>● Live</span>
+              )}
+            </div>
+            <div ref={previewContainerRef} style={{ position: 'relative', minHeight: '200px' }}>
+              {!previewActive && (
+                <div className={styles.previewPlaceholder}>
+                  Klik &quot;Jalankan&quot; untuk melihat preview HTML...
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Console Output */}
+          {(output || outputError) && (
+            <div className={styles.consolePanel} style={{ borderRadius: '12px', marginTop: '12px' }}>
+              <span className={styles.consoleLabel}>📟 Console Output</span>
+              {outputError && <div className={styles.errorText}>{outputError}</div>}
+              {output && <div>{output}</div>}
+            </div>
+          )}
         </div>
       </div>
 
