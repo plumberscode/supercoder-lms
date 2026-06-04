@@ -83,8 +83,13 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
   }
 
   const handleSubmit = async () => {
+    if (testCases.length === 0) {
+      setOutputError('Tidak ada test case untuk soal ini. Hubungi guru Anda.')
+      return
+    }
     setIsSubmitting(true)
     setTestResults(null)
+    setOutputError(null)
 
     try {
       const result = await runTestCases(challenge.language, code, testCases)
@@ -101,6 +106,7 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
         })
       }
     } catch (err: any) {
+      console.error('Submit error:', err)
       setOutputError(err.message || 'Terjadi kesalahan saat submit')
     } finally {
       setIsSubmitting(false)
