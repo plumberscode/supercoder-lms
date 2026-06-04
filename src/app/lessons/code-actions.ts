@@ -46,8 +46,17 @@ export async function submitCodeSolution(params: {
     })
     if (error) throw new Error('Gagal menyimpan: ' + error.message)
 
-    // Award 50 XP for completing a coding challenge
-    await supabase.rpc('increment_xp', { user_id: user.id, amount: 50 })
+    // Fetch the challenge to get its max_score (XP weight)
+    const { data: challenge } = await supabase
+      .from('coding_challenges')
+      .select('max_score')
+      .eq('id', params.challengeId)
+      .single()
+      
+    const xpReward = challenge?.max_score ?? 100
+
+    // Award XP for completing a coding challenge based on its weight
+    await supabase.rpc('increment_xp', { user_id: user.id, amount: xpReward })
   }
 
   revalidatePath(`/lessons/${params.lessonId}`)

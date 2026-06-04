@@ -133,6 +133,22 @@ export default function ChallengeEditor({ lessonId, existingChallenge, existingT
             </div>
           </div>
 
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Bobot Nilai (XP)</label>
+              <input
+                name="maxScore"
+                type="number"
+                min="0"
+                placeholder="100"
+                defaultValue={existingChallenge?.max_score ?? 100}
+                required
+                style={inputStyle}
+              />
+              <span style={{ fontSize: '0.75rem', color: '#64748B' }}>XP yang didapat siswa jika berhasil menyelesaikan soal.</span>
+            </div>
+          </div>
+
           <div style={inputGroupStyle}>
             <label style={labelStyle}>Deskripsi Soal (Instruksi untuk siswa)</label>
             <textarea

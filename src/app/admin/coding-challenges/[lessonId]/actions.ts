@@ -15,6 +15,7 @@ export async function saveChallenge(lessonId: string, formData: FormData) {
   const starterHtml = formData.get('starterHtml') as string || ''
   const solutionCode = formData.get('solutionCode') as string
   const hintsRaw = formData.get('hints') as string
+  const maxScore = parseInt(formData.get('maxScore') as string || '100', 10)
 
   let hints: string[] = []
   try {
@@ -33,7 +34,7 @@ export async function saveChallenge(lessonId: string, formData: FormData) {
   if (existing) {
     const { error } = await supabase
       .from('coding_challenges')
-      .update({ title, description, language, starter_code: starterCode, starter_html: starterHtml, solution_code: solutionCode, hints })
+      .update({ title, description, language, starter_code: starterCode, starter_html: starterHtml, solution_code: solutionCode, hints, max_score: maxScore })
       .eq('id', existing.id)
     if (error) throw new Error('Gagal memperbarui soal: ' + error.message)
   } else {
@@ -48,6 +49,7 @@ export async function saveChallenge(lessonId: string, formData: FormData) {
         starter_html: starterHtml,
         solution_code: solutionCode,
         hints,
+        max_score: maxScore,
         created_by: user.id
       })
     if (error) throw new Error('Gagal membuat soal: ' + error.message)
