@@ -219,6 +219,7 @@ export default function ChallengeEditor({ lessonId, existingChallenge, existingT
       </div>
 
       {/* Test Cases Section */}
+      {language !== 'html-js' && (
       <div style={cardStyle}>
         <h2 style={{ marginBottom: '8px' }}>🧪 Test Cases</h2>
         <p style={{ color: '#64748B', marginBottom: '24px', fontSize: '0.875rem' }}>
@@ -334,6 +335,7 @@ export default function ChallengeEditor({ lessonId, existingChallenge, existingT
           </>
         )}
       </div>
+      )}
     </div>
   )
 }
