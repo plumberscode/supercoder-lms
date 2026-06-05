@@ -54,6 +54,8 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
   const [gradeResult, setGradeResult] = useState<{ score: number; feedback: string } | null>(null)
   const [bestScore, setBestScore] = useState<number>(existingSubmission?.score || 0)
   const [attemptsUsed, setAttemptsUsed] = useState<number>(existingSubmission?.data?.attempts?.length || 0)
+  const [lastSubmittedHtml, setLastSubmittedHtml] = useState<string>(initialHtml)
+  const [lastSubmittedJs, setLastSubmittedJs] = useState<string>(initialJs)
   
   const [hint, setHint] = useState('')
   const [isLoadingHint, setIsLoadingHint] = useState(false)
@@ -100,6 +102,11 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
   }
 
   const handleSubmit = async () => {
+    if (htmlCode === lastSubmittedHtml && jsCode === lastSubmittedJs) {
+      setOutputError('Kode belum diubah. Silakan perbaiki kode Anda sebelum submit ulang.')
+      return
+    }
+
     setIsSubmitting(true)
     setGradeResult(null)
     setHint('')
@@ -117,6 +124,8 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
       setGradeResult({ score: result.score, feedback: result.feedback })
       setBestScore(result.bestScore)
       setAttemptsUsed(result.attemptsUsed)
+      setLastSubmittedHtml(htmlCode)
+      setLastSubmittedJs(jsCode)
     } catch (err: any) {
       setOutputError(err.message || 'Terjadi kesalahan saat submit ke AI')
     } finally {
