@@ -3,11 +3,10 @@
 import { useState, useRef, useCallback } from 'react'
 import CodeEditor from './CodeEditor'
 import styles from './code-challenge.module.css'
-import { submitCodeSolution, getCodeHint } from '@/app/lessons/code-actions'
+import { submitHtmlJsSolution, getHtmlJsHint } from '@/app/lessons/html-js-actions'
 import {
   createSandboxedIframe,
   executeJsInIframe,
-  runDomTest,
   destroyIframe
 } from '@/lib/iframe-runner'
 
@@ -21,6 +20,7 @@ interface CodingChallenge {
   starter_html?: string
   hints: string[]
   max_score: number
+  max_attempts?: number
 }
 
 interface TestCase {
@@ -30,20 +30,6 @@ interface TestCase {
   expected_output: string
   is_hidden: boolean
   order_index: number
-}
-
-interface TestResult {
-  testCase: TestCase
-  passed: boolean
-  actual_output: string
-  error: string | null
-}
-
-interface GradingResult {
-  results: TestResult[]
-  totalPassed: number
-  totalTests: number
-  score: number
 }
 
 interface Props {
@@ -63,11 +49,14 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
   const [outputError, setOutputError] = useState<string | null>(null)
   const [isRunning, setIsRunning] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [testResults, setTestResults] = useState<GradingResult | null>(null)
+  
+  // AI Grading states
+  const [gradeResult, setGradeResult] = useState<{ score: number; feedback: string } | null>(null)
+  const [bestScore, setBestScore] = useState<number>(existingSubmission?.score || 0)
+  const [attemptsUsed, setAttemptsUsed] = useState<number>(existingSubmission?.data?.attempts?.length || 0)
+  
   const [hint, setHint] = useState('')
   const [isLoadingHint, setIsLoadingHint] = useState(false)
-  const [attemptCount, setAttemptCount] = useState(0)
-  const [finalScore, setFinalScore] = useState<number | null>(existingSubmission?.score ?? null)
   const [previewActive, setPreviewActive] = useState(false)
 
   const previewContainerRef = useRef<HTMLDivElement>(null)
@@ -111,86 +100,38 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
   }
 
   const handleSubmit = async () => {
-    if (testCases.length === 0) {
-      setOutputError('Tidak ada test case untuk soal ini. Hubungi guru Anda.')
-      return
-    }
     setIsSubmitting(true)
-    setTestResults(null)
+    setGradeResult(null)
+    setHint('')
     clearPreview()
 
     try {
-      if (!previewContainerRef.current) throw new Error('Preview container not found')
-
-      // Create a fresh iframe for testing
-      const iframe = await createSandboxedIframe(
-        previewContainerRef.current,
-        htmlCode,
-        true
-      )
-      currentIframeRef.current = iframe
-      setPreviewActive(true)
-
-      // Execute student JS first
-      await executeJsInIframe(iframe, jsCode)
-
-      // Run DOM assertion tests
-      const results: TestResult[] = []
-      for (const tc of testCases) {
-        const testResult = await runDomTest(iframe, tc.id, tc.input)
-        const actualTrimmed = (testResult.result || '').trim()
-        const expectedTrimmed = (tc.expected_output || '').trim()
-        const passed = !testResult.error && actualTrimmed === expectedTrimmed
-
-        results.push({
-          testCase: tc,
-          passed,
-          actual_output: testResult.result || '',
-          error: testResult.error
-        })
-      }
-
-      const totalPassed = results.filter(r => r.passed).length
-      const totalTests = results.length
-      const score = totalTests > 0 ? Math.round((totalPassed / totalTests) * 100) : 0
-      const gradingResult: GradingResult = { results, totalPassed, totalTests, score }
-
-      setTestResults(gradingResult)
-      setAttemptCount(prev => prev + 1)
-
-      if (score >= 70) {
-        setFinalScore(score)
-        await submitCodeSolution({
-          challengeId: challenge.id,
-          lessonId: challenge.lesson_id,
-          code: jsCode,
-          score,
-          html: htmlCode
-        })
-      }
+      const result = await submitHtmlJsSolution({
+        challengeId: challenge.id,
+        lessonId: challenge.lesson_id,
+        html: htmlCode,
+        js: jsCode,
+        description: challenge.description,
+        maxScore: challenge.max_score
+      })
+      setGradeResult({ score: result.score, feedback: result.feedback })
+      setBestScore(result.bestScore)
+      setAttemptsUsed(result.attemptsUsed)
     } catch (err: any) {
-      setOutputError(err.message || 'Terjadi kesalahan saat submit')
+      setOutputError(err.message || 'Terjadi kesalahan saat submit ke AI')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleGetHint = async () => {
-    if (!testResults) return
     setIsLoadingHint(true)
-
     try {
-      const hintText = await getCodeHint({
-        challengeDescription: challenge.description,
-        language: 'html-js',
-        studentCode: `<!-- HTML -->\n${htmlCode}\n\n/* JavaScript */\n${jsCode}`,
-        testResults: testResults.results.map(r => ({
-          title: r.testCase.title,
-          passed: r.passed,
-          expected: r.testCase.expected_output,
-          actual: r.actual_output
-        })),
-        attemptNumber: attemptCount
+      const hintText = await getHtmlJsHint({
+        description: challenge.description,
+        studentHtml: htmlCode,
+        studentJs: jsCode,
+        attemptNumber: attemptsUsed
       })
       setHint(hintText)
     } catch {
@@ -205,15 +146,25 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
     setJsCode(challenge.starter_code || '')
     setOutput('')
     setOutputError(null)
-    setTestResults(null)
+    setGradeResult(null)
     setHint('')
     clearPreview()
     setPreviewActive(false)
   }
 
+  const maxAttempts = challenge.max_attempts || 3
+  const remainingAttempts = maxAttempts - attemptsUsed
+  const isMaxedOut = attemptsUsed >= maxAttempts
+
+  const getScoreClass = (score: number) => {
+    if (score >= 70) return ''
+    if (score >= 50) return styles.scoreMid
+    return styles.scoreLow
+  }
+
   return (
     <div className={styles.container}>
-      {existingSubmission && (
+      {existingSubmission && existingSubmission.score > 0 && (
         <div className={styles.existingScore}>
           🏆 Skor terbaik sebelumnya: {existingSubmission.score}/100
         </div>
@@ -227,27 +178,6 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
             🌐 HTML + JavaScript
           </span>
           <div className={styles.description}>{challenge.description}</div>
-
-          {visibleTests.length > 0 && (
-            <>
-              <h4 style={{ fontSize: '0.875rem', color: '#64748B', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Contoh Test Cases
-              </h4>
-              {visibleTests.map((tc, i) => (
-                <div key={tc.id} className={styles.sampleSection}>
-                  <h4>Test {i + 1}: {tc.title}</h4>
-                  {tc.input && (
-                    <>
-                      <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px' }}>DOM Assertion:</div>
-                      <code>{tc.input}</code>
-                    </>
-                  )}
-                  <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px', marginTop: tc.input ? '8px' : 0 }}>Expected:</div>
-                  <code>{tc.expected_output}</code>
-                </div>
-              ))}
-            </>
-          )}
         </div>
 
         {/* Right Panel: Editor + Preview */}
@@ -259,8 +189,13 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
               <button onClick={handleRun} disabled={isRunning || isSubmitting} className={styles.runButton}>
                 {isRunning ? '⏳ Menjalankan...' : '▶ Jalankan'}
               </button>
-              <button onClick={handleSubmit} disabled={isRunning || isSubmitting} className={styles.submitButton}>
-                {isSubmitting ? '⏳ Memeriksa...' : '📤 Submit'}
+              <button onClick={handleSubmit} disabled={isRunning || isSubmitting || isMaxedOut} className={styles.submitButton}>
+                {isSubmitting
+                  ? '⏳ Memeriksa...'
+                  : isMaxedOut
+                    ? '📤 Batas tercapai'
+                    : `📤 Submit ke AI (sisa: ${remainingAttempts})`
+                }
               </button>
               <button onClick={handleReset} className={styles.resetButton}>
                 ↺ Reset
@@ -330,47 +265,42 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
         </div>
       </div>
 
-      {/* Test Results */}
-      {testResults && (
-        <div className={styles.testResultsPanel}>
-          <div className={styles.testResultsTitle}>
-            🧪 Hasil Test Cases ({testResults.totalPassed}/{testResults.totalTests} lulus)
-          </div>
-          {testResults.results.map((r, i) => (
-            <div key={i} className={`${styles.testItem} ${r.passed ? styles.testPassed : styles.testFailed}`}>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>{r.passed ? '✅' : '❌'}</span>
-                  <strong>{r.testCase.is_hidden ? 'Test Tersembunyi' : r.testCase.title}</strong>
-                </div>
-                {!r.testCase.is_hidden && !r.passed && (
-                  <div className={styles.testDetails}>
-                    <div>
-                      <span style={{ color: '#64748B' }}>Diharapkan:</span>
-                      <code>{r.testCase.expected_output}</code>
-                    </div>
-                    <div>
-                      <span style={{ color: '#64748B' }}>Hasil kamu:</span>
-                      <code>{r.error ? `Error: ${r.error}` : r.actual_output || '(kosong)'}</code>
-                    </div>
-                  </div>
-                )}
-              </div>
+      {/* Grade Result */}
+      {gradeResult && (
+        <div className={styles.resultPanel} style={{ marginTop: '24px' }}>
+          <div className={`${styles.scoreDisplay} ${getScoreClass(gradeResult.score)}`}>
+            <div className={styles.scoreValue}>{gradeResult.score}</div>
+            <div className={styles.scoreLabel}>
+              {gradeResult.score >= 90
+                ? '🎉 Luar biasa!'
+                : gradeResult.score >= 70
+                  ? '👏 Bagus sekali!'
+                  : gradeResult.score >= 50
+                    ? '💪 Hampir benar, coba lagi!'
+                    : '📚 Pelajari lagi materinya'
+              }
             </div>
-          ))}
+          </div>
+          <div className={styles.feedbackPanel} style={{ marginTop: '16px', padding: '16px', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+            <strong style={{ display: 'block', marginBottom: '8px', color: '#1E293B' }}>💬 Feedback dari AI:</strong>
+            <div style={{ whiteSpace: 'pre-wrap', color: '#334155' }}>{gradeResult.feedback}</div>
+          </div>
+          <div className={styles.attemptsInfo} style={{ marginTop: '12px', fontSize: '0.875rem', color: '#64748B' }}>
+            Percobaan terpakai: {attemptsUsed}/{maxAttempts}
+          </div>
         </div>
       )}
 
       {/* Hint Section */}
-      {attemptCount > 0 && testResults && testResults.score < 100 && (
+      {gradeResult && gradeResult.score < 100 && !isMaxedOut && (
         <>
           {!hint && (
-            <button onClick={handleGetHint} disabled={isLoadingHint} className={styles.hintButton}>
+            <button onClick={handleGetHint} disabled={isLoadingHint} className={styles.hintButton} style={{ marginTop: '16px' }}>
               {isLoadingHint ? '⏳ Meminta bantuan AI...' : '💡 Minta Petunjuk (AI Hint)'}
             </button>
           )}
           {hint && (
-            <div className={styles.hintPanel}>
+            <div className={styles.hintPanel} style={{ marginTop: '16px' }}>
               <div className={styles.hintTitle}>💡 Petunjuk dari AI Tutor</div>
               <div className={styles.hintText}>{hint}</div>
               <button
@@ -385,13 +315,15 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
         </>
       )}
 
-      {/* Score Display */}
-      {testResults && testResults.score >= 70 && (
-        <div className={styles.scoreDisplay}>
-          <div className={styles.scoreValue}>{testResults.score}</div>
-          <div className={styles.scoreLabel}>
-            🎉 Selamat! Kode kamu berhasil lulus {testResults.totalPassed} dari {testResults.totalTests} test cases!
-          </div>
+      {/* Success panel */}
+      {bestScore >= 70 && (
+        <div className={styles.successPanel} style={{ marginTop: '24px', padding: '24px', backgroundColor: '#F0FDF4', borderRadius: '8px', border: '1px solid #BBF7D0', textAlign: 'center' }}>
+          <span style={{ fontSize: '3rem', display: 'block', marginBottom: '12px' }}>🎉</span>
+          <h3 style={{ color: '#166534', marginBottom: '8px' }}>Selamat!</h3>
+          <p style={{ color: '#15803D', margin: 0 }}>
+            Kamu telah menyelesaikan tantangan ini dengan skor terbaik {bestScore}/100.
+            {bestScore < 100 && !isMaxedOut && ' Kamu masih bisa mencoba untuk skor lebih tinggi!'}
+          </p>
         </div>
       )}
     </div>
