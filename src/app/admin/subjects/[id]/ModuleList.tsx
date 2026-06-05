@@ -559,6 +559,18 @@ export default function ModuleList({
                                           💻 Kelola Soal Coding
                                         </Link>
                                       )}
+                                      {lesson.type === "css-challenge" && (
+                                        <Link
+                                          href={`/admin/css-challenges/${lesson.id}`}
+                                          className="btn btn-secondary"
+                                          style={{
+                                            padding: "6px 12px",
+                                            fontSize: "0.75rem",
+                                          }}
+                                        >
+                                          🎨 Kelola Soal CSS
+                                        </Link>
+                                      )}
                                       <form
                                         action={deleteLesson.bind(
                                           null,
@@ -732,6 +744,36 @@ export default function ModuleList({
                           }}
                         >
                           💻 Soal Coding
+                        </button>
+                        <button
+                          onClick={() =>
+                            setActiveAddForm(
+                              activeAddForm?.moduleId === module.id &&
+                                activeAddForm?.type === "css-challenge"
+                                ? null
+                                : { moduleId: module.id, type: "css-challenge" },
+                            )
+                          }
+                          className="btn"
+                          style={{
+                            padding: "8px 16px",
+                            fontSize: "0.875rem",
+                            backgroundColor:
+                              activeAddForm?.moduleId === module.id &&
+                              activeAddForm?.type === "css-challenge"
+                                ? "var(--primary)"
+                                : "#F1F5F9",
+                            color:
+                              activeAddForm?.moduleId === module.id &&
+                              activeAddForm?.type === "css-challenge"
+                                ? "white"
+                                : "var(--secondary)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          🎨 Soal CSS
                         </button>
                       </div>
 

@@ -3,7 +3,7 @@
 import Editor from '@monaco-editor/react'
 
 interface Props {
-  language: 'python' | 'javascript' | 'html'
+  language: 'python' | 'javascript' | 'html' | 'css'
   value: string
   onChange: (value: string) => void
   readOnly?: boolean

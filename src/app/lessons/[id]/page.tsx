@@ -3,6 +3,7 @@ import Link from 'next/link'
 import QuizView from './quiz-view'
 import ProjectSubmission from './project-submission'
 import CodeChallenge from '@/components/CodeChallenge'
+import CssChallenge from '@/components/CssChallenge'
 
 export default async function LessonPage({ params }: { params: { id: string } }) {
   const { id } = await params
@@ -20,6 +21,7 @@ export default async function LessonPage({ params }: { params: { id: string } })
 
   let lessonScore = null
   let codeSubmission = null
+  let cssSubmission: { score: number; data: any } | null = null
   if (user) {
     const { data } = await supabase
       .from('submissions')
@@ -38,6 +40,15 @@ export default async function LessonPage({ params }: { params: { id: string } })
       .eq('type', 'code')
       .maybeSingle()
     if (codeSub) codeSubmission = codeSub
+
+    const { data: cssSub } = await supabase
+      .from('submissions')
+      .select('score, data')
+      .eq('student_id', user.id)
+      .eq('content_id', id)
+      .eq('type', 'css')
+      .maybeSingle()
+    if (cssSub) cssSubmission = cssSub
   }
 
   // Fetch coding challenge if lesson type is 'code'
@@ -58,6 +69,17 @@ export default async function LessonPage({ params }: { params: { id: string } })
         .order('order_index')
       testCases = cases || []
     }
+  }
+
+  // Fetch CSS challenge if lesson type is 'css-challenge'
+  let cssChallenge = null
+  if (lesson.type === 'css-challenge') {
+    const { data: challenge } = await supabase
+      .from('css_challenges')
+      .select('*')
+      .eq('lesson_id', id)
+      .single()
+    if (challenge) cssChallenge = challenge
   }
 
   const subjectId = (lesson.module_id as any).subject_id
@@ -153,6 +175,21 @@ export default async function LessonPage({ params }: { params: { id: string } })
               <span style={{ fontSize: '4rem', marginBottom: '16px', display: 'block' }}>💻</span>
               <h3>Soal Coding</h3>
               <p style={{ color: '#64748B' }}>Soal coding untuk materi ini belum dibuat oleh guru.</p>
+            </div>
+          )}
+
+          {lesson.type === 'css-challenge' && cssChallenge && (
+            <CssChallenge
+              challenge={cssChallenge}
+              existingSubmission={cssSubmission}
+            />
+          )}
+
+          {lesson.type === 'css-challenge' && !cssChallenge && (
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+              <span style={{ fontSize: '4rem', marginBottom: '16px', display: 'block' }}>🎨</span>
+              <h3>CSS Challenge</h3>
+              <p style={{ color: '#64748B' }}>Soal CSS untuk materi ini belum dibuat oleh guru.</p>
             </div>
           )}
         </div>
