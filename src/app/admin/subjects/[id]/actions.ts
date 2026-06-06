@@ -78,38 +78,31 @@ export async function deleteLesson(lessonId: string, subjectId: string) {
 
 export async function reorderModules(subjectId: string, modules: any[]) {
   const supabase = await createClient()
-  
-  const updates = modules.map((m, index) => ({
-    id: m.id,
-    title: m.title,
-    subject_id: subjectId,
-    order_index: index + 1
-  }))
 
-  const { error } = await supabase
-    .from('modules')
-    .upsert(updates)
+  await Promise.all(
+    modules.map((m, index) =>
+      supabase
+        .from('modules')
+        .update({ order_index: index + 1 })
+        .eq('id', m.id)
+    )
+  )
 
-  if (error) throw new Error(error.message)
   revalidatePath(`/admin/subjects/${subjectId}`)
 }
 
 export async function reorderLessons(subjectId: string, lessons: any[]) {
   const supabase = await createClient()
-  
-  const updates = lessons.map((l, index) => ({
-    id: l.id,
-    module_id: l.module_id,
-    title: l.title,
-    type: l.type,
-    order_index: index + 1
-  }))
 
-  const { error } = await supabase
-    .from('lessons')
-    .upsert(updates)
+  await Promise.all(
+    lessons.map((l, index) =>
+      supabase
+        .from('lessons')
+        .update({ order_index: index + 1 })
+        .eq('id', l.id)
+    )
+  )
 
-  if (error) throw new Error(error.message)
   revalidatePath(`/admin/subjects/${subjectId}`)
 }
 export async function updateModule(moduleId: string, subjectId: string, title: string) {

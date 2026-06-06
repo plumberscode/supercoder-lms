@@ -33,7 +33,17 @@ export default async function SubjectDetailPage({ params }: { params: { id: stri
       
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '40px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          <ModuleList initialModules={subject.modules?.sort((a: any, b: any) => a.order_index - b.order_index) || []} subjectId={id} />
+          <ModuleList 
+            initialModules={
+              subject.modules
+                ?.sort((a: any, b: any) => a.order_index - b.order_index)
+                .map((m: any) => ({
+                  ...m,
+                  lessons: m.lessons?.sort((a: any, b: any) => a.order_index - b.order_index) || []
+                })) || []
+            } 
+            subjectId={id} 
+          />
 
 
           {/* Add Module Form */}
