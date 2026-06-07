@@ -121,9 +121,15 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
         description: challenge.description,
         maxScore: challenge.max_score
       })
-      setGradeResult({ score: result.score, feedback: result.feedback })
-      setBestScore(result.bestScore)
-      setAttemptsUsed(result.attemptsUsed)
+      
+      if ('error' in result && result.error) {
+        setOutputError(result.error)
+        return
+      }
+
+      setGradeResult({ score: result.score!, feedback: result.feedback! })
+      setBestScore(result.bestScore!)
+      setAttemptsUsed(result.attemptsUsed!)
       setLastSubmittedHtml(htmlCode)
       setLastSubmittedJs(jsCode)
     } catch (err: any) {

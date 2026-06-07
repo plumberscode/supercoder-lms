@@ -64,9 +64,15 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
         description: challenge.description,
         maxScore: challenge.max_score
       })
-      setGradeResult({ score: result.score, feedback: result.feedback })
-      setBestScore(result.bestScore)
-      setAttemptsUsed(result.attemptsUsed)
+
+      if ('error' in result && result.error) {
+        setGradeResult({ score: 0, feedback: result.error })
+        return
+      }
+
+      setGradeResult({ score: result.score!, feedback: result.feedback! })
+      setBestScore(result.bestScore!)
+      setAttemptsUsed(result.attemptsUsed!)
     } catch (err: any) {
       setGradeResult({ score: 0, feedback: err.message || 'Terjadi kesalahan saat menilai.' })
     } finally {

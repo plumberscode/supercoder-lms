@@ -14,7 +14,7 @@ export async function submitHtmlJsSolution(params: {
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  if (!user) return { error: 'Not authenticated' }
 
   // Fetch existing submission
   const { data: existing } = await supabase
@@ -30,12 +30,12 @@ export async function submitHtmlJsSolution(params: {
     existingAttempts = []
   }
   if (existingAttempts.length >= 3) {
-    throw new Error('Batas submit sudah tercapai (3/3)')
+    return { error: 'Batas submit sudah tercapai (3/3)' }
   }
 
   // Call Gemini API for grading
   const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) throw new Error('AI grading belum dikonfigurasi. Hubungi admin.')
+  if (!apiKey) return { error: 'AI grading belum dikonfigurasi. Hubungi admin.' }
 
   const genAI = new GoogleGenerativeAI(apiKey)
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
@@ -86,12 +86,12 @@ Balas HANYA dengan JSON valid (tanpa markdown code block):
         score = typeof parsed.score === 'number' ? parsed.score : 0
         feedback = parsed.feedback || 'Tidak ada feedback.'
       } else {
-        throw new Error('Format respons AI tidak dikenali.')
+        return { error: 'Format respons AI tidak dikenali.' }
       }
     }
   } catch (err: any) {
     console.error('HTML+JS grading AI error:', err)
-    throw new Error('Gagal memproses penilaian dengan AI. Silakan coba lagi.')
+    return { error: 'Gagal memproses penilaian dengan AI. Silakan coba lagi.' }
   }
 
   const now = new Date().toISOString()
@@ -104,7 +104,7 @@ Balas HANYA dengan JSON valid (tanpa markdown code block):
       score: bestScore,
       graded_at: now
     }).eq('id', existing.id)
-    if (error) throw new Error('Gagal memperbarui: ' + error.message)
+    if (error) return { error: 'Gagal memperbarui: ' + error.message }
   } else {
     const { error } = await supabase.from('submissions').insert({
       student_id: user.id,
@@ -116,7 +116,7 @@ Balas HANYA dengan JSON valid (tanpa markdown code block):
       submitted_at: now,
       graded_at: now
     })
-    if (error) throw new Error('Gagal menyimpan: ' + error.message)
+    if (error) return { error: 'Gagal menyimpan: ' + error.message }
 
     // Award XP on first submission if it passes
     if (score >= 70) {
