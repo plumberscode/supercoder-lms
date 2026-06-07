@@ -129,7 +129,7 @@ export default function HtmlJsChallenge({ challenge, testCases, existingSubmissi
 
       setGradeResult({ score: result.score!, feedback: result.feedback! })
       setBestScore(result.bestScore!)
-      setAttemptsUsed(result.attemptsUsed!)
+      setAttemptsUsed(typeof result.attemptsUsed === 'number' && !isNaN(result.attemptsUsed) ? result.attemptsUsed : (attemptsUsed + 1))
       setLastSubmittedHtml(htmlCode)
       setLastSubmittedJs(jsCode)
     } catch (err: any) {

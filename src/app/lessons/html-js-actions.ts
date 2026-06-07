@@ -38,7 +38,12 @@ export async function submitHtmlJsSolution(params: {
   if (!apiKey) return { error: 'AI grading belum dikonfigurasi. Hubungi admin.' }
 
   const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+  const model = genAI.getGenerativeModel({ 
+    model: 'gemini-2.5-flash',
+    generationConfig: {
+      responseMimeType: "application/json"
+    }
+  })
 
   const prompt = `Kamu adalah penilai kode HTML dan Javascript untuk siswa.
 
@@ -64,7 +69,7 @@ ${params.js}
    - 50-69: Ada usaha yang relevan, tetapi ada error logika atau gagal mengimplementasikan bagian krusial.
    - 0-49: Salah, error parah, atau sangat tidak lengkap.
 
-Balas HANYA dengan JSON valid (tanpa markdown code block):
+Balas HANYA dengan JSON valid:
 {"score": <number>, "feedback": "<feedback mendidik dalam Bahasa Indonesia>"}`
 
   let score = 0

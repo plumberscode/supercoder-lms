@@ -39,7 +39,12 @@ export async function submitCssSolution(params: {
   if (!apiKey) return { error: 'AI grading belum dikonfigurasi. Hubungi admin.' }
 
   const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+  const model = genAI.getGenerativeModel({ 
+    model: 'gemini-2.5-flash',
+    generationConfig: {
+      responseMimeType: "application/json"
+    }
+  })
 
   const prompt = `Kamu adalah penilai CSS untuk siswa pemula.
 
@@ -71,8 +76,8 @@ ${params.starterHtml}
    - 50-69: Konsep dasar benar tapi ada error signifikan
    - 0-49: Jawaban salah atau sangat tidak lengkap
 
-Balas HANYA dengan JSON valid (tanpa markdown code block):
-{"score": <number>, "feedback": "<feedback dalam Bahasa Indonesia>"}`
+Balas HANYA dengan JSON valid:
+{"score": <number>, "feedback": "<feedback mendidik dalam Bahasa Indonesia>"}`
 
   let score = 0
   let feedback = 'Tidak dapat menilai jawaban saat ini.'

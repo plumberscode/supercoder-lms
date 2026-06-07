@@ -72,7 +72,7 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
 
       setGradeResult({ score: result.score!, feedback: result.feedback! })
       setBestScore(result.bestScore!)
-      setAttemptsUsed(result.attemptsUsed!)
+      setAttemptsUsed(typeof result.attemptsUsed === 'number' && !isNaN(result.attemptsUsed) ? result.attemptsUsed : (attemptsUsed + 1))
     } catch (err: any) {
       setGradeResult({ score: 0, feedback: err.message || 'Terjadi kesalahan saat menilai.' })
     } finally {
