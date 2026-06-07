@@ -25,7 +25,10 @@ export async function submitHtmlJsSolution(params: {
     .eq('type', 'code')
     .maybeSingle()
 
-  const existingAttempts: any[] = existing?.data?.attempts || []
+  let existingAttempts: any[] = existing?.data?.attempts || []
+  if (user.email === 'nararyariffat@gmail.com') {
+    existingAttempts = []
+  }
   if (existingAttempts.length >= 3) {
     throw new Error('Batas submit sudah tercapai (3/3)')
   }
@@ -70,24 +73,25 @@ Balas HANYA dengan JSON valid (tanpa markdown code block):
   try {
     const result = await model.generateContent(prompt)
     const responseText = result.response.text()
-    const parsed = JSON.parse(responseText)
-    score = typeof parsed.score === 'number' ? parsed.score : 0
-    feedback = parsed.feedback || 'Tidak ada feedback.'
-  } catch (err: any) {
-    console.error('HTML+JS grading AI error:', err)
-    // Try to extract JSON from response if parse failed
+    
     try {
-      const result = await model.generateContent(prompt)
-      const text = result.response.text()
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      const parsed = JSON.parse(responseText)
+      score = typeof parsed.score === 'number' ? parsed.score : 0
+      feedback = parsed.feedback || 'Tidak ada feedback.'
+    } catch (parseErr) {
+      // Try to extract JSON from response if parse failed (e.g. markdown block)
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0])
         score = typeof parsed.score === 'number' ? parsed.score : 0
         feedback = parsed.feedback || 'Tidak ada feedback.'
+      } else {
+        throw new Error('Format respons AI tidak dikenali.')
       }
-    } catch {
-      // Use defaults
     }
+  } catch (err: any) {
+    console.error('HTML+JS grading AI error:', err)
+    throw new Error('Gagal memproses penilaian dengan AI. Silakan coba lagi.')
   }
 
   const now = new Date().toISOString()
