@@ -2,7 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 
 export async function submitCssSolution(params: {
   challengeId: string
@@ -35,15 +35,12 @@ export async function submitCssSolution(params: {
   }
 
   // Call Gemini API for grading
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.DEEPSEEK_API_KEY
   if (!apiKey) return { error: 'AI grading belum dikonfigurasi. Hubungi admin.' }
 
-  const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ 
-    model: 'gemini-2.5-flash',
-    generationConfig: {
-      responseMimeType: "application/json"
-    }
+  const openai = new OpenAI({
+    baseURL: 'https://api.deepseek.com',
+    apiKey: apiKey
   })
 
   const prompt = `Kamu adalah penilai CSS untuk siswa pemula.
@@ -83,8 +80,12 @@ Balas HANYA dengan JSON valid:
   let feedback = 'Tidak dapat menilai jawaban saat ini.'
 
   try {
-    const result = await model.generateContent(prompt)
-    const responseText = result.response.text()
+    const result = await openai.chat.completions.create({
+      model: 'deepseek-chat',
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' }
+    })
+    const responseText = result.choices[0].message.content || '{}'
     
     try {
       const parsed = JSON.parse(responseText)
@@ -150,14 +151,16 @@ export async function getCssHint(params: {
   starterHtml: string
   attemptNumber: number
 }): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.DEEPSEEK_API_KEY
   if (!apiKey) {
     return 'Fitur AI Hint belum dikonfigurasi. Hubungi admin untuk mengaktifkan.'
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const openai = new OpenAI({
+      baseURL: 'https://api.deepseek.com',
+      apiKey: apiKey
+    })
 
     const hintLevel = params.attemptNumber <= 1
       ? 'Berikan petunjuk yang SANGAT umum, hanya arahkan siswa ke konsep yang benar.'
@@ -185,9 +188,11 @@ ${hintLevel}
 
 Berikan hint SINGKAT (maksimal 2-3 kalimat) dalam Bahasa Indonesia. JANGAN berikan jawaban langsung. Bantu siswa menemukan solusinya sendiri.`
 
-    const result = await model.generateContent(prompt)
-    const response = result.response
-    return response.text() || 'Tidak dapat menghasilkan hint saat ini.'
+    const result = await openai.chat.completions.create({
+      model: 'deepseek-chat',
+      messages: [{ role: 'user', content: prompt }]
+    })
+    return result.choices[0].message.content || 'Tidak dapat menghasilkan hint saat ini.'
   } catch (err: any) {
     console.error('CSS Hint error:', err)
     return 'Maaf, terjadi kesalahan saat meminta bantuan AI. Silakan coba lagi.'

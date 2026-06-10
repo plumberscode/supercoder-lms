@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 
 interface HintParams {
   challengeDescription: string
@@ -9,15 +9,17 @@ interface HintParams {
 }
 
 export async function getAIHint(params: HintParams): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.DEEPSEEK_API_KEY
 
   if (!apiKey) {
     return 'Fitur AI Hint belum dikonfigurasi. Hubungi admin untuk mengaktifkan.'
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const openai = new OpenAI({
+      baseURL: 'https://api.deepseek.com',
+      apiKey: apiKey
+    })
 
     const failedTests = params.testResults
       .filter(t => !t.passed)
@@ -50,9 +52,11 @@ ${hintLevel}
 
 Berikan hint SINGKAT (maksimal 2-3 kalimat) dalam Bahasa Indonesia. JANGAN berikan jawaban langsung. Bantu siswa menemukan solusinya sendiri.`
 
-    const result = await model.generateContent(prompt)
-    const response = result.response
-    return response.text() || 'Tidak dapat menghasilkan hint saat ini.'
+    const result = await openai.chat.completions.create({
+      model: 'deepseek-chat',
+      messages: [{ role: 'user', content: prompt }]
+    })
+    return result.choices[0].message.content || 'Tidak dapat menghasilkan hint saat ini.'
   } catch (err: any) {
     console.error('AI Hint error:', err)
     return 'Maaf, terjadi kesalahan saat meminta bantuan AI. Silakan coba lagi.'
