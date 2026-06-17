@@ -39,7 +39,12 @@ export default async function LessonPage({ params }: { params: { id: string } })
       .eq('content_id', id)
       .eq('type', 'code')
       .maybeSingle()
-    if (codeSub) codeSubmission = codeSub
+    if (codeSub) {
+      if (user.email === 'nararyariffat@gmail.com') {
+        if (codeSub.data) codeSub.data.attempts = []
+      }
+      codeSubmission = codeSub
+    }
 
     const { data: cssSub } = await supabase
       .from('submissions')
@@ -48,7 +53,12 @@ export default async function LessonPage({ params }: { params: { id: string } })
       .eq('content_id', id)
       .eq('type', 'css')
       .maybeSingle()
-    if (cssSub) cssSubmission = cssSub
+    if (cssSub) {
+      if (user.email === 'nararyariffat@gmail.com') {
+        if (cssSub.data) cssSub.data.attempts = []
+      }
+      cssSubmission = cssSub
+    }
   }
 
   // Fetch coding challenge if lesson type is 'code'

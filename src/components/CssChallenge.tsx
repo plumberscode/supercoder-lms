@@ -29,6 +29,8 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
   const [gradeResult, setGradeResult] = useState<{ score: number; feedback: string } | null>(null)
   const [bestScore, setBestScore] = useState<number>(existingSubmission?.score || 0)
   const [attemptsUsed, setAttemptsUsed] = useState<number>(existingSubmission?.data?.attempts?.length || 0)
+  const [lastSubmittedCss, setLastSubmittedCss] = useState<string>(existingSubmission?.data?.css || challenge.starter_css || '')
+  const [outputError, setOutputError] = useState<string | null>(null)
   const [hint, setHint] = useState('')
   const [isLoadingHint, setIsLoadingHint] = useState(false)
   const [previewKey, setPreviewKey] = useState(0)
@@ -50,9 +52,15 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
   }, [cssCode, challenge.starter_html, previewKey])
 
   const handleSubmit = async () => {
+    if (cssCode === lastSubmittedCss) {
+      setOutputError('Kode belum diubah. Silakan perbaiki CSS Anda sebelum submit ulang.')
+      return
+    }
+
     setIsSubmitting(true)
     setGradeResult(null)
     setHint('')
+    setOutputError(null)
 
     try {
       const result = await submitCssSolution({
@@ -73,6 +81,7 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
       setGradeResult({ score: result.score!, feedback: result.feedback! })
       setBestScore(result.bestScore!)
       setAttemptsUsed(typeof result.attemptsUsed === 'number' && !isNaN(result.attemptsUsed) ? result.attemptsUsed : (attemptsUsed + 1))
+      setLastSubmittedCss(cssCode)
     } catch (err: any) {
       setGradeResult({ score: 0, feedback: err.message || 'Terjadi kesalahan saat menilai.' })
     } finally {
@@ -100,6 +109,7 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
 
   const handleReset = () => {
     setCssCode(challenge.starter_css || '')
+    setOutputError(null)
     setGradeResult(null)
     setHint('')
     setPreviewKey(prev => prev + 1)
@@ -175,6 +185,12 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
           ↺ Reset
         </button>
       </div>
+
+      {outputError && (
+        <div style={{ color: '#EF4444', backgroundColor: '#FEF2F2', padding: '12px 16px', borderRadius: '8px', border: '1px solid #FCA5A5', marginTop: '16px', fontSize: '0.875rem' }}>
+          ⚠️ {outputError}
+        </div>
+      )}
 
       {/* Live Preview */}
       <div className={styles.previewPanel}>
