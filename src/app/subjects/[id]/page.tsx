@@ -20,6 +20,30 @@ export default async function SubjectPage({ params }: { params: { id: string } }
 
   if (!subject) return <div className="container" style={{ padding: '40px' }}>Mata Pelajaran tidak ditemukan</div>
 
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let userScores: Record<string, number> = {}
+
+  if (user && subject.modules) {
+    const lessonIds = subject.modules.flatMap((m: any) => m.lessons?.map((l: any) => l.id) || [])
+    
+    if (lessonIds.length > 0) {
+      const { data: submissions } = await supabase
+        .from('submissions')
+        .select('content_id, score')
+        .eq('student_id', user.id)
+        .in('content_id', lessonIds)
+
+      if (submissions) {
+        submissions.forEach(sub => {
+          if (sub.score !== null) {
+            userScores[sub.content_id] = Math.max(userScores[sub.content_id] || 0, sub.score)
+          }
+        })
+      }
+    }
+  }
+
   return (
     <div style={{ backgroundColor: '#F8FAFC', minHeight: '100vh' }}>
       <header style={{ backgroundColor: 'white', borderBottom: '1px solid var(--border)', padding: '20px 40px', position: 'sticky', top: 0, zIndex: 10 }}>
@@ -54,7 +78,12 @@ export default async function SubjectPage({ params }: { params: { id: string } }
                           {lesson.type === 'video' ? '📺' : lesson.type === 'quiz' ? '🧠' : '📄'}
                         </span>
                         <div>
-                          <div style={{ fontWeight: 600 }}>{lesson.title}</div>
+                          <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {lesson.title}
+                            {userScores[lesson.id] >= 70 && (
+                              <span style={{ color: '#10B981', fontSize: '1rem' }} title={`Selesai (Skor: ${userScores[lesson.id]})`}>✅</span>
+                            )}
+                          </div>
                           <div style={{ fontSize: '0.75rem', color: '#94A3B8' }}>{lesson.type.toUpperCase()} {lesson.description && `• ${lesson.description}`}</div>
                         </div>
                       </div>
