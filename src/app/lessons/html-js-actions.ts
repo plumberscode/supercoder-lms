@@ -138,6 +138,7 @@ Balas HANYA dengan JSON valid:
   revalidatePath(`/lessons/${params.lessonId}`)
   revalidatePath('/leaderboard')
   revalidatePath('/dashboard')
+  revalidatePath('/admin/gradebook')
 
   return { score, feedback, bestScore, attemptsUsed: newAttempts.length }
 }
