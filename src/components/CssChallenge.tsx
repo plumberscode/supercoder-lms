@@ -25,6 +25,7 @@ interface Props {
 
 export default function CssChallengeComponent({ challenge, existingSubmission }: Props) {
   const [cssCode, setCssCode] = useState(existingSubmission?.data?.css || challenge.starter_css || '')
+  const [htmlCode, setHtmlCode] = useState(challenge.starter_html || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [gradeResult, setGradeResult] = useState<{ score: number; feedback: string } | null>(null)
   const [bestScore, setBestScore] = useState<number>(existingSubmission?.score || 0)
@@ -43,13 +44,13 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       if (iframeRef.current) {
-        iframeRef.current.srcdoc = buildCssPreview(challenge.starter_html, cssCode)
+        iframeRef.current.srcdoc = buildCssPreview(htmlCode, cssCode)
       }
     }, 300)
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-  }, [cssCode, challenge.starter_html, previewKey])
+  }, [cssCode, htmlCode, previewKey])
 
   const handleSubmit = async () => {
     if (cssCode === lastSubmittedCss) {
@@ -67,7 +68,7 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
         challengeId: challenge.id,
         lessonId: challenge.lesson_id,
         css: cssCode,
-        starterHtml: challenge.starter_html,
+        starterHtml: htmlCode,
         referenceCss: challenge.reference_css,
         description: challenge.description,
         maxScore: challenge.max_score
@@ -96,7 +97,7 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
         description: challenge.description,
         studentCss: cssCode,
         referenceCss: challenge.reference_css,
-        starterHtml: challenge.starter_html,
+        starterHtml: htmlCode,
         attemptNumber: attemptsUsed
       })
       setHint(hintText)
@@ -109,6 +110,7 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
 
   const handleReset = () => {
     setCssCode(challenge.starter_css || '')
+    setHtmlCode(challenge.starter_html || '')
     setOutputError(null)
     setGradeResult(null)
     setHint('')
@@ -140,16 +142,16 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
       </span>
       <div className={styles.description}>{challenge.description}</div>
 
-      {/* HTML section — read only */}
+      {/* HTML section — editable */}
       <div className={styles.editorSection}>
         <div className={styles.editorHeader}>
-          <span className={styles.editorLabel}>📄 HTML (Read Only)</span>
+          <span className={styles.editorLabel}>📄 HTML</span>
         </div>
         <CodeEditor
           language="html"
-          value={challenge.starter_html}
-          onChange={() => {}}
-          readOnly={true}
+          value={htmlCode}
+          onChange={setHtmlCode}
+          readOnly={false}
           height="200px"
         />
       </div>
@@ -201,7 +203,7 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
         <iframe
           ref={iframeRef}
           className={styles.previewIframe}
-          srcDoc={buildCssPreview(challenge.starter_html, cssCode)}
+          srcDoc={buildCssPreview(htmlCode, cssCode)}
           title="CSS Preview"
           sandbox="allow-scripts"
           style={{ height: '250px' }}
