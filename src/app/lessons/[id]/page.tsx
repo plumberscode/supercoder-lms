@@ -40,9 +40,6 @@ export default async function LessonPage({ params }: { params: { id: string } })
       .eq('type', 'code')
       .maybeSingle()
     if (codeSub) {
-      if (user.email === 'nararyariffat@gmail.com') {
-        if (codeSub.data) codeSub.data.attempts = []
-      }
       codeSubmission = codeSub
     }
 
@@ -54,9 +51,6 @@ export default async function LessonPage({ params }: { params: { id: string } })
       .eq('type', 'css')
       .maybeSingle()
     if (cssSub) {
-      if (user.email === 'nararyariffat@gmail.com') {
-        if (cssSub.data) cssSub.data.attempts = []
-      }
       cssSubmission = cssSub
     }
   }

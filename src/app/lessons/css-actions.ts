@@ -26,10 +26,7 @@ export async function submitCssSolution(params: {
     .eq('type', 'css')
     .maybeSingle()
 
-  let existingAttempts: any[] = existing?.data?.attempts || []
-  if (user.email === 'nararyariffat@gmail.com') {
-    existingAttempts = []
-  }
+  const existingAttempts: any[] = existing?.data?.attempts || []
   if (existingAttempts.length >= 3) {
     return { error: 'Batas submit sudah tercapai (3/3)' }
   }
@@ -117,7 +114,10 @@ Balas HANYA dengan JSON valid:
       score: bestScore,
       graded_at: now
     }).eq('id', existing.id)
-    if (error) return { error: 'Gagal memperbarui: ' + error.message }
+    if (error) {
+      console.error('Update CSS submission failed:', error)
+      return { error: 'Gagal memperbarui: ' + error.message }
+    }
   } else {
     const { error } = await supabase.from('submissions').insert({
       student_id: user.id,
@@ -129,7 +129,10 @@ Balas HANYA dengan JSON valid:
       submitted_at: now,
       graded_at: now
     })
-    if (error) return { error: 'Gagal menyimpan: ' + error.message }
+    if (error) {
+      console.error('Insert CSS submission failed:', error)
+      return { error: 'Gagal menyimpan: ' + error.message }
+    }
   }
 
   // Award XP if score >= 70 and first time passing

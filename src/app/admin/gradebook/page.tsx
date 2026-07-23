@@ -56,10 +56,12 @@ export default async function GradebookPage({
         const lessonIds = lessons.map(l => l.id)
 
         // Single query: all submissions for all students for this subject
+        // Filter by relevant types to prevent score mixing between different submission types
         const { data: submissions } = await supabase
           .from('submissions')
-          .select('student_id, content_id, score')
+          .select('student_id, content_id, score, type')
           .in('content_id', lessonIds)
+          .in('type', ['code', 'css', 'quiz', 'lesson'])
 
         if (submissions) {
           submissions.forEach(sub => {

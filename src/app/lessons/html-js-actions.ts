@@ -25,10 +25,7 @@ export async function submitHtmlJsSolution(params: {
     .eq('type', 'code')
     .maybeSingle()
 
-  let existingAttempts: any[] = existing?.data?.attempts || []
-  if (user.email === 'nararyariffat@gmail.com') {
-    existingAttempts = []
-  }
+  const existingAttempts: any[] = existing?.data?.attempts || []
   if (existingAttempts.length >= 3) {
     return { error: 'Batas submit sudah tercapai (3/3)' }
   }
@@ -110,7 +107,10 @@ Balas HANYA dengan JSON valid:
       score: bestScore,
       graded_at: now
     }).eq('id', existing.id)
-    if (error) return { error: 'Gagal memperbarui: ' + error.message }
+    if (error) {
+      console.error('Update submission failed:', error)
+      return { error: 'Gagal memperbarui: ' + error.message }
+    }
   } else {
     const { error } = await supabase.from('submissions').insert({
       student_id: user.id,
@@ -122,16 +122,14 @@ Balas HANYA dengan JSON valid:
       submitted_at: now,
       graded_at: now
     })
-    if (error) return { error: 'Gagal menyimpan: ' + error.message }
-
-    // Award XP on first submission if it passes
-    if (score >= 70) {
-      await supabase.rpc('increment_xp', { user_id: user.id, amount: params.maxScore })
+    if (error) {
+      console.error('Insert submission failed:', error)
+      return { error: 'Gagal menyimpan: ' + error.message }
     }
   }
 
-  // Award XP if it didn't pass before but passes now
-  if (score >= 70 && existing && (existing.score || 0) < 70) {
+  // Award XP ONCE: only when transitioning from below-70 to 70+
+  if (score >= 70 && (!existing || (existing.score || 0) < 70)) {
     await supabase.rpc('increment_xp', { user_id: user.id, amount: params.maxScore })
   }
 
