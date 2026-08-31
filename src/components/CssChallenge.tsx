@@ -149,194 +149,207 @@ export default function CssChallengeComponent({
     return styles.scoreLow;
   };
 
+  const [activeTab, setActiveTab] = useState<"css" | "html">("css");
+
   return (
     <div className={styles.container}>
       {/* Existing best score banner */}
       {existingSubmission && existingSubmission.score > 0 && (
         <div className={styles.existingScore}>
-          🏆 Skor terbaik: {existingSubmission.score}/100
+          🏆 Skor terbaik sebelumnya: {existingSubmission.score}/100
         </div>
       )}
 
-      {/* Soal section */}
-      <h2 className={styles.challengeTitle}>{challenge.title}</h2>
-      <span className={styles.languageBadge}>🎨 CSS Challenge</span>
-      <div className={styles.description}>{challenge.description}</div>
+      <div className={styles.splitLayout}>
+        {/* Left: Description, Hints & Feedback Panel */}
+        <div className={styles.descriptionPanel}>
+          <h2 className={styles.challengeTitle}>{challenge.title}</h2>
+          <span className={styles.languageBadge}>🎨 CSS Challenge</span>
+          <div className={styles.description}>{challenge.description}</div>
 
-      {/* HTML section — editable */}
-      <div className={styles.editorSection}>
-        <div className={styles.editorHeader}>
-          <span className={styles.editorLabel}>📄 HTML</span>
-        </div>
-        <CodeEditor
-          language="html"
-          value={htmlCode}
-          onChange={setHtmlCode}
-          readOnly={false}
-          height="200px"
-        />
-      </div>
-
-      {/* CSS section — editable */}
-      <div className={styles.editorSection}>
-        <div className={styles.editorHeader}>
-          <span className={styles.editorLabel}>
-            🎨 CSS (Tulis CSS kamu di sini)
-          </span>
-        </div>
-        <CodeEditor
-          language="css"
-          value={cssCode}
-          onChange={setCssCode}
-          height="280px"
-        />
-      </div>
-
-      {/* Button bar */}
-      <div className={styles.buttonGroup}>
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting || isMaxedOut}
-          className={styles.submitButton}
-        >
-          {isSubmitting
-            ? "⏳ Memeriksa..."
-            : isMaxedOut
-              ? "📤 Batas tercapai"
-              : `📤 Submit ke AI (sisa: ${remainingAttempts})`}
-        </button>
-        <button onClick={handleReset} className={styles.resetButton}>
-          ↺ Reset
-        </button>
-      </div>
-
-      {outputError && (
-        <div
-          style={{
-            color: "#EF4444",
-            backgroundColor: "#FEF2F2",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            border: "1px solid #FCA5A5",
-            marginTop: "16px",
-            fontSize: "0.875rem",
-          }}
-        >
-          ⚠️ {outputError}
-        </div>
-      )}
-
-      {/* Live Preview */}
-      <div className={styles.previewPanel}>
-        <div className={styles.previewHeader}>
-          <span>🖥️ Live Preview</span>
-          <span style={{ color: "#10B981", fontSize: "0.6875rem" }}>
-            ● Live
-          </span>
-        </div>
-        <iframe
-          ref={iframeRef}
-          className={styles.previewIframe}
-          srcDoc={buildCssPreview(htmlCode, cssCode)}
-          title="CSS Preview"
-          sandbox="allow-scripts"
-          style={{ height: "250px" }}
-        />
-      </div>
-
-      {/* Grade Result */}
-      {gradeResult && (
-        <div className={styles.resultPanel}>
-          <div
-            className={`${styles.scoreDisplay} ${getScoreClass(gradeResult.score)}`}
-          >
-            <div className={styles.scoreValue}>{gradeResult.score}</div>
-            <div className={styles.scoreLabel}>
-              {gradeResult.score >= 90
-                ? "🎉 Luar biasa!"
-                : gradeResult.score >= 70
-                  ? "👏 Bagus sekali!"
-                  : gradeResult.score >= 50
-                    ? "💪 Hampir benar, coba lagi!"
-                    : "📚 Pelajari lagi materinya"}
-            </div>
-          </div>
-          <div className={styles.feedbackPanel}>
-            <strong
+          {outputError && (
+            <div
               style={{
-                display: "block",
-                marginBottom: "8px",
-                color: "#1E293B",
+                color: "#EF4444",
+                backgroundColor: "#FEF2F2",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                border: "1px solid #FCA5A5",
+                marginBottom: "16px",
+                fontSize: "0.8rem",
               }}
             >
-              💬 Feedback dari AI:
-            </strong>
-            {gradeResult.feedback}
-          </div>
-          <div className={styles.attemptsInfo}>
-            Percobaan terpakai: {attemptsUsed}/{challenge.max_attempts}
-          </div>
-        </div>
-      )}
-
-      {/* Hint section */}
-      {gradeResult && gradeResult.score < 100 && !isMaxedOut && (
-        <>
-          {!hint && (
-            <button
-              onClick={handleGetHint}
-              disabled={isLoadingHint}
-              className={styles.hintButton}
-            >
-              {isLoadingHint
-                ? "⏳ Meminta bantuan AI..."
-                : "💡 Minta Petunjuk (AI Hint)"}
-            </button>
-          )}
-          {hint && (
-            <div className={styles.hintPanel}>
-              <div className={styles.hintTitle}>💡 Petunjuk dari AI Tutor</div>
-              <div className={styles.hintText}>{hint}</div>
-              <button
-                onClick={handleGetHint}
-                disabled={isLoadingHint}
-                style={{
-                  marginTop: "12px",
-                  background: "transparent",
-                  border: "1px solid #D97706",
-                  color: "#92400E",
-                  padding: "6px 16px",
-                  borderRadius: "6px",
-                  fontSize: "0.8125rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Lagi"}
-              </button>
+              ⚠️ {outputError}
             </div>
           )}
-        </>
-      )}
 
-      {/* Success panel */}
-      {bestScore >= 70 && (
-        <div className={styles.successPanel}>
-          <span
-            style={{ fontSize: "3rem", display: "block", marginBottom: "12px" }}
-          >
-            🎉
-          </span>
-          <h3 style={{ color: "#166534", marginBottom: "8px" }}>Selamat!</h3>
-          <p style={{ color: "#15803D", margin: 0 }}>
-            Kamu telah menyelesaikan CSS Challenge ini dengan skor terbaik{" "}
-            {bestScore}/100.
-            {bestScore < 100 &&
-              !isMaxedOut &&
-              " Kamu masih bisa mencoba untuk skor lebih tinggi!"}
-          </p>
+          {/* Grade Result */}
+          {gradeResult && (
+            <div className={styles.resultPanel}>
+              <div
+                className={`${styles.scoreDisplay} ${getScoreClass(gradeResult.score)}`}
+              >
+                <div className={styles.scoreValue}>{gradeResult.score}</div>
+                <div className={styles.scoreLabel}>
+                  {gradeResult.score >= 90
+                    ? "🎉 Luar biasa!"
+                    : gradeResult.score >= 70
+                      ? "👏 Bagus sekali!"
+                      : gradeResult.score >= 50
+                        ? "💪 Hampir benar, coba lagi!"
+                        : "📚 Pelajari lagi materinya"}
+                </div>
+              </div>
+              <div className={styles.feedbackPanel}>
+                <strong
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    color: "#1E293B",
+                  }}
+                >
+                  💬 Feedback dari AI:
+                </strong>
+                {gradeResult.feedback}
+              </div>
+              <div className={styles.attemptsInfo}>
+                Percobaan terpakai: {attemptsUsed}/{challenge.max_attempts}
+              </div>
+            </div>
+          )}
+
+          {/* Hint section */}
+          {gradeResult && gradeResult.score < 100 && !isMaxedOut && (
+            <>
+              {!hint && (
+                <button
+                  onClick={handleGetHint}
+                  disabled={isLoadingHint}
+                  className={styles.hintButton}
+                >
+                  {isLoadingHint
+                    ? "⏳ Meminta bantuan AI..."
+                    : "💡 Minta Petunjuk (AI Hint)"}
+                </button>
+              )}
+              {hint && (
+                <div className={styles.hintPanel}>
+                  <div className={styles.hintTitle}>💡 Petunjuk dari AI Tutor</div>
+                  <div className={styles.hintText}>{hint}</div>
+                  <button
+                    onClick={handleGetHint}
+                    disabled={isLoadingHint}
+                    style={{
+                      marginTop: "10px",
+                      background: "transparent",
+                      border: "1px solid #D97706",
+                      color: "#92400E",
+                      padding: "4px 12px",
+                      borderRadius: "6px",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Lagi"}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Success panel */}
+          {bestScore >= 70 && (
+            <div className={styles.successPanel} style={{ marginTop: "16px", padding: "16px" }}>
+              <span
+                style={{ fontSize: "2rem", display: "block", marginBottom: "8px" }}
+              >
+                🎉
+              </span>
+              <h3 style={{ color: "#166534", marginBottom: "6px", fontSize: "1rem" }}>Selamat!</h3>
+              <p style={{ color: "#15803D", margin: 0, fontSize: "0.8rem" }}>
+                Kamu telah menyelesaikan CSS Challenge ini dengan skor terbaik{" "}
+                {bestScore}/100.
+                {bestScore < 100 &&
+                  !isMaxedOut &&
+                  " Kamu masih bisa mencoba untuk skor lebih tinggi!"}
+              </p>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Right: Editor + Live Preview */}
+        <div className={styles.editorPanel}>
+          <div className={styles.editorHeader}>
+            <div className={styles.tabBar}>
+              <button
+                className={`${styles.tab} ${activeTab === "css" ? styles.tabActive : ""}`}
+                onClick={() => setActiveTab("css")}
+              >
+                🎨 CSS Editor
+              </button>
+              <button
+                className={`${styles.tab} ${activeTab === "html" ? styles.tabActive : ""}`}
+                onClick={() => setActiveTab("html")}
+              >
+                📄 HTML Editor
+              </button>
+            </div>
+
+            <div className={styles.buttonGroup}>
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting || isMaxedOut}
+                className={styles.submitButton}
+              >
+                {isSubmitting
+                  ? "⏳ Memeriksa..."
+                  : isMaxedOut
+                    ? "📤 Batas tercapai"
+                    : `📤 Submit ke AI (${remainingAttempts}x)`}
+              </button>
+              <button onClick={handleReset} className={styles.resetButton}>
+                ↺ Reset
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.editorBody}>
+            {activeTab === "css" ? (
+              <CodeEditor
+                language="css"
+                value={cssCode}
+                onChange={setCssCode}
+                height="100%"
+              />
+            ) : (
+              <CodeEditor
+                language="html"
+                value={htmlCode}
+                onChange={setHtmlCode}
+                height="100%"
+              />
+            )}
+          </div>
+
+          {/* Live Preview */}
+          <div className={styles.previewPanel}>
+            <div className={styles.previewHeader}>
+              <span>🖥️ Live Preview</span>
+              <span style={{ color: "#10B981", fontSize: "0.6875rem" }}>
+                ● Live
+              </span>
+            </div>
+            <iframe
+              ref={iframeRef}
+              className={styles.previewIframe}
+              srcDoc={buildCssPreview(htmlCode, cssCode)}
+              title="CSS Preview"
+              sandbox="allow-scripts"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

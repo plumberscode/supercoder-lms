@@ -268,20 +268,20 @@ export default function HtmlJsChallenge({
           </div>
 
           {/* Editors (show/hide based on tab) */}
-          <div style={{ display: activeTab === "html" ? "block" : "none" }}>
+          <div className={styles.editorBody} style={{ display: activeTab === "html" ? "block" : "none", height: "100%" }}>
             <CodeEditor
               language="html"
               value={htmlCode}
               onChange={setHtmlCode}
-              height="280px"
+              height="100%"
             />
           </div>
-          <div style={{ display: activeTab === "js" ? "block" : "none" }}>
+          <div className={styles.editorBody} style={{ display: activeTab === "js" ? "block" : "none", height: "100%" }}>
             <CodeEditor
               language="javascript"
               value={jsCode}
               onChange={setJsCode}
-              height="280px"
+              height="100%"
             />
           </div>
 

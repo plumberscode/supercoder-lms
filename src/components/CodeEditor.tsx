@@ -18,7 +18,14 @@ export default function CodeEditor({
   height = "400px",
 }: Props) {
   return (
-    <div style={{ borderRadius: "0", overflow: "hidden" }}>
+    <div
+      style={{
+        borderRadius: "0",
+        overflow: "hidden",
+        height: height === "100%" ? "100%" : "auto",
+        width: "100%",
+      }}
+    >
       <Editor
         height={height}
         language={language}

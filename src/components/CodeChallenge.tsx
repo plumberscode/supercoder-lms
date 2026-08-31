@@ -81,12 +81,15 @@ function StandardCodeChallenge({
   );
   const [pyodideLoading, setPyodideLoading] = useState(false);
 
+  const [activeBottomTab, setActiveBottomTab] = useState<"console" | "tests" | "hint">("console");
+
   const visibleTests = testCases.filter((tc) => !tc.is_hidden);
 
   const handleRun = async () => {
     setIsRunning(true);
     setOutput("");
     setOutputError(null);
+    setActiveBottomTab("console");
 
     if (challenge.language === "python") setPyodideLoading(true);
 
@@ -105,11 +108,13 @@ function StandardCodeChallenge({
   const handleSubmit = async () => {
     if (testCases.length === 0) {
       setOutputError("Tidak ada test case untuk soal ini. Hubungi guru Anda.");
+      setActiveBottomTab("console");
       return;
     }
     setIsSubmitting(true);
     setTestResults(null);
     setOutputError(null);
+    setActiveBottomTab("tests");
 
     try {
       const result = await runTestCases(challenge.language, code, testCases);
@@ -128,6 +133,7 @@ function StandardCodeChallenge({
     } catch (err: any) {
       console.error("Submit error:", err);
       setOutputError(err.message || "Terjadi kesalahan saat submit");
+      setActiveBottomTab("console");
     } finally {
       setIsSubmitting(false);
     }
@@ -136,6 +142,7 @@ function StandardCodeChallenge({
   const handleGetHint = async () => {
     if (!testResults) return;
     setIsLoadingHint(true);
+    setActiveBottomTab("hint");
 
     try {
       const hintText = await getCodeHint({
@@ -164,6 +171,7 @@ function StandardCodeChallenge({
     setOutputError(null);
     setTestResults(null);
     setHint("");
+    setActiveBottomTab("console");
   };
 
   const langIcon = challenge.language === "python" ? "🐍" : "⚡";
@@ -192,11 +200,12 @@ function StandardCodeChallenge({
             <>
               <h4
                 style={{
-                  fontSize: "0.875rem",
+                  fontSize: "0.8rem",
                   color: "#64748B",
-                  marginBottom: "12px",
+                  marginBottom: "10px",
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
+                  fontWeight: 700,
                 }}
               >
                 Contoh Test Cases
@@ -210,7 +219,7 @@ function StandardCodeChallenge({
                     <>
                       <div
                         style={{
-                          fontSize: "0.75rem",
+                          fontSize: "0.72rem",
                           color: "#94A3B8",
                           marginBottom: "4px",
                         }}
@@ -222,7 +231,7 @@ function StandardCodeChallenge({
                   )}
                   <div
                     style={{
-                      fontSize: "0.75rem",
+                      fontSize: "0.72rem",
                       color: "#94A3B8",
                       marginBottom: "4px",
                       marginTop: tc.input ? "8px" : 0,
@@ -237,7 +246,7 @@ function StandardCodeChallenge({
           )}
         </div>
 
-        {/* Right Panel: Editor */}
+        {/* Right Panel: Editor + Bottom Tabs */}
         <div className={styles.editorPanel}>
           <div className={styles.editorHeader}>
             <span className={styles.editorLabel}>
@@ -264,129 +273,169 @@ function StandardCodeChallenge({
             </div>
           </div>
 
-          <CodeEditor
-            language={challenge.language === "python" ? "python" : "javascript"}
-            value={code}
-            onChange={setCode}
-            height="350px"
-          />
+          <div className={styles.editorBody}>
+            <CodeEditor
+              language={challenge.language === "python" ? "python" : "javascript"}
+              value={code}
+              onChange={setCode}
+              height="100%"
+            />
+          </div>
 
-          <div className={styles.consolePanel}>
-            <span className={styles.consoleLabel}>
-              {isRunning
-                ? "⏳ Menjalankan kode..."
-                : pyodideLoading
-                  ? "📦 Memuat Python runtime..."
-                  : "📟 Console Output"}
-            </span>
-            {outputError && (
-              <div className={styles.errorText}>{outputError}</div>
+          {/* Bottom Tab Bar */}
+          <div className={styles.bottomTabBar}>
+            <button
+              className={`${styles.bottomTab} ${activeBottomTab === "console" ? styles.bottomTabActive : ""}`}
+              onClick={() => setActiveBottomTab("console")}
+            >
+              📟 Console Output {outputError && <span style={{ color: "#f87171" }}>●</span>}
+            </button>
+            <button
+              className={`${styles.bottomTab} ${activeBottomTab === "tests" ? styles.bottomTabActive : ""}`}
+              onClick={() => setActiveBottomTab("tests")}
+            >
+              🧪 Test Results {testResults && <span>({testResults.totalPassed}/{testResults.totalTests})</span>}
+            </button>
+            <button
+              className={`${styles.bottomTab} ${activeBottomTab === "hint" ? styles.bottomTabActive : ""}`}
+              onClick={() => setActiveBottomTab("hint")}
+            >
+              💡 Petunjuk AI {hint && <span style={{ color: "#fbbf24" }}>●</span>}
+            </button>
+          </div>
+
+          {/* Bottom Panel Content */}
+          <div className={styles.bottomPanel}>
+            {activeBottomTab === "console" && (
+              <div className={styles.consolePanel}>
+                <span className={styles.consoleLabel}>
+                  {isRunning
+                    ? "⏳ Menjalankan kode..."
+                    : pyodideLoading
+                      ? "📦 Memuat Python runtime..."
+                      : "📟 Console Output"}
+                </span>
+                {outputError && (
+                  <div className={styles.errorText}>{outputError}</div>
+                )}
+                {output && <div>{output}</div>}
+                {!output && !outputError && !isRunning && (
+                  <span style={{ color: "#6b7280" }}>
+                    Klik &quot;Jalankan&quot; untuk melihat output kode kamu di sini...
+                  </span>
+                )}
+              </div>
             )}
-            {output && <div>{output}</div>}
-            {!output && !outputError && !isRunning && (
-              <span style={{ color: "#4B5563" }}>
-                Klik &quot;Jalankan&quot; untuk melihat output...
-              </span>
+
+            {activeBottomTab === "tests" && (
+              <div className={styles.testResultsPanel}>
+                {!testResults ? (
+                  <span style={{ color: "#6b7280" }}>
+                    Klik &quot;Submit&quot; untuk menguji kode dengan semua test case...
+                  </span>
+                ) : (
+                  <>
+                    <div className={styles.testResultsTitle}>
+                      🧪 Hasil Test Cases ({testResults.totalPassed}/{testResults.totalTests} lulus) — Skor: {testResults.score}/100
+                    </div>
+                    {testResults.results.map((r, i) => (
+                      <div
+                        key={i}
+                        className={`${styles.testItem} ${r.passed ? styles.testPassed : styles.testFailed}`}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div
+                            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                          >
+                            <span>{r.passed ? "✅" : "❌"}</span>
+                            <strong>
+                              {r.testCase.is_hidden
+                                ? "Test Tersembunyi"
+                                : r.testCase.title}
+                            </strong>
+                          </div>
+                          {!r.testCase.is_hidden && !r.passed && (
+                            <div className={styles.testDetails}>
+                              <div>
+                                <span style={{ color: "#94a3b8" }}>Diharapkan:</span>
+                                <code>{r.testCase.expected_output}</code>
+                              </div>
+                              <div>
+                                <span style={{ color: "#94a3b8" }}>Hasil kamu:</span>
+                                <code>
+                                  {r.error
+                                    ? `Error: ${r.error}`
+                                    : r.actual_output || "(kosong)"}
+                                </code>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {attemptCount > 0 && testResults.score < 100 && !hint && (
+                      <button
+                        onClick={handleGetHint}
+                        disabled={isLoadingHint}
+                        className={styles.hintButton}
+                      >
+                        {isLoadingHint
+                          ? "⏳ Meminta bantuan AI..."
+                          : "💡 Minta Petunjuk (AI Hint)"}
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {activeBottomTab === "hint" && (
+              <div>
+                {!hint ? (
+                  <div>
+                    <p style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: "10px" }}>
+                      Butuh bantuan? AI Tutor dapat menganalisis kodemu dan memberikan petunjuk tanpa memberi jawaban langsung.
+                    </p>
+                    <button
+                      onClick={handleGetHint}
+                      disabled={isLoadingHint || !testResults}
+                      className={styles.hintButton}
+                    >
+                      {isLoadingHint
+                        ? "⏳ Meminta bantuan AI..."
+                        : !testResults
+                          ? "Submit kode terlebih dahulu untuk mendapat hint"
+                          : "💡 Minta Petunjuk (AI Hint)"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.hintPanel}>
+                    <div className={styles.hintTitle}>💡 Petunjuk dari AI Tutor</div>
+                    <div className={styles.hintText}>{hint}</div>
+                    <button
+                      onClick={handleGetHint}
+                      disabled={isLoadingHint}
+                      style={{
+                        marginTop: "10px",
+                        background: "transparent",
+                        border: "1px solid #D97706",
+                        color: "#fcd34d",
+                        padding: "4px 12px",
+                        borderRadius: "6px",
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Baru"}
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
       </div>
-
-      {/* Test Results */}
-      {testResults && (
-        <div className={styles.testResultsPanel}>
-          <div className={styles.testResultsTitle}>
-            🧪 Hasil Test Cases ({testResults.totalPassed}/
-            {testResults.totalTests} lulus)
-          </div>
-          {testResults.results.map((r, i) => (
-            <div
-              key={i}
-              className={`${styles.testItem} ${r.passed ? styles.testPassed : styles.testFailed}`}
-            >
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
-                >
-                  <span>{r.passed ? "✅" : "❌"}</span>
-                  <strong>
-                    {r.testCase.is_hidden
-                      ? "Test Tersembunyi"
-                      : r.testCase.title}
-                  </strong>
-                </div>
-                {!r.testCase.is_hidden && !r.passed && (
-                  <div className={styles.testDetails}>
-                    <div>
-                      <span style={{ color: "#64748B" }}>Diharapkan:</span>
-                      <code>{r.testCase.expected_output}</code>
-                    </div>
-                    <div>
-                      <span style={{ color: "#64748B" }}>Hasil kamu:</span>
-                      <code>
-                        {r.error
-                          ? `Error: ${r.error}`
-                          : r.actual_output || "(kosong)"}
-                      </code>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Hint Section */}
-      {attemptCount > 0 && testResults && testResults.score < 100 && (
-        <>
-          {!hint && (
-            <button
-              onClick={handleGetHint}
-              disabled={isLoadingHint}
-              className={styles.hintButton}
-            >
-              {isLoadingHint
-                ? "⏳ Meminta bantuan AI..."
-                : "💡 Minta Petunjuk (AI Hint)"}
-            </button>
-          )}
-          {hint && (
-            <div className={styles.hintPanel}>
-              <div className={styles.hintTitle}>💡 Petunjuk dari AI Tutor</div>
-              <div className={styles.hintText}>{hint}</div>
-              <button
-                onClick={handleGetHint}
-                disabled={isLoadingHint}
-                style={{
-                  marginTop: "12px",
-                  background: "transparent",
-                  border: "1px solid #D97706",
-                  color: "#92400E",
-                  padding: "6px 16px",
-                  borderRadius: "6px",
-                  fontSize: "0.8125rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Lagi"}
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Score Display */}
-      {testResults && testResults.score >= 70 && (
-        <div className={styles.scoreDisplay}>
-          <div className={styles.scoreValue}>{testResults.score}</div>
-          <div className={styles.scoreLabel}>
-            🎉 Selamat! Kode kamu berhasil lulus {testResults.totalPassed} dari{" "}
-            {testResults.totalTests} test cases!
-          </div>
-        </div>
-      )}
     </div>
   );
 }
