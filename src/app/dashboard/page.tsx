@@ -1,8 +1,34 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import styles from "./dashboard.module.css";
+import Image from "next/image";
 import Link from "next/link";
+import styles from "./dashboard.module.css";
 import { signOut } from "@/app/auth/actions";
+
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins} menit lalu`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} jam lalu`;
+  return `${Math.floor(hrs / 24)} hari lalu`;
+}
+
+function xpColor(type: string): string {
+  if (type === "quiz") return "#f97316";
+  if (type === "lesson") return "#3b82f6";
+  return "#10b981";
+}
+
+function xpIcon(type: string): string {
+  if (type === "quiz") return "🧠";
+  if (type === "lesson") return "📖";
+  return "✅";
+}
+
+// ─── page ───────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -22,315 +48,431 @@ export default async function DashboardPage() {
     redirect("/pending-approval");
   }
 
+  // Subjects
   const { data: subjects } = await supabase
     .from("subjects")
     .select("*")
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .order("order_index", { ascending: true });
 
-  const xpPercent = Math.min((profile.xp / 1000) * 100, 100);
+  // Recent activity from submissions (lesson + quiz)
+  const { data: recentActivity } = await supabase
+    .from("submissions")
+    .select(
+      `
+      id,
+      type,
+      score,
+      submitted_at,
+      lessons ( title, modules ( subjects ( title ) ) )
+    `
+    )
+    .eq("student_id", user.id)
+    .order("submitted_at", { ascending: false })
+    .limit(5);
+
+  // Top leaderboard
+  const { data: leaderboard } = await supabase
+    .from("profiles")
+    .select("id, full_name, xp, level")
+    .eq("status", "approved")
+    .eq("role", "student")
+    .order("xp", { ascending: false })
+    .limit(5);
+
+  // Stats
+  const { count: completedModules } = await supabase
+    .from("submissions")
+    .select("*", { count: "exact", head: true })
+    .eq("student_id", user.id)
+    .eq("type", "lesson");
+
+  const { count: completedQuizzes } = await supabase
+    .from("submissions")
+    .select("*", { count: "exact", head: true })
+    .eq("student_id", user.id)
+    .eq("type", "quiz");
+
+  const xpToNextLevel = (profile.level + 1) * (profile.level + 1) * 100;
+  const xpThisLevel = profile.level * profile.level * 100;
+  const xpProgress =
+    xpThisLevel >= xpToNextLevel
+      ? 100
+      : Math.min(
+          Math.round(
+            ((profile.xp - xpThisLevel) / (xpToNextLevel - xpThisLevel)) * 100
+          ),
+          100
+        );
+
+  // SVG ring params
+  const RING_R = 52;
+  const RING_CIRC = 2 * Math.PI * RING_R;
+  const ringOffset = RING_CIRC * (1 - xpProgress / 100);
+
+  const myRank =
+    leaderboard?.findIndex((p) => p.id === profile.id) ?? -1;
+
+  const firstName = (profile.full_name || user.email?.split("@")[0] || "Coder")
+    .split(" ")[0];
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="container">
-      <div className={styles.dashboardGrid}>
-        {/* Welcome Header */}
-        <div className={styles.welcomeCard}>
-          <div>
-            <h1>Halo, {profile.full_name || user.email?.split("@")[0]}! 👋</h1>
-            <p>Siap untuk meningkatkan skill coding Anda hari ini?</p>
-            <div
-              style={{
-                marginTop: "16px",
-                display: "flex",
-                gap: "10px",
-                flexWrap: "wrap",
-                alignItems: "center",
-              }}
-            >
-              <Link
-                href="/dashboard/testimonials"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  backgroundColor: "rgba(255, 255, 255, 0.18)",
-                  backdropFilter: "blur(4px)",
-                  border: "1px solid rgba(255, 255, 255, 0.35)",
-                  color: "#FFFFFF",
-                  padding: "8px 16px",
-                  borderRadius: "10px",
-                  fontSize: "0.875rem",
-                  fontWeight: 600,
-                  textDecoration: "none",
-                }}
-                className="hover:bg-white/25 transition-colors"
-              >
-                <span>⭐</span> Beri Testimoni
-              </Link>
+    <div className={styles.dashboardShell}>
+      {/* ── TOP BAR ─────────────────────────────────────────── */}
+      <header className={styles.topBar}>
+        <div className={styles.topBarBrand}>
+          <Image
+            src="/images/Logo transparent orange.webp"
+            alt="Supercoder"
+            width={140}
+            height={40}
+            className={styles.brandLogo}
+          />
+        </div>
 
-              {(profile.role === "admin" || profile.role === "teacher") && (
+        <div className={styles.topBarRight}>
+          {(profile.role === "admin" || profile.role === "teacher") && (
+            <Link href="/admin/users" className={styles.adminPill}>
+              ⚙️ Admin
+            </Link>
+          )}
+          <div className={styles.levelPill}>
+            <span className={styles.levelIcon}>⚡</span>
+            <span>Level {profile.level}</span>
+          </div>
+          <div className={styles.userAvatar}>
+            {firstName.charAt(0).toUpperCase()}
+          </div>
+        </div>
+      </header>
+
+      {/* ── MAIN LAYOUT ─────────────────────────────────────── */}
+      <main className={styles.mainLayout}>
+        {/* ── LEFT / MAIN CONTENT ─────────────────────────── */}
+        <div className={styles.mainContent}>
+          {/* HERO BANNER */}
+          <div className={styles.heroBanner}>
+            {/* text side */}
+            <div className={styles.heroText}>
+              <p className={styles.heroLabel}>Dashboard Siswa</p>
+              <h1 className={styles.heroTitle}>
+                Halo, {firstName}! 👋
+              </h1>
+              <p className={styles.heroSubtitle}>
+                Siap membangun sesuatu yang keren hari ini?
+              </p>
+
+              <div className={styles.heroActions}>
                 <Link
-                  href="/admin/users"
-                  className="btn btn-primary"
-                  style={{
-                    padding: "8px 16px",
-                    fontSize: "0.875rem",
-                  }}
+                  href={subjects?.[0] ? `/subjects/${subjects[0].id}` : "#"}
+                  className={styles.heroCTA}
                 >
-                  Buka Panel Admin ⚙️
+                  🚀 Mulai Belajar
                 </Link>
-              )}
+                <Link
+                  href="/dashboard/testimonials"
+                  className={styles.heroSecondary}
+                >
+                  ⭐ Beri Testimoni
+                </Link>
+              </div>
+            </div>
+
+            {/* mascot side */}
+            <div className={styles.heroMascot}>
+              <Image
+                src="/images/dashboard-mascot.webp"
+                alt="HTML JS CSS mascots"
+                width={340}
+                height={253}
+                priority
+                className={styles.mascotImage}
+                sizes="(max-width: 768px) 200px, 340px"
+              />
             </div>
           </div>
-          <div style={{ textAlign: "right" }}>
-            <div
-              style={{
-                fontSize: "0.875rem",
-                color: "#94A3B8",
-                marginBottom: "4px",
-              }}
-            >
-              LEVEL SAAT INI
-            </div>
-            <div
-              style={{ fontSize: "2.5rem", fontWeight: 800, color: "white" }}
-            >
-              Lvl {profile.level}
-            </div>
-            <form action={signOut} style={{ marginTop: "12px" }}>
-              <button
-                type="submit"
-                style={{
-                  background: "rgba(255,255,255,0.1)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  color: "white",
-                  padding: "6px 12px",
-                  borderRadius: "8px",
-                  fontSize: "0.75rem",
-                  cursor: "pointer",
-                }}
+
+          {/* STAT CARDS ROW */}
+          <div className={styles.statRow}>
+            <div className={styles.statCard}>
+              <div
+                className={styles.statIcon}
+                style={{ background: "linear-gradient(135deg,#d1fae5,#a7f3d0)" }}
               >
-                Log Out 🚪
+                📚
+              </div>
+              <div>
+                <p className={styles.statLabel}>Modul Selesai</p>
+                <p className={styles.statValue}>{completedModules ?? 0}</p>
+              </div>
+            </div>
+
+            <div className={styles.statCard}>
+              <div
+                className={styles.statIcon}
+                style={{ background: "linear-gradient(135deg,#fef3c7,#fde68a)" }}
+              >
+                🧠
+              </div>
+              <div>
+                <p className={styles.statLabel}>Quiz Dikerjakan</p>
+                <p className={styles.statValue}>{completedQuizzes ?? 0}</p>
+              </div>
+            </div>
+
+            <div className={styles.statCard}>
+              <div
+                className={styles.statIcon}
+                style={{ background: "linear-gradient(135deg,#ede9fe,#ddd6fe)" }}
+              >
+                ⚡
+              </div>
+              <div>
+                <p className={styles.statLabel}>Total XP</p>
+                <p className={styles.statValue}>{profile.xp}</p>
+              </div>
+            </div>
+
+            {myRank >= 0 && (
+              <div className={styles.statCard}>
+                <div
+                  className={styles.statIcon}
+                  style={{
+                    background: "linear-gradient(135deg,#fee2e2,#fecaca)",
+                  }}
+                >
+                  🏆
+                </div>
+                <div>
+                  <p className={styles.statLabel}>Peringkat</p>
+                  <p className={styles.statValue}>#{myRank + 1}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* SUBJECT GRID */}
+          <section className={styles.sectionBlock}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>Materi Belajar</h2>
+              <span className={styles.sectionCount}>
+                {subjects?.length ?? 0} kursus tersedia
+              </span>
+            </div>
+
+            <div className={styles.subjectGrid}>
+              {subjects?.map((subject, i) => {
+                const icons = ["💻", "🎨", "⚡", "🔧", "🌐", "🛠️"];
+                const gradients = [
+                  "linear-gradient(135deg,#eef2ff,#e0e7ff)",
+                  "linear-gradient(135deg,#fef3c7,#fde68a)",
+                  "linear-gradient(135deg,#d1fae5,#a7f3d0)",
+                  "linear-gradient(135deg,#ffe4e6,#fecdd3)",
+                  "linear-gradient(135deg,#ede9fe,#ddd6fe)",
+                  "linear-gradient(135deg,#e0f2fe,#bae6fd)",
+                ];
+                return (
+                  <Link
+                    href={`/subjects/${subject.id}`}
+                    key={subject.id}
+                    className={styles.subjectCard}
+                  >
+                    <div
+                      className={styles.subjectIconWrap}
+                      style={{ background: gradients[i % gradients.length] }}
+                    >
+                      <span className={styles.subjectIconEmoji}>
+                        {icons[i % icons.length]}
+                      </span>
+                    </div>
+                    <h3 className={styles.subjectName}>{subject.title}</h3>
+                    <p className={styles.subjectDesc}>{subject.description}</p>
+                    <div className={styles.subjectFooter}>
+                      <span className={styles.subjectTag}>Coding</span>
+                      <span className={styles.subjectCTA}>
+                        Mulai →
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+
+              {(!subjects || subjects.length === 0) && (
+                <div className={styles.emptyState}>
+                  <p>Belum ada materi tersedia. Cek lagi nanti! 🕐</p>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {/* ── RIGHT SIDEBAR ────────────────────────────────── */}
+        <aside className={styles.rightPanel}>
+          {/* XP PROGRESS */}
+          <div className={styles.panelCard}>
+            <div className={styles.panelCardHeader}>
+              <h3 className={styles.panelTitle}>Progres XP</h3>
+              <Link href="/leaderboard" className={styles.panelLink}>
+                Papan →
+              </Link>
+            </div>
+
+            <div className={styles.xpRingWrap}>
+              <svg
+                width="128"
+                height="128"
+                viewBox="0 0 128 128"
+                className={styles.xpSvg}
+              >
+                {/* track */}
+                <circle
+                  cx="64"
+                  cy="64"
+                  r={RING_R}
+                  fill="none"
+                  stroke="#e2e8f0"
+                  strokeWidth="12"
+                />
+                {/* progress */}
+                <circle
+                  cx="64"
+                  cy="64"
+                  r={RING_R}
+                  fill="none"
+                  stroke="url(#xpGrad)"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  strokeDasharray={RING_CIRC}
+                  strokeDashoffset={ringOffset}
+                  transform="rotate(-90 64 64)"
+                />
+                <defs>
+                  <linearGradient id="xpGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#f97316" />
+                    <stop offset="100%" stopColor="#ef4444" />
+                  </linearGradient>
+                </defs>
+              </svg>
+
+              <div className={styles.xpRingCenter}>
+                <span className={styles.xpNumber}>{profile.xp}</span>
+                <span className={styles.xpLabel}>XP</span>
+              </div>
+            </div>
+
+            <p className={styles.xpCaption}>
+              {xpProgress}% menuju Level {profile.level + 1}
+            </p>
+
+            <form action={signOut} className={styles.signOutForm}>
+              <button type="submit" className={styles.signOutBtn}>
+                Keluar 🚪
               </button>
             </form>
           </div>
-        </div>
 
-        {/* Subjects Section (Left Side - 8 Columns) */}
-        <div className={styles.subjectGrid}>
-          {subjects?.map((subject) => (
-            <Link
-              href={`/subjects/${subject.id}`}
-              key={subject.id}
-              className={styles.subjectCard}
-            >
-              <div className={styles.subjectIcon}>💻</div>
-              <div>
-                <h3 style={{ marginBottom: "8px" }}>{subject.title}</h3>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "#64748B",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                  }}
-                >
-                  {subject.description}
-                </p>
-              </div>
-              <div
-                style={{
-                  marginTop: "auto",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span className="badge badge-xp">Coding</span>
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    color: "#6366F1",
-                    fontWeight: 600,
-                  }}
-                >
-                  Mulai Belajar →
-                </span>
-              </div>
-            </Link>
-          ))}
-          {subjects?.length === 0 && (
-            <div
-              className="card"
-              style={{
-                gridColumn: "span 2",
-                textAlign: "center",
-                padding: "60px",
-              }}
-            >
-              <p style={{ color: "#64748B" }}>
-                Belum ada materi tersedia. Cek lagi nanti ya!
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Sidebar (Right Side - 4 Columns) */}
-        <div className={styles.sidebar}>
-          {/* Stats Section */}
-          <div className={styles.statCard}>
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <h3 style={{ marginBottom: "24px", alignSelf: "flex-start" }}>
-                Progres Saya
-              </h3>
-
-              <div
-                className={styles.xpCircle}
-                style={{ "--xp-percent": xpPercent } as React.CSSProperties}
-              >
-                <div className={styles.xpCircleContent}>
-                  {profile.xp}
-                  <span>XP</span>
-                </div>
-              </div>
-
-              <p style={{ fontWeight: 600, marginTop: "8px" }}>
-                Terus kumpulkan XP!
-              </p>
-              <p
-                style={{
-                  fontSize: "0.875rem",
-                  color: "#64748B",
-                  marginTop: "4px",
-                }}
-              >
-                Selesaikan modul dan kuis untuk dapat lebih banyak XP.
-              </p>
+          {/* RECENT ACTIVITY */}
+          <div className={styles.panelCard}>
+            <div className={styles.panelCardHeader}>
+              <h3 className={styles.panelTitle}>Aktivitas Terbaru</h3>
             </div>
 
-            <div
-              style={{
-                marginTop: "24px",
-                paddingTop: "20px",
-                borderTop: "1px solid var(--border)",
-                width: "100%",
-              }}
-            >
-              <Link
-                href="/leaderboard"
-                style={{
-                  color: "var(--primary)",
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                }}
-              >
-                Lihat Papan Peringkat →
+            {recentActivity && recentActivity.length > 0 ? (
+              <ul className={styles.activityList}>
+                {recentActivity.map((item: any) => {
+                  const lessonTitle =
+                    item.lessons?.title ?? "—";
+                  const subjectTitle =
+                    item.lessons?.modules?.subjects?.title ?? "";
+                  return (
+                    <li key={item.id} className={styles.activityItem}>
+                      <div
+                        className={styles.activityIcon}
+                        style={{ background: xpColor(item.type) }}
+                      >
+                        {xpIcon(item.type)}
+                      </div>
+                      <div className={styles.activityInfo}>
+                        <p className={styles.activityTitle}>{lessonTitle}</p>
+                        {subjectTitle && (
+                          <p className={styles.activitySub}>{subjectTitle}</p>
+                        )}
+                        <p className={styles.activityMeta}>
+                          {item.score != null && (
+                            <span className={styles.activityScore}>
+                              Skor {item.score}
+                            </span>
+                          )}
+                          {timeAgo(item.submitted_at)}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className={styles.emptyText}>
+                Belum ada aktivitas. Yuk mulai belajar! 🚀
+              </p>
+            )}
+          </div>
+
+          {/* LEADERBOARD MINI */}
+          <div className={styles.panelCard}>
+            <div className={styles.panelCardHeader}>
+              <h3 className={styles.panelTitle}>Top Siswa</h3>
+              <Link href="/leaderboard" className={styles.panelLink}>
+                Lihat Semua →
               </Link>
             </div>
+
+            <ul className={styles.leaderList}>
+              {leaderboard?.slice(0, 5).map((p, i) => {
+                const medals = ["🥇", "🥈", "🥉"];
+                const isMe = p.id === profile.id;
+                return (
+                  <li
+                    key={p.id}
+                    className={`${styles.leaderItem} ${isMe ? styles.leaderItemMe : ""}`}
+                  >
+                    <span className={styles.leaderRank}>
+                      {i < 3 ? medals[i] : `#${i + 1}`}
+                    </span>
+                    <div className={styles.leaderAvatar}>
+                      {(p.full_name || "?").charAt(0).toUpperCase()}
+                    </div>
+                    <div className={styles.leaderInfo}>
+                      <p className={styles.leaderName}>
+                        {p.full_name || "Anonim"}
+                        {isMe && (
+                          <span className={styles.meBadge}> (Kamu)</span>
+                        )}
+                      </p>
+                      <p className={styles.leaderXp}>⚡ {p.xp} XP</p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
 
-          {/* Achievements / Notifications */}
-          <div className={styles.leaderboardCard}>
-            <h3 style={{ marginBottom: "20px" }}>Lencana Terbaru</h3>
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "50%",
-                  backgroundColor: "#F1F5F9",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1.25rem",
-                }}
-                title="Pemula"
-              >
-                🌱
-              </div>
+          {/* TESTIMONI BANNER */}
+          <div className={styles.testimoniBanner}>
+            <span className={styles.testimoniEmoji}>💬</span>
+            <div>
+              <p className={styles.testimoniTitle}>Bagikan Pengalamanmu</p>
+              <p className={styles.testimoniDesc}>
+                Bantu kami jadi lebih baik!
+              </p>
             </div>
-            <p
-              style={{
-                marginTop: "24px",
-                fontSize: "0.875rem",
-                color: "#64748B",
-              }}
-            >
-              Buka lebih banyak lencana dengan menyelesaikan modul!
-            </p>
-          </div>
-
-          {/* Testimonial Banner Card */}
-          <div
-            style={{
-              backgroundColor: "#FFFBEB",
-              border: "1px solid #FDE68A",
-              borderRadius: "16px",
-              padding: "24px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                marginBottom: "10px",
-              }}
-            >
-              <span style={{ fontSize: "1.4rem" }}>💬</span>
-              <h3
-                style={{
-                  fontSize: "1.05rem",
-                  fontWeight: 700,
-                  color: "#92400E",
-                  margin: 0,
-                }}
-              >
-                Testimoni Belajar
-              </h3>
-            </div>
-            <p
-              style={{
-                fontSize: "0.85rem",
-                color: "#78350F",
-                lineHeight: 1.5,
-                marginBottom: "16px",
-              }}
-            >
-              Bagikan pengalaman dan masukan belajarmu di Supercoder untuk bantu
-              kami jadi lebih baik!
-            </p>
-            <Link
-              href="/dashboard/testimonials"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "6px",
-                backgroundColor: "#F59E0B",
-                color: "#FFFFFF",
-                padding: "8px 16px",
-                borderRadius: "10px",
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                textDecoration: "none",
-                width: "100%",
-              }}
-              className="hover:bg-amber-600 transition-colors shadow-xs"
-            >
-              Beri Testimoni Sekarang →
+            <Link href="/dashboard/testimonials" className={styles.testimoniCTA}>
+              Tulis →
             </Link>
           </div>
-        </div>
-      </div>
+        </aside>
+      </main>
     </div>
   );
 }
