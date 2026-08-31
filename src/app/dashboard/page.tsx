@@ -122,28 +122,30 @@ export default async function DashboardPage() {
     <div className={styles.dashboardShell}>
       {/* ── TOP BAR ─────────────────────────────────────────── */}
       <header className={styles.topBar}>
-        <div className={styles.topBarBrand}>
-          <Image
-            src="/images/Logo transparent orange.webp"
-            alt="Supercoder"
-            width={140}
-            height={40}
-            className={styles.brandLogo}
-          />
-        </div>
-
-        <div className={styles.topBarRight}>
-          {(profile.role === "admin" || profile.role === "teacher") && (
-            <Link href="/admin/users" className={styles.adminPill}>
-              ⚙️ Admin
-            </Link>
-          )}
-          <div className={styles.levelPill}>
-            <span className={styles.levelIcon}>⚡</span>
-            <span>Level {profile.level}</span>
+        <div className={styles.topBarContainer}>
+          <div className={styles.topBarBrand}>
+            <Image
+              src="/images/Logo transparent orange.webp"
+              alt="Supercoder"
+              width={140}
+              height={40}
+              className={styles.brandLogo}
+            />
           </div>
-          <div className={styles.userAvatar}>
-            {firstName.charAt(0).toUpperCase()}
+
+          <div className={styles.topBarRight}>
+            {(profile.role === "admin" || profile.role === "teacher") && (
+              <Link href="/admin/users" className={styles.adminPill}>
+                ⚙️ Admin
+              </Link>
+            )}
+            <div className={styles.levelPill}>
+              <span className={styles.levelIcon}>⚡</span>
+              <span>Level {profile.level}</span>
+            </div>
+            <div className={styles.userAvatar}>
+              {firstName.charAt(0).toUpperCase()}
+            </div>
           </div>
         </div>
       </header>
