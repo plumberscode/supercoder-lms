@@ -14,8 +14,7 @@ import Footer from "@/components/homepage/Footer";
 import JsonLd from "@/components/seo/JsonLd";
 
 export const metadata = {
-  title:
-    "Supercoder - Kelas Coding & AI Balikpapan | Learn the Fundamentals. Build with AI.",
+  title: "Supercoder - Belajar Coding & AI",
   description:
     "Tempat generasi muda memahami teknologi, menguasai coding fundamentals, dan menggunakan AI untuk mengubah ide menjadi produk digital nyata di Balikpapan.",
   alternates: {

@@ -22,7 +22,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://supercoder.id";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Supercoder - Learn the Fundamentals. Build with AI.",
+    default: "Supercoder - Belajar Coding & AI",
     template: "%s | Supercoder",
   },
   description:
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: siteUrl,
     siteName: "Supercoder",
-    title: "Supercoder - Learn the Fundamentals. Build with AI.",
+    title: "Supercoder - Belajar Coding & AI",
     description:
       "Tempat generasi muda memahami teknologi, menguasai coding fundamentals, dan menggunakan AI untuk mengubah ide menjadi produk digital nyata di Balikpapan.",
     images: [
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Supercoder - Learn the Fundamentals. Build with AI.",
+    title: "Supercoder - Belajar Coding & AI",
     description:
       "Kuasai coding fundamentals dan manfaatkan modern AI workflow untuk membangun aplikasi web dan project digital nyata.",
     images: ["/images/hero-image-supercoder.webp"],
