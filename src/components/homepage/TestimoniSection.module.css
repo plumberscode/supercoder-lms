@@ -1,0 +1,286 @@
+.section {
+  padding: 100px 20px;
+  background: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.title {
+  font-family: "Poppins", sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.textRed {
+  color: #ef4444;
+}
+
+.textOrange {
+  color: #f97316;
+}
+
+.subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: 1.05rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 60px;
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+/* Testimonial Card */
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  border: none;
+  padding: 32px 28px 28px;
+  box-shadow:
+    0 10px 30px -5px rgba(0, 0, 0, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 400px;
+  position: relative;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.09);
+}
+
+/* Floating Arrow Buttons (Right & Left) */
+.floatingArrowBtnRight {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.floatingArrowBtnRight:hover {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+}
+
+.floatingArrowBtnLeft {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.floatingArrowBtnLeft:hover {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+}
+
+/* Card Header */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.userName {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+}
+
+.userRole {
+  font-family: "Inter", sans-serif;
+  font-size: 0.775rem;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.verifiedBadge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Card Body */
+.cardBody {
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.quoteHighlight {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.025rem;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.45;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.quoteText {
+  font-family: "Inter", sans-serif;
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.65;
+}
+
+/* Card Footer */
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.stars {
+  color: #f59e0b;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+}
+
+.programTag {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.725rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Dots */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.dotActive {
+  width: 24px;
+  border-radius: 4px;
+  background: #ef4444;
+}
+
+@media (max-width: 992px) {
+  .cardsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .card {
+    min-height: auto;
+  }
+  .photoCard {
+    min-height: 380px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .headerCta {
+    width: 100%;
+    text-align: center;
+  }
+}

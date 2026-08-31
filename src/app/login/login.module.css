@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
 }
 
 .loginCard {
@@ -13,7 +13,9 @@
   background: var(--card);
   padding: 48px;
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   text-align: center;
 }
 
@@ -38,7 +40,7 @@
 }
 
 .subtitle {
-  color: #64748B;
+  color: #64748b;
   margin-bottom: 32px;
   font-size: 0.9375rem;
 }
@@ -67,7 +69,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  color: #94A3B8;
+  color: #94a3b8;
   font-size: 0.8125rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -97,14 +99,14 @@
 }
 
 .googleBtn:hover {
-  background: #F8FAFC;
-  border-color: #CBD5E1;
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .footerText {
   margin-top: 32px;
   font-size: 0.875rem;
-  color: #64748B;
+  color: #64748b;
 }
 
 .footerText a {

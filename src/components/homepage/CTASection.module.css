@@ -1,0 +1,52 @@
+.section {
+  padding: 100px 20px;
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+}
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+.titleTop {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.titleBottom {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.7;
+  margin-bottom: 40px;
+  font-weight: 400;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  color: #ef4444;
+  padding: 16px 36px;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25);
+  color: #ef4444;
+}
+.waIcon {
+  width: 24px;
+  height: 24px;
+}

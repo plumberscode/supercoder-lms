@@ -1,0 +1,58 @@
+.section {
+  padding: 100px 20px;
+  background: #f1f5f9;
+}
+.title {
+  font-family: "Poppins", sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+  color: #111827;
+}
+.textOrange {
+  color: #f97316;
+}
+.subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: 1.05rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 60px;
+}
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.frame {
+  flex: 1;
+  min-width: 280px;
+  max-width: 380px;
+}
+.imgWrapper {
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.galleryImg {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.galleryImg:hover {
+  transform: scale(1.03);
+}
+.caption {
+  font-family: "Inter", sans-serif;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+  line-height: 1.6;
+  text-align: center;
+}

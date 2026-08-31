@@ -1,0 +1,38 @@
+.footer {
+  background: #f1f5f9;
+  padding: 40px 20px 30px;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.footerLogo {
+  height: 40px;
+  width: auto;
+}
+.rightSide {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.igLogo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  transition: opacity 0.2s ease;
+}
+.igLogo:hover {
+  opacity: 0.7;
+}
+.copyright {
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 20px;
+}

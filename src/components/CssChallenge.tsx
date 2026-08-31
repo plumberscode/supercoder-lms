@@ -1,67 +1,83 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import CodeEditor from './CodeEditor'
-import styles from './CssChallenge.module.css'
-import { submitCssSolution, getCssHint } from '@/app/lessons/css-actions'
-import { buildCssPreview } from '@/lib/css-preview'
+import { useState, useEffect, useRef } from "react";
+import CodeEditor from "./CodeEditor";
+import styles from "./CssChallenge.module.css";
+import { submitCssSolution, getCssHint } from "@/app/lessons/css-actions";
+import { buildCssPreview } from "@/lib/css-preview";
 
 interface CssChallenge {
-  id: string
-  lesson_id: string
-  title: string
-  description: string
-  starter_html: string
-  starter_css: string
-  reference_css: string
-  max_score: number
-  max_attempts: number
+  id: string;
+  lesson_id: string;
+  title: string;
+  description: string;
+  starter_html: string;
+  starter_css: string;
+  reference_css: string;
+  max_score: number;
+  max_attempts: number;
 }
 
 interface Props {
-  challenge: CssChallenge
-  existingSubmission?: { score: number; data: any } | null
+  challenge: CssChallenge;
+  existingSubmission?: { score: number; data: any } | null;
 }
 
-export default function CssChallengeComponent({ challenge, existingSubmission }: Props) {
-  const [cssCode, setCssCode] = useState(existingSubmission?.data?.css || challenge.starter_css || '')
-  const [htmlCode, setHtmlCode] = useState(challenge.starter_html || '')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [gradeResult, setGradeResult] = useState<{ score: number; feedback: string } | null>(null)
-  const [bestScore, setBestScore] = useState<number>(existingSubmission?.score || 0)
-  const [attemptsUsed, setAttemptsUsed] = useState<number>(existingSubmission?.data?.attempts?.length || 0)
-  const [lastSubmittedCss, setLastSubmittedCss] = useState<string>(existingSubmission?.data?.css || challenge.starter_css || '')
-  const [outputError, setOutputError] = useState<string | null>(null)
-  const [hint, setHint] = useState('')
-  const [isLoadingHint, setIsLoadingHint] = useState(false)
-  const [previewKey, setPreviewKey] = useState(0)
+export default function CssChallengeComponent({
+  challenge,
+  existingSubmission,
+}: Props) {
+  const [cssCode, setCssCode] = useState(
+    existingSubmission?.data?.css || challenge.starter_css || "",
+  );
+  const [htmlCode, setHtmlCode] = useState(challenge.starter_html || "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [gradeResult, setGradeResult] = useState<{
+    score: number;
+    feedback: string;
+  } | null>(null);
+  const [bestScore, setBestScore] = useState<number>(
+    existingSubmission?.score || 0,
+  );
+  const [attemptsUsed, setAttemptsUsed] = useState<number>(
+    existingSubmission?.data?.attempts?.length || 0,
+  );
+  const [lastSubmittedCss, setLastSubmittedCss] = useState<string>(
+    existingSubmission?.data?.css || challenge.starter_css || "",
+  );
+  const [outputError, setOutputError] = useState<string | null>(null);
+  const [hint, setHint] = useState("");
+  const [isLoadingHint, setIsLoadingHint] = useState(false);
+  const [previewKey, setPreviewKey] = useState(0);
 
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Live preview with 300ms debounce
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       if (iframeRef.current) {
-        iframeRef.current.srcdoc = buildCssPreview(htmlCode, cssCode)
+        iframeRef.current.srcdoc = buildCssPreview(htmlCode, cssCode);
       }
-    }, 300)
+    }, 300);
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [cssCode, htmlCode, previewKey])
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [cssCode, htmlCode, previewKey]);
 
   const handleSubmit = async () => {
     if (cssCode === lastSubmittedCss) {
-      setOutputError('Kode belum diubah. Silakan perbaiki CSS Anda sebelum submit ulang.')
-      return
+      setOutputError(
+        "Kode belum diubah. Silakan perbaiki CSS Anda sebelum submit ulang.",
+      );
+      return;
     }
 
-    setIsSubmitting(true)
-    setGradeResult(null)
-    setHint('')
-    setOutputError(null)
+    setIsSubmitting(true);
+    setGradeResult(null);
+    setHint("");
+    setOutputError(null);
 
     try {
       const result = await submitCssSolution({
@@ -71,60 +87,67 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
         starterHtml: htmlCode,
         referenceCss: challenge.reference_css,
         description: challenge.description,
-        maxScore: challenge.max_score
-      })
+        maxScore: challenge.max_score,
+      });
 
-      if ('error' in result && result.error) {
-        setGradeResult({ score: 0, feedback: result.error })
-        return
+      if ("error" in result && result.error) {
+        setGradeResult({ score: 0, feedback: result.error });
+        return;
       }
 
-      setGradeResult({ score: result.score!, feedback: result.feedback! })
-      setBestScore(result.bestScore!)
-      setAttemptsUsed(typeof result.attemptsUsed === 'number' && !isNaN(result.attemptsUsed) ? result.attemptsUsed : (attemptsUsed + 1))
-      setLastSubmittedCss(cssCode)
+      setGradeResult({ score: result.score!, feedback: result.feedback! });
+      setBestScore(result.bestScore!);
+      setAttemptsUsed(
+        typeof result.attemptsUsed === "number" && !isNaN(result.attemptsUsed)
+          ? result.attemptsUsed
+          : attemptsUsed + 1,
+      );
+      setLastSubmittedCss(cssCode);
     } catch (err: any) {
-      setGradeResult({ score: 0, feedback: err.message || 'Terjadi kesalahan saat menilai.' })
+      setGradeResult({
+        score: 0,
+        feedback: err.message || "Terjadi kesalahan saat menilai.",
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleGetHint = async () => {
-    setIsLoadingHint(true)
+    setIsLoadingHint(true);
     try {
       const hintText = await getCssHint({
         description: challenge.description,
         studentCss: cssCode,
         referenceCss: challenge.reference_css,
         starterHtml: htmlCode,
-        attemptNumber: attemptsUsed
-      })
-      setHint(hintText)
+        attemptNumber: attemptsUsed,
+      });
+      setHint(hintText);
     } catch {
-      setHint('Maaf, tidak dapat memuat hint saat ini.')
+      setHint("Maaf, tidak dapat memuat hint saat ini.");
     } finally {
-      setIsLoadingHint(false)
+      setIsLoadingHint(false);
     }
-  }
+  };
 
   const handleReset = () => {
-    setCssCode(challenge.starter_css || '')
-    setHtmlCode(challenge.starter_html || '')
-    setOutputError(null)
-    setGradeResult(null)
-    setHint('')
-    setPreviewKey(prev => prev + 1)
-  }
+    setCssCode(challenge.starter_css || "");
+    setHtmlCode(challenge.starter_html || "");
+    setOutputError(null);
+    setGradeResult(null);
+    setHint("");
+    setPreviewKey((prev) => prev + 1);
+  };
 
-  const remainingAttempts = challenge.max_attempts - attemptsUsed
-  const isMaxedOut = attemptsUsed >= challenge.max_attempts
+  const remainingAttempts = challenge.max_attempts - attemptsUsed;
+  const isMaxedOut = attemptsUsed >= challenge.max_attempts;
 
   const getScoreClass = (score: number) => {
-    if (score >= 70) return ''
-    if (score >= 50) return styles.scoreMid
-    return styles.scoreLow
-  }
+    if (score >= 70) return "";
+    if (score >= 50) return styles.scoreMid;
+    return styles.scoreLow;
+  };
 
   return (
     <div className={styles.container}>
@@ -137,9 +160,7 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
 
       {/* Soal section */}
       <h2 className={styles.challengeTitle}>{challenge.title}</h2>
-      <span className={styles.languageBadge}>
-        🎨 CSS Challenge
-      </span>
+      <span className={styles.languageBadge}>🎨 CSS Challenge</span>
       <div className={styles.description}>{challenge.description}</div>
 
       {/* HTML section — editable */}
@@ -159,7 +180,9 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
       {/* CSS section — editable */}
       <div className={styles.editorSection}>
         <div className={styles.editorHeader}>
-          <span className={styles.editorLabel}>🎨 CSS (Tulis CSS kamu di sini)</span>
+          <span className={styles.editorLabel}>
+            🎨 CSS (Tulis CSS kamu di sini)
+          </span>
         </div>
         <CodeEditor
           language="css"
@@ -177,11 +200,10 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
           className={styles.submitButton}
         >
           {isSubmitting
-            ? '⏳ Memeriksa...'
+            ? "⏳ Memeriksa..."
             : isMaxedOut
-              ? '📤 Batas tercapai'
-              : `📤 Submit ke AI (sisa: ${remainingAttempts})`
-          }
+              ? "📤 Batas tercapai"
+              : `📤 Submit ke AI (sisa: ${remainingAttempts})`}
         </button>
         <button onClick={handleReset} className={styles.resetButton}>
           ↺ Reset
@@ -189,7 +211,17 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
       </div>
 
       {outputError && (
-        <div style={{ color: '#EF4444', backgroundColor: '#FEF2F2', padding: '12px 16px', borderRadius: '8px', border: '1px solid #FCA5A5', marginTop: '16px', fontSize: '0.875rem' }}>
+        <div
+          style={{
+            color: "#EF4444",
+            backgroundColor: "#FEF2F2",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            border: "1px solid #FCA5A5",
+            marginTop: "16px",
+            fontSize: "0.875rem",
+          }}
+        >
           ⚠️ {outputError}
         </div>
       )}
@@ -198,7 +230,9 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
       <div className={styles.previewPanel}>
         <div className={styles.previewHeader}>
           <span>🖥️ Live Preview</span>
-          <span style={{ color: '#10B981', fontSize: '0.6875rem' }}>● Live</span>
+          <span style={{ color: "#10B981", fontSize: "0.6875rem" }}>
+            ● Live
+          </span>
         </div>
         <iframe
           ref={iframeRef}
@@ -206,28 +240,37 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
           srcDoc={buildCssPreview(htmlCode, cssCode)}
           title="CSS Preview"
           sandbox="allow-scripts"
-          style={{ height: '250px' }}
+          style={{ height: "250px" }}
         />
       </div>
 
       {/* Grade Result */}
       {gradeResult && (
         <div className={styles.resultPanel}>
-          <div className={`${styles.scoreDisplay} ${getScoreClass(gradeResult.score)}`}>
+          <div
+            className={`${styles.scoreDisplay} ${getScoreClass(gradeResult.score)}`}
+          >
             <div className={styles.scoreValue}>{gradeResult.score}</div>
             <div className={styles.scoreLabel}>
               {gradeResult.score >= 90
-                ? '🎉 Luar biasa!'
+                ? "🎉 Luar biasa!"
                 : gradeResult.score >= 70
-                  ? '👏 Bagus sekali!'
+                  ? "👏 Bagus sekali!"
                   : gradeResult.score >= 50
-                    ? '💪 Hampir benar, coba lagi!'
-                    : '📚 Pelajari lagi materinya'
-              }
+                    ? "💪 Hampir benar, coba lagi!"
+                    : "📚 Pelajari lagi materinya"}
             </div>
           </div>
           <div className={styles.feedbackPanel}>
-            <strong style={{ display: 'block', marginBottom: '8px', color: '#1E293B' }}>💬 Feedback dari AI:</strong>
+            <strong
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                color: "#1E293B",
+              }}
+            >
+              💬 Feedback dari AI:
+            </strong>
             {gradeResult.feedback}
           </div>
           <div className={styles.attemptsInfo}>
@@ -240,8 +283,14 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
       {gradeResult && gradeResult.score < 100 && !isMaxedOut && (
         <>
           {!hint && (
-            <button onClick={handleGetHint} disabled={isLoadingHint} className={styles.hintButton}>
-              {isLoadingHint ? '⏳ Meminta bantuan AI...' : '💡 Minta Petunjuk (AI Hint)'}
+            <button
+              onClick={handleGetHint}
+              disabled={isLoadingHint}
+              className={styles.hintButton}
+            >
+              {isLoadingHint
+                ? "⏳ Meminta bantuan AI..."
+                : "💡 Minta Petunjuk (AI Hint)"}
             </button>
           )}
           {hint && (
@@ -252,18 +301,18 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
                 onClick={handleGetHint}
                 disabled={isLoadingHint}
                 style={{
-                  marginTop: '12px',
-                  background: 'transparent',
-                  border: '1px solid #D97706',
-                  color: '#92400E',
-                  padding: '6px 16px',
-                  borderRadius: '6px',
-                  fontSize: '0.8125rem',
+                  marginTop: "12px",
+                  background: "transparent",
+                  border: "1px solid #D97706",
+                  color: "#92400E",
+                  padding: "6px 16px",
+                  borderRadius: "6px",
+                  fontSize: "0.8125rem",
                   fontWeight: 600,
-                  cursor: 'pointer'
+                  cursor: "pointer",
                 }}
               >
-                {isLoadingHint ? '⏳ Memuat...' : '🔄 Minta Petunjuk Lagi'}
+                {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Lagi"}
               </button>
             </div>
           )}
@@ -273,14 +322,21 @@ export default function CssChallengeComponent({ challenge, existingSubmission }:
       {/* Success panel */}
       {bestScore >= 70 && (
         <div className={styles.successPanel}>
-          <span style={{ fontSize: '3rem', display: 'block', marginBottom: '12px' }}>🎉</span>
-          <h3 style={{ color: '#166534', marginBottom: '8px' }}>Selamat!</h3>
-          <p style={{ color: '#15803D', margin: 0 }}>
-            Kamu telah menyelesaikan CSS Challenge ini dengan skor terbaik {bestScore}/100.
-            {bestScore < 100 && !isMaxedOut && ' Kamu masih bisa mencoba untuk skor lebih tinggi!'}
+          <span
+            style={{ fontSize: "3rem", display: "block", marginBottom: "12px" }}
+          >
+            🎉
+          </span>
+          <h3 style={{ color: "#166534", marginBottom: "8px" }}>Selamat!</h3>
+          <p style={{ color: "#15803D", margin: 0 }}>
+            Kamu telah menyelesaikan CSS Challenge ini dengan skor terbaik{" "}
+            {bestScore}/100.
+            {bestScore < 100 &&
+              !isMaxedOut &&
+              " Kamu masih bisa mencoba untuk skor lebih tinggi!"}
           </p>
         </div>
       )}
     </div>
-  )
+  );
 }

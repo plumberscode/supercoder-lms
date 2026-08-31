@@ -751,7 +751,10 @@ export default function ModuleList({
                               activeAddForm?.moduleId === module.id &&
                                 activeAddForm?.type === "css-challenge"
                                 ? null
-                                : { moduleId: module.id, type: "css-challenge" },
+                                : {
+                                    moduleId: module.id,
+                                    type: "css-challenge",
+                                  },
                             )
                           }
                           className="btn"
@@ -777,33 +780,34 @@ export default function ModuleList({
                         </button>
                       </div>
 
-                      {activeAddForm && activeAddForm.moduleId === module.id && (
-                        <div style={{ position: "relative" }}>
-                          <button
-                            onClick={() => setActiveAddForm(null)}
-                            style={{
-                              position: "absolute",
-                              right: "12px",
-                              top: "28px",
-                              zIndex: 10,
-                              background: "transparent",
-                              border: "none",
-                              cursor: "pointer",
-                              fontSize: "1.25rem",
-                              color: "#94A3B8",
-                            }}
-                          >
-                            ✕
-                          </button>
-                          <LessonForm
-                            key={`${module.id}-${activeAddForm.type}`}
-                            moduleId={module.id}
-                            subjectId={subjectId}
-                            orderIndex={(module.lessons?.length || 0) + 1}
-                            initialType={activeAddForm.type}
-                          />
-                        </div>
-                      )}
+                      {activeAddForm &&
+                        activeAddForm.moduleId === module.id && (
+                          <div style={{ position: "relative" }}>
+                            <button
+                              onClick={() => setActiveAddForm(null)}
+                              style={{
+                                position: "absolute",
+                                right: "12px",
+                                top: "28px",
+                                zIndex: 10,
+                                background: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                                fontSize: "1.25rem",
+                                color: "#94A3B8",
+                              }}
+                            >
+                              ✕
+                            </button>
+                            <LessonForm
+                              key={`${module.id}-${activeAddForm.type}`}
+                              moduleId={module.id}
+                              subjectId={subjectId}
+                              orderIndex={(module.lessons?.length || 0) + 1}
+                              initialType={activeAddForm.type}
+                            />
+                          </div>
+                        )}
                     </div>
                   </div>
                 )}

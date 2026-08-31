@@ -45,13 +45,13 @@
 }
 
 .languageBadgePython {
-  background: #FEF3C7;
-  color: #92400E;
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .languageBadgeJavascript {
-  background: #FEF9C3;
-  color: #854D0E;
+  background: #fef9c3;
+  color: #854d0e;
 }
 
 .description {
@@ -63,8 +63,8 @@
 }
 
 .sampleSection {
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
@@ -72,17 +72,17 @@
 
 .sampleSection h4 {
   font-size: 0.8125rem;
-  color: #64748B;
+  color: #64748b;
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .sampleSection code {
-  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-family: "Fira Code", "Cascadia Code", monospace;
   font-size: 0.8125rem;
-  background: #1E1E1E;
-  color: #D4D4D4;
+  background: #1e1e1e;
+  color: #d4d4d4;
   padding: 12px;
   border-radius: 6px;
   display: block;
@@ -93,14 +93,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #1E1E1E;
+  background: #1e1e1e;
   padding: 12px 16px;
   border-radius: 12px 12px 0 0;
   border-bottom: 1px solid #333;
 }
 
 .editorLabel {
-  color: #A1A1AA;
+  color: #a1a1aa;
   font-size: 0.8125rem;
   font-weight: 600;
   display: flex;
@@ -109,9 +109,9 @@
 }
 
 .consolePanel {
-  background: #1E1E1E;
-  color: #D4D4D4;
-  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-family: "Fira Code", "Cascadia Code", monospace;
   font-size: 0.8125rem;
   padding: 16px;
   border-radius: 0 0 12px 12px;
@@ -123,7 +123,7 @@
 }
 
 .consoleLabel {
-  color: #6B7280;
+  color: #6b7280;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -132,7 +132,7 @@
 }
 
 .errorText {
-  color: #F87171;
+  color: #f87171;
 }
 
 .buttonGroup {
@@ -142,7 +142,7 @@
 }
 
 .runButton {
-  background: #10B981;
+  background: #10b981;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -195,7 +195,7 @@
 
 .resetButton {
   background: transparent;
-  color: #94A3B8;
+  color: #94a3b8;
   border: 1px solid #334155;
   padding: 8px 16px;
   border-radius: 8px;
@@ -206,7 +206,7 @@
 }
 
 .resetButton:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   color: white;
 }
 
@@ -239,13 +239,13 @@
 }
 
 .testPassed {
-  background: #F0FDF4;
-  border-left-color: #10B981;
+  background: #f0fdf4;
+  border-left-color: #10b981;
 }
 
 .testFailed {
-  background: #FEF2F2;
-  border-left-color: #EF4444;
+  background: #fef2f2;
+  border-left-color: #ef4444;
 }
 
 .testDetails {
@@ -257,7 +257,7 @@
 }
 
 .testDetails code {
-  background: #F8FAFC;
+  background: #f8fafc;
   padding: 6px 8px;
   border-radius: 4px;
   font-family: monospace;
@@ -266,8 +266,8 @@
 }
 
 .hintPanel {
-  border-left: 4px solid #F59E0B;
-  background: #FFFBEB;
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
   padding: 20px;
   border-radius: 0 8px 8px 0;
   margin-bottom: 24px;
@@ -275,7 +275,7 @@
 
 .hintTitle {
   font-weight: 700;
-  color: #92400E;
+  color: #92400e;
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -283,14 +283,14 @@
 }
 
 .hintText {
-  color: #78350F;
+  color: #78350f;
   line-height: 1.6;
   font-size: 0.9375rem;
 }
 
 .hintButton {
-  background: #FBBF24;
-  color: #78350F;
+  background: #fbbf24;
+  color: #78350f;
   border: none;
   padding: 10px 20px;
   border-radius: 8px;
@@ -305,7 +305,7 @@
 }
 
 .hintButton:hover {
-  background: #F59E0B;
+  background: #f59e0b;
   transform: translateY(-1px);
 }
 
@@ -318,8 +318,8 @@
 .scoreDisplay {
   text-align: center;
   padding: 32px;
-  background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
-  border: 1px solid #BBF7D0;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #bbf7d0;
   border-radius: var(--radius-lg);
   margin-bottom: 24px;
 }
@@ -331,7 +331,7 @@
 }
 
 .scoreLabel {
-  color: #15803D;
+  color: #15803d;
   font-weight: 600;
   margin-top: 8px;
 }
@@ -339,12 +339,12 @@
 .existingScore {
   text-align: center;
   padding: 16px 24px;
-  background: #EEF2FF;
-  border: 1px solid #C7D2FE;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
   border-radius: 12px;
   margin-bottom: 16px;
   font-size: 0.875rem;
-  color: #3730A3;
+  color: #3730a3;
   font-weight: 600;
 }
 
@@ -352,7 +352,7 @@
 .tabBar {
   display: flex;
   gap: 0;
-  background: #161B22;
+  background: #161b22;
   border-bottom: 1px solid #333;
 }
 
@@ -360,7 +360,7 @@
   padding: 10px 20px;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #6B7280;
+  color: #6b7280;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -372,14 +372,14 @@
 }
 
 .tab:hover {
-  color: #D1D5DB;
-  background: rgba(255,255,255,0.03);
+  color: #d1d5db;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .tabActive {
-  color: #F8FAFC;
+  color: #f8fafc;
   border-bottom-color: var(--primary);
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* HTML/JS Mode — Preview Panel */
@@ -396,11 +396,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 16px;
-  background: #F8FAFC;
+  background: #f8fafc;
   border-bottom: 1px solid var(--border);
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748B;
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -418,7 +418,7 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  color: #94A3B8;
+  color: #94a3b8;
   font-size: 0.875rem;
   padding: 24px;
   text-align: center;
@@ -431,8 +431,8 @@
 }
 
 .languageBadgeHtmlJs {
-  background: #DBEAFE;
-  color: #1E40AF;
+  background: #dbeafe;
+  color: #1e40af;
 }
 
 @media (max-width: 768px) {
@@ -445,4 +445,3 @@
     grid-template-columns: 1fr;
   }
 }
-

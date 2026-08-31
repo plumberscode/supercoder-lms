@@ -1,153 +1,173 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import CodeEditor from './CodeEditor'
-import styles from './code-challenge.module.css'
-import { submitCodeSolution, getCodeHint } from '@/app/lessons/code-actions'
-import { runCode } from '@/lib/code-runner'
-import { runTestCases, type GradingResult } from '@/lib/test-runner'
-import HtmlJsChallenge from './HtmlJsChallenge'
+import { useState } from "react";
+import CodeEditor from "./CodeEditor";
+import styles from "./code-challenge.module.css";
+import { submitCodeSolution, getCodeHint } from "@/app/lessons/code-actions";
+import { runCode } from "@/lib/code-runner";
+import { runTestCases, type GradingResult } from "@/lib/test-runner";
+import HtmlJsChallenge from "./HtmlJsChallenge";
 
 interface CodingChallenge {
-  id: string
-  lesson_id: string
-  title: string
-  description: string
-  language: 'python' | 'javascript' | 'html-js'
-  starter_code: string
-  starter_html?: string
-  hints: string[]
-  max_score: number
+  id: string;
+  lesson_id: string;
+  title: string;
+  description: string;
+  language: "python" | "javascript" | "html-js";
+  starter_code: string;
+  starter_html?: string;
+  hints: string[];
+  max_score: number;
 }
 
 interface TestCase {
-  id: string
-  title: string
-  input: string
-  expected_output: string
-  is_hidden: boolean
-  order_index: number
+  id: string;
+  title: string;
+  input: string;
+  expected_output: string;
+  is_hidden: boolean;
+  order_index: number;
 }
 
 interface Props {
-  challenge: CodingChallenge
-  testCases: TestCase[]
-  existingSubmission?: { score: number; data: any } | null
+  challenge: CodingChallenge;
+  testCases: TestCase[];
+  existingSubmission?: { score: number; data: any } | null;
 }
 
-export default function CodeChallenge({ challenge, testCases, existingSubmission }: Props) {
-  // Delegate to HtmlJsChallenge for html-js mode
-  if (challenge.language === 'html-js') {
+export default function CodeChallenge({
+  challenge,
+  testCases,
+  existingSubmission,
+}: Props) {
+  if (challenge.language === "html-js") {
     return (
       <HtmlJsChallenge
-        challenge={{ ...challenge, language: 'html-js' }}
+        challenge={{ ...challenge, language: "html-js" }}
         testCases={testCases}
         existingSubmission={existingSubmission}
       />
-    )
+    );
   }
 
-  const initialCode = existingSubmission?.data?.code || challenge.starter_code || ''
-  
-  const [code, setCode] = useState(initialCode)
-  const [output, setOutput] = useState('')
-  const [outputError, setOutputError] = useState<string | null>(null)
-  const [isRunning, setIsRunning] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [testResults, setTestResults] = useState<GradingResult | null>(null)
-  const [hint, setHint] = useState('')
-  const [isLoadingHint, setIsLoadingHint] = useState(false)
-  const [attemptCount, setAttemptCount] = useState(0)
-  const [finalScore, setFinalScore] = useState<number | null>(existingSubmission?.score ?? null)
-  const [pyodideLoading, setPyodideLoading] = useState(false)
+  return (
+    <StandardCodeChallenge
+      challenge={challenge}
+      testCases={testCases}
+      existingSubmission={existingSubmission}
+    />
+  );
+}
 
-  const visibleTests = testCases.filter(tc => !tc.is_hidden)
+function StandardCodeChallenge({
+  challenge,
+  testCases,
+  existingSubmission,
+}: Props) {
+  const initialCode =
+    existingSubmission?.data?.code || challenge.starter_code || "";
+
+  const [code, setCode] = useState(initialCode);
+  const [output, setOutput] = useState("");
+  const [outputError, setOutputError] = useState<string | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [testResults, setTestResults] = useState<GradingResult | null>(null);
+  const [hint, setHint] = useState("");
+  const [isLoadingHint, setIsLoadingHint] = useState(false);
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [finalScore, setFinalScore] = useState<number | null>(
+    existingSubmission?.score ?? null,
+  );
+  const [pyodideLoading, setPyodideLoading] = useState(false);
+
+  const visibleTests = testCases.filter((tc) => !tc.is_hidden);
 
   const handleRun = async () => {
-    setIsRunning(true)
-    setOutput('')
-    setOutputError(null)
-    
-    if (challenge.language === 'python') setPyodideLoading(true)
+    setIsRunning(true);
+    setOutput("");
+    setOutputError(null);
+
+    if (challenge.language === "python") setPyodideLoading(true);
 
     try {
-      const result = await runCode(challenge.language, code)
-      setOutput(result.output)
-      setOutputError(result.error)
+      const result = await runCode(challenge.language, code);
+      setOutput(result.output);
+      setOutputError(result.error);
     } catch (err: any) {
-      setOutputError(err.message || 'Terjadi kesalahan')
+      setOutputError(err.message || "Terjadi kesalahan");
     } finally {
-      setIsRunning(false)
-      setPyodideLoading(false)
+      setIsRunning(false);
+      setPyodideLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async () => {
     if (testCases.length === 0) {
-      setOutputError('Tidak ada test case untuk soal ini. Hubungi guru Anda.')
-      return
+      setOutputError("Tidak ada test case untuk soal ini. Hubungi guru Anda.");
+      return;
     }
-    setIsSubmitting(true)
-    setTestResults(null)
-    setOutputError(null)
+    setIsSubmitting(true);
+    setTestResults(null);
+    setOutputError(null);
 
     try {
-      const result = await runTestCases(challenge.language, code, testCases)
-      setTestResults(result)
-      setAttemptCount(prev => prev + 1)
+      const result = await runTestCases(challenge.language, code, testCases);
+      setTestResults(result);
+      setAttemptCount((prev) => prev + 1);
 
       if (result.score >= 70) {
-        setFinalScore(result.score)
+        setFinalScore(result.score);
         await submitCodeSolution({
           challengeId: challenge.id,
           lessonId: challenge.lesson_id,
           code,
-          score: result.score
-        })
+          score: result.score,
+        });
       }
     } catch (err: any) {
-      console.error('Submit error:', err)
-      setOutputError(err.message || 'Terjadi kesalahan saat submit')
+      console.error("Submit error:", err);
+      setOutputError(err.message || "Terjadi kesalahan saat submit");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleGetHint = async () => {
-    if (!testResults) return
-    setIsLoadingHint(true)
+    if (!testResults) return;
+    setIsLoadingHint(true);
 
     try {
       const hintText = await getCodeHint({
         challengeDescription: challenge.description,
         language: challenge.language,
         studentCode: code,
-        testResults: testResults.results.map(r => ({
+        testResults: testResults.results.map((r) => ({
           title: r.testCase.title,
           passed: r.passed,
           expected: r.testCase.expected_output,
-          actual: r.actual_output
+          actual: r.actual_output,
         })),
-        attemptNumber: attemptCount
-      })
-      setHint(hintText)
+        attemptNumber: attemptCount,
+      });
+      setHint(hintText);
     } catch (err: any) {
-      setHint('Maaf, tidak dapat memuat hint saat ini.')
+      setHint("Maaf, tidak dapat memuat hint saat ini.");
     } finally {
-      setIsLoadingHint(false)
+      setIsLoadingHint(false);
     }
-  }
+  };
 
   const handleReset = () => {
-    setCode(challenge.starter_code || '')
-    setOutput('')
-    setOutputError(null)
-    setTestResults(null)
-    setHint('')
-  }
+    setCode(challenge.starter_code || "");
+    setOutput("");
+    setOutputError(null);
+    setTestResults(null);
+    setHint("");
+  };
 
-  const langIcon = challenge.language === 'python' ? '🐍' : '⚡'
-  const langLabel = challenge.language === 'python' ? 'Python' : 'JavaScript'
+  const langIcon = challenge.language === "python" ? "🐍" : "⚡";
+  const langLabel = challenge.language === "python" ? "Python" : "JavaScript";
 
   return (
     <div className={styles.container}>
@@ -161,26 +181,55 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
         {/* Left Panel: Description */}
         <div className={styles.descriptionPanel}>
           <h2 className={styles.challengeTitle}>{challenge.title}</h2>
-          <span className={`${styles.languageBadge} ${challenge.language === 'python' ? styles.languageBadgePython : styles.languageBadgeJavascript}`}>
+          <span
+            className={`${styles.languageBadge} ${challenge.language === "python" ? styles.languageBadgePython : styles.languageBadgeJavascript}`}
+          >
             {langIcon} {langLabel}
           </span>
           <div className={styles.description}>{challenge.description}</div>
 
           {visibleTests.length > 0 && (
             <>
-              <h4 style={{ fontSize: '0.875rem', color: '#64748B', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <h4
+                style={{
+                  fontSize: "0.875rem",
+                  color: "#64748B",
+                  marginBottom: "12px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
                 Contoh Test Cases
               </h4>
               {visibleTests.map((tc, i) => (
                 <div key={tc.id} className={styles.sampleSection}>
-                  <h4>Test {i + 1}: {tc.title}</h4>
+                  <h4>
+                    Test {i + 1}: {tc.title}
+                  </h4>
                   {tc.input && (
                     <>
-                      <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px' }}>Input:</div>
+                      <div
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "#94A3B8",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        Input:
+                      </div>
                       <code>{tc.input}</code>
                     </>
                   )}
-                  <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px', marginTop: tc.input ? '8px' : 0 }}>Expected Output:</div>
+                  <div
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "#94A3B8",
+                      marginBottom: "4px",
+                      marginTop: tc.input ? "8px" : 0,
+                    }}
+                  >
+                    Expected Output:
+                  </div>
                   <code>{tc.expected_output}</code>
                 </div>
               ))}
@@ -195,11 +244,19 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
               {langIcon} {langLabel} Editor
             </span>
             <div className={styles.buttonGroup}>
-              <button onClick={handleRun} disabled={isRunning || isSubmitting} className={styles.runButton}>
-                {isRunning ? '⏳ Menjalankan...' : '▶ Jalankan'}
+              <button
+                onClick={handleRun}
+                disabled={isRunning || isSubmitting}
+                className={styles.runButton}
+              >
+                {isRunning ? "⏳ Menjalankan..." : "▶ Jalankan"}
               </button>
-              <button onClick={handleSubmit} disabled={isRunning || isSubmitting} className={styles.submitButton}>
-                {isSubmitting ? '⏳ Memeriksa...' : '📤 Submit'}
+              <button
+                onClick={handleSubmit}
+                disabled={isRunning || isSubmitting}
+                className={styles.submitButton}
+              >
+                {isSubmitting ? "⏳ Memeriksa..." : "📤 Submit"}
               </button>
               <button onClick={handleReset} className={styles.resetButton}>
                 ↺ Reset
@@ -208,7 +265,7 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
           </div>
 
           <CodeEditor
-            language={challenge.language}
+            language={challenge.language === "python" ? "python" : "javascript"}
             value={code}
             onChange={setCode}
             height="350px"
@@ -216,12 +273,20 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
 
           <div className={styles.consolePanel}>
             <span className={styles.consoleLabel}>
-              {isRunning ? '⏳ Menjalankan kode...' : pyodideLoading ? '📦 Memuat Python runtime...' : '📟 Console Output'}
+              {isRunning
+                ? "⏳ Menjalankan kode..."
+                : pyodideLoading
+                  ? "📦 Memuat Python runtime..."
+                  : "📟 Console Output"}
             </span>
-            {outputError && <div className={styles.errorText}>{outputError}</div>}
+            {outputError && (
+              <div className={styles.errorText}>{outputError}</div>
+            )}
             {output && <div>{output}</div>}
             {!output && !outputError && !isRunning && (
-              <span style={{ color: '#4B5563' }}>Klik &quot;Jalankan&quot; untuk melihat output...</span>
+              <span style={{ color: "#4B5563" }}>
+                Klik &quot;Jalankan&quot; untuk melihat output...
+              </span>
             )}
           </div>
         </div>
@@ -231,24 +296,38 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
       {testResults && (
         <div className={styles.testResultsPanel}>
           <div className={styles.testResultsTitle}>
-            🧪 Hasil Test Cases ({testResults.totalPassed}/{testResults.totalTests} lulus)
+            🧪 Hasil Test Cases ({testResults.totalPassed}/
+            {testResults.totalTests} lulus)
           </div>
           {testResults.results.map((r, i) => (
-            <div key={i} className={`${styles.testItem} ${r.passed ? styles.testPassed : styles.testFailed}`}>
+            <div
+              key={i}
+              className={`${styles.testItem} ${r.passed ? styles.testPassed : styles.testFailed}`}
+            >
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>{r.passed ? '✅' : '❌'}</span>
-                  <strong>{r.testCase.is_hidden ? 'Test Tersembunyi' : r.testCase.title}</strong>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <span>{r.passed ? "✅" : "❌"}</span>
+                  <strong>
+                    {r.testCase.is_hidden
+                      ? "Test Tersembunyi"
+                      : r.testCase.title}
+                  </strong>
                 </div>
                 {!r.testCase.is_hidden && !r.passed && (
                   <div className={styles.testDetails}>
                     <div>
-                      <span style={{ color: '#64748B' }}>Diharapkan:</span>
+                      <span style={{ color: "#64748B" }}>Diharapkan:</span>
                       <code>{r.testCase.expected_output}</code>
                     </div>
                     <div>
-                      <span style={{ color: '#64748B' }}>Hasil kamu:</span>
-                      <code>{r.error ? `Error: ${r.error}` : r.actual_output || '(kosong)'}</code>
+                      <span style={{ color: "#64748B" }}>Hasil kamu:</span>
+                      <code>
+                        {r.error
+                          ? `Error: ${r.error}`
+                          : r.actual_output || "(kosong)"}
+                      </code>
                     </div>
                   </div>
                 )}
@@ -262,8 +341,14 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
       {attemptCount > 0 && testResults && testResults.score < 100 && (
         <>
           {!hint && (
-            <button onClick={handleGetHint} disabled={isLoadingHint} className={styles.hintButton}>
-              {isLoadingHint ? '⏳ Meminta bantuan AI...' : '💡 Minta Petunjuk (AI Hint)'}
+            <button
+              onClick={handleGetHint}
+              disabled={isLoadingHint}
+              className={styles.hintButton}
+            >
+              {isLoadingHint
+                ? "⏳ Meminta bantuan AI..."
+                : "💡 Minta Petunjuk (AI Hint)"}
             </button>
           )}
           {hint && (
@@ -273,9 +358,19 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
               <button
                 onClick={handleGetHint}
                 disabled={isLoadingHint}
-                style={{ marginTop: '12px', background: 'transparent', border: '1px solid #D97706', color: '#92400E', padding: '6px 16px', borderRadius: '6px', fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer' }}
+                style={{
+                  marginTop: "12px",
+                  background: "transparent",
+                  border: "1px solid #D97706",
+                  color: "#92400E",
+                  padding: "6px 16px",
+                  borderRadius: "6px",
+                  fontSize: "0.8125rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
               >
-                {isLoadingHint ? '⏳ Memuat...' : '🔄 Minta Petunjuk Lagi'}
+                {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Lagi"}
               </button>
             </div>
           )}
@@ -287,10 +382,11 @@ export default function CodeChallenge({ challenge, testCases, existingSubmission
         <div className={styles.scoreDisplay}>
           <div className={styles.scoreValue}>{testResults.score}</div>
           <div className={styles.scoreLabel}>
-            🎉 Selamat! Kode kamu berhasil lulus {testResults.totalPassed} dari {testResults.totalTests} test cases!
+            🎉 Selamat! Kode kamu berhasil lulus {testResults.totalPassed} dari{" "}
+            {testResults.totalTests} test cases!
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

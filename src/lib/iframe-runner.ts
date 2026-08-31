@@ -4,13 +4,13 @@
  */
 
 export interface IframeRunResult {
-  output: string
-  error: string | null
+  output: string;
+  error: string | null;
 }
 
 export interface DomTestResult {
-  result: string
-  error: string | null
+  result: string;
+  error: string | null;
 }
 
 function buildSrcdoc(studentHtml: string): string {
@@ -71,7 +71,7 @@ window.addEventListener('message', function(e) {
 parent.postMessage({ type: 'iframe-ready' }, '*');
 <\/script>
 </body>
-</html>`
+</html>`;
 }
 
 /**
@@ -80,39 +80,39 @@ parent.postMessage({ type: 'iframe-ready' }, '*');
 export function createSandboxedIframe(
   container: HTMLElement,
   studentHtml: string,
-  visible: boolean = true
+  visible: boolean = true,
 ): Promise<HTMLIFrameElement> {
   return new Promise((resolve, reject) => {
-    const iframe = document.createElement('iframe')
-    iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals')
-    iframe.style.width = '100%'
-    iframe.style.height = visible ? '100%' : '0'
-    iframe.style.border = 'none'
-    iframe.style.backgroundColor = 'white'
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("sandbox", "allow-scripts allow-forms allow-modals");
+    iframe.style.width = "100%";
+    iframe.style.height = visible ? "100%" : "0";
+    iframe.style.border = "none";
+    iframe.style.backgroundColor = "white";
     if (!visible) {
-      iframe.style.position = 'absolute'
-      iframe.style.opacity = '0'
-      iframe.style.pointerEvents = 'none'
+      iframe.style.position = "absolute";
+      iframe.style.opacity = "0";
+      iframe.style.pointerEvents = "none";
     }
 
-    const srcdoc = buildSrcdoc(studentHtml)
-    iframe.setAttribute('srcdoc', srcdoc)
+    const srcdoc = buildSrcdoc(studentHtml);
+    iframe.setAttribute("srcdoc", srcdoc);
 
     const timeout = setTimeout(() => {
-      reject(new Error('Iframe gagal dimuat (timeout)'))
-    }, 10000)
+      reject(new Error("Iframe gagal dimuat (timeout)"));
+    }, 10000);
 
     const onMessage = (e: MessageEvent) => {
-      if (e.data?.type === 'iframe-ready') {
-        clearTimeout(timeout)
-        window.removeEventListener('message', onMessage)
-        resolve(iframe)
+      if (e.data?.type === "iframe-ready") {
+        clearTimeout(timeout);
+        window.removeEventListener("message", onMessage);
+        resolve(iframe);
       }
-    }
-    window.addEventListener('message', onMessage)
+    };
+    window.addEventListener("message", onMessage);
 
-    container.appendChild(iframe)
-  })
+    container.appendChild(iframe);
+  });
 }
 
 /**
@@ -120,27 +120,30 @@ export function createSandboxedIframe(
  */
 export function executeJsInIframe(
   iframe: HTMLIFrameElement,
-  jsCode: string
+  jsCode: string,
 ): Promise<IframeRunResult> {
   return new Promise((resolve) => {
     const timeout = setTimeout(() => {
-      resolve({ output: '', error: 'Timeout: Kode berjalan terlalu lama (maks 10 detik)' })
-    }, 10000)
+      resolve({
+        output: "",
+        error: "Timeout: Kode berjalan terlalu lama (maks 10 detik)",
+      });
+    }, 10000);
 
     const onMessage = (e: MessageEvent) => {
-      if (e.data?.type === 'exec-result') {
-        clearTimeout(timeout)
-        window.removeEventListener('message', onMessage)
+      if (e.data?.type === "exec-result") {
+        clearTimeout(timeout);
+        window.removeEventListener("message", onMessage);
         resolve({
-          output: e.data.output || '',
-          error: e.data.error || null
-        })
+          output: e.data.output || "",
+          error: e.data.error || null,
+        });
       }
-    }
-    window.addEventListener('message', onMessage)
+    };
+    window.addEventListener("message", onMessage);
 
-    iframe.contentWindow?.postMessage({ type: 'exec-js', code: jsCode }, '*')
-  })
+    iframe.contentWindow?.postMessage({ type: "exec-js", code: jsCode }, "*");
+  });
 }
 
 /**
@@ -150,36 +153,39 @@ export function executeJsInIframe(
 export function runDomTest(
   iframe: HTMLIFrameElement,
   testId: string,
-  testScript: string
+  testScript: string,
 ): Promise<DomTestResult> {
   return new Promise((resolve) => {
     const timeout = setTimeout(() => {
-      resolve({ result: '', error: 'Timeout: Test berjalan terlalu lama' })
-    }, 5000)
+      resolve({ result: "", error: "Timeout: Test berjalan terlalu lama" });
+    }, 5000);
 
     const onMessage = (e: MessageEvent) => {
-      if (e.data?.type === 'test-result' && e.data.id === testId) {
-        clearTimeout(timeout)
-        window.removeEventListener('message', onMessage)
+      if (e.data?.type === "test-result" && e.data.id === testId) {
+        clearTimeout(timeout);
+        window.removeEventListener("message", onMessage);
         resolve({
-          result: e.data.result || '',
-          error: e.data.error || null
-        })
+          result: e.data.result || "",
+          error: e.data.error || null,
+        });
       }
-    }
-    window.addEventListener('message', onMessage)
+    };
+    window.addEventListener("message", onMessage);
 
-    iframe.contentWindow?.postMessage({
-      type: 'run-test',
-      id: testId,
-      code: testScript
-    }, '*')
-  })
+    iframe.contentWindow?.postMessage(
+      {
+        type: "run-test",
+        id: testId,
+        code: testScript,
+      },
+      "*",
+    );
+  });
 }
 
 /**
  * Remove iframe from DOM and clean up.
  */
 export function destroyIframe(iframe: HTMLIFrameElement): void {
-  iframe.remove()
+  iframe.remove();
 }

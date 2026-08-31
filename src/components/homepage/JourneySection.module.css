@@ -1,0 +1,80 @@
+.section {
+  padding: 100px 20px;
+  background: #f1f5f9;
+}
+.title {
+  font-family: "Poppins", sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+  color: #111827;
+}
+.subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: 1.05rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 60px;
+}
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  overflow: hidden;
+  flex: 1;
+  min-width: 280px;
+  max-width: 360px;
+}
+.cardImage {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+.cardBody {
+  padding: 24px;
+}
+.cardTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 12px;
+}
+.cardDesc {
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  color: #374151;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.listItem {
+  font-family: "Inter", sans-serif;
+  font-size: 0.875rem;
+  color: #374151;
+  padding: 4px 0 4px 20px;
+  position: relative;
+  line-height: 1.5;
+}
+.listItem::before {
+  content: "■";
+  color: #ef4444;
+  position: absolute;
+  left: 0;
+  font-size: 0.5rem;
+  top: 8px;
+}

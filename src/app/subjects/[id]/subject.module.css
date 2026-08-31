@@ -9,7 +9,7 @@
 }
 
 .lessonItem:hover {
-  background-color: #F1F5F9;
+  background-color: #f1f5f9;
   transform: translateX(4px);
 }
 

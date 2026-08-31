@@ -1,43 +1,46 @@
-'use server'
+"use server";
 
-import { createClient } from '@/utils/supabase/server'
-import { revalidatePath } from 'next/cache'
-import OpenAI from 'openai'
+import { createClient } from "@/utils/supabase/server";
+import { revalidatePath } from "next/cache";
+import OpenAI from "openai";
 
 export async function submitHtmlJsSolution(params: {
-  challengeId: string
-  lessonId: string
-  html: string
-  js: string
-  description: string
-  maxScore: number
+  challengeId: string;
+  lessonId: string;
+  html: string;
+  js: string;
+  description: string;
+  maxScore: number;
 }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
 
   // Fetch existing submission
   const { data: existing } = await supabase
-    .from('submissions')
-    .select('id, score, data')
-    .eq('student_id', user.id)
-    .eq('content_id', params.lessonId)
-    .eq('type', 'code')
-    .maybeSingle()
+    .from("submissions")
+    .select("id, score, data")
+    .eq("student_id", user.id)
+    .eq("content_id", params.lessonId)
+    .eq("type", "code")
+    .maybeSingle();
 
-  const existingAttempts: any[] = existing?.data?.attempts || []
+  const existingAttempts: any[] = existing?.data?.attempts || [];
   if (existingAttempts.length >= 3) {
-    return { error: 'Batas submit sudah tercapai (3/3)' }
+    return { error: "Batas submit sudah tercapai (3/3)" };
   }
 
   // Call Gemini API for grading
-  const apiKey = process.env.DEEPSEEK_API_KEY
-  if (!apiKey) return { error: 'AI grading belum dikonfigurasi. Hubungi admin.' }
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey)
+    return { error: "AI grading belum dikonfigurasi. Hubungi admin." };
 
   const openai = new OpenAI({
-    baseURL: 'https://api.deepseek.com',
-    apiKey: apiKey
-  })
+    baseURL: "https://api.deepseek.com",
+    apiKey: apiKey,
+  });
 
   const prompt = `Kamu adalah penilai kode HTML dan Javascript untuk siswa.
 
@@ -64,105 +67,112 @@ ${params.js}
    - 0-49: Salah, error parah, atau sangat tidak lengkap.
 
 Balas HANYA dengan JSON valid:
-{"score": <number>, "feedback": "<feedback mendidik dalam Bahasa Indonesia>"}`
+{"score": <number>, "feedback": "<feedback mendidik dalam Bahasa Indonesia>"}`;
 
-  let score = 0
-  let feedback = 'Tidak dapat menilai jawaban saat ini.'
+  let score = 0;
+  let feedback = "Tidak dapat menilai jawaban saat ini.";
 
   try {
     const result = await openai.chat.completions.create({
-      model: 'deepseek-chat',
-      messages: [{ role: 'user', content: prompt }],
-      response_format: { type: 'json_object' }
-    })
-    const responseText = result.choices[0].message.content || '{}'
-    
+      model: "deepseek-chat",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+    });
+    const responseText = result.choices[0].message.content || "{}";
+
     try {
-      const parsed = JSON.parse(responseText)
-      score = typeof parsed.score === 'number' ? parsed.score : 0
-      feedback = parsed.feedback || 'Tidak ada feedback.'
+      const parsed = JSON.parse(responseText);
+      score = typeof parsed.score === "number" ? parsed.score : 0;
+      feedback = parsed.feedback || "Tidak ada feedback.";
     } catch (parseErr) {
       // Try to extract JSON from response if parse failed (e.g. markdown block)
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0])
-        score = typeof parsed.score === 'number' ? parsed.score : 0
-        feedback = parsed.feedback || 'Tidak ada feedback.'
+        const parsed = JSON.parse(jsonMatch[0]);
+        score = typeof parsed.score === "number" ? parsed.score : 0;
+        feedback = parsed.feedback || "Tidak ada feedback.";
       } else {
-        return { error: 'Format respons AI tidak dikenali.' }
+        return { error: "Format respons AI tidak dikenali." };
       }
     }
   } catch (err: any) {
-    console.error('HTML+JS grading AI error:', err)
-    return { error: 'Gagal memproses penilaian dengan AI. Silakan coba lagi.' }
+    console.error("HTML+JS grading AI error:", err);
+    return { error: "Gagal memproses penilaian dengan AI. Silakan coba lagi." };
   }
 
-  const now = new Date().toISOString()
-  const newAttempts = [...existingAttempts, { score, feedback, at: now }]
-  const bestScore = Math.max(score, existing?.score || 0)
+  const now = new Date().toISOString();
+  const newAttempts = [...existingAttempts, { score, feedback, at: now }];
+  const bestScore = Math.max(score, existing?.score || 0);
 
   if (existing) {
-    const { error } = await supabase.from('submissions').update({
-      data: { code: params.js, html: params.html, attempts: newAttempts },
-      score: bestScore,
-      graded_at: now
-    }).eq('id', existing.id)
+    const { error } = await supabase
+      .from("submissions")
+      .update({
+        data: { code: params.js, html: params.html, attempts: newAttempts },
+        score: bestScore,
+        graded_at: now,
+      })
+      .eq("id", existing.id);
     if (error) {
-      console.error('Update submission failed:', error)
-      return { error: 'Gagal memperbarui: ' + error.message }
+      console.error("Update submission failed:", error);
+      return { error: "Gagal memperbarui: " + error.message };
     }
   } else {
-    const { error } = await supabase.from('submissions').insert({
+    const { error } = await supabase.from("submissions").insert({
       student_id: user.id,
       content_id: params.lessonId,
-      type: 'code',
+      type: "code",
       data: { code: params.js, html: params.html, attempts: newAttempts },
       score: bestScore,
-      status: 'graded',
+      status: "graded",
       submitted_at: now,
-      graded_at: now
-    })
+      graded_at: now,
+    });
     if (error) {
-      console.error('Insert submission failed:', error)
-      return { error: 'Gagal menyimpan: ' + error.message }
+      console.error("Insert submission failed:", error);
+      return { error: "Gagal menyimpan: " + error.message };
     }
   }
 
   // Award XP ONCE: only when transitioning from below-70 to 70+
   if (score >= 70 && (!existing || (existing.score || 0) < 70)) {
-    await supabase.rpc('increment_xp', { user_id: user.id, amount: params.maxScore })
+    await supabase.rpc("increment_xp", {
+      user_id: user.id,
+      amount: params.maxScore,
+    });
   }
 
-  revalidatePath(`/lessons/${params.lessonId}`)
-  revalidatePath('/leaderboard')
-  revalidatePath('/dashboard')
-  revalidatePath('/admin/gradebook')
+  revalidatePath(`/lessons/${params.lessonId}`);
+  revalidatePath("/leaderboard");
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/gradebook");
 
-  return { score, feedback, bestScore, attemptsUsed: newAttempts.length }
+  return { score, feedback, bestScore, attemptsUsed: newAttempts.length };
 }
 
 export async function getHtmlJsHint(params: {
-  description: string
-  studentHtml: string
-  studentJs: string
-  attemptNumber: number
+  description: string;
+  studentHtml: string;
+  studentJs: string;
+  attemptNumber: number;
 }): Promise<string> {
-  const apiKey = process.env.DEEPSEEK_API_KEY
+  const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
-    return 'Fitur AI Hint belum dikonfigurasi. Hubungi admin untuk mengaktifkan.'
+    return "Fitur AI Hint belum dikonfigurasi. Hubungi admin untuk mengaktifkan.";
   }
 
   try {
     const openai = new OpenAI({
-      baseURL: 'https://api.deepseek.com',
-      apiKey: apiKey
-    })
+      baseURL: "https://api.deepseek.com",
+      apiKey: apiKey,
+    });
 
-    const hintLevel = params.attemptNumber <= 1
-      ? 'Berikan petunjuk umum. Fokus pada logika atau konsep yang salah.'
-      : params.attemptNumber <= 3
-        ? 'Berikan petunjuk spesifik ke bagian mana di JS atau HTML yang error.'
-        : 'Berikan petunjuk detail, hampir menunjukkan solusi kode.'
+    const hintLevel =
+      params.attemptNumber <= 1
+        ? "Berikan petunjuk umum. Fokus pada logika atau konsep yang salah."
+        : params.attemptNumber <= 3
+          ? "Berikan petunjuk spesifik ke bagian mana di JS atau HTML yang error."
+          : "Berikan petunjuk detail, hampir menunjukkan solusi kode.";
 
     const prompt = `Kamu adalah tutor Javascript & HTML untuk siswa pemula.
 
@@ -181,15 +191,18 @@ ${params.studentJs}
 Ini adalah percobaan ke-${params.attemptNumber} siswa.
 ${hintLevel}
 
-Berikan hint SINGKAT (maksimal 2-3 kalimat) dalam Bahasa Indonesia. JANGAN berikan jawaban langsung.`
+Berikan hint SINGKAT (maksimal 2-3 kalimat) dalam Bahasa Indonesia. JANGAN berikan jawaban langsung.`;
 
     const result = await openai.chat.completions.create({
-      model: 'deepseek-chat',
-      messages: [{ role: 'user', content: prompt }]
-    })
-    return result.choices[0].message.content || 'Tidak dapat menghasilkan hint saat ini.'
+      model: "deepseek-chat",
+      messages: [{ role: "user", content: prompt }],
+    });
+    return (
+      result.choices[0].message.content ||
+      "Tidak dapat menghasilkan hint saat ini."
+    );
   } catch (err: any) {
-    console.error('HTML+JS Hint error:', err)
-    return 'Maaf, terjadi kesalahan saat meminta bantuan AI. Silakan coba lagi.'
+    console.error("HTML+JS Hint error:", err);
+    return "Maaf, terjadi kesalahan saat meminta bantuan AI. Silakan coba lagi.";
   }
 }

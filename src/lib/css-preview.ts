@@ -16,5 +16,5 @@ ${css}
 <body>
 ${html}
 </body>
-</html>`
+</html>`;
 }
