@@ -58,6 +58,9 @@ export default async function AdminLayout({
           <Link href="/admin/notifications" className={styles.navLink}>
             <span>🔔</span> Notifikasi
           </Link>
+          <Link href="/admin/testimonials" className={styles.navLink}>
+            <span>💬</span> Testimoni Siswa
+          </Link>
         </nav>
 
         <div

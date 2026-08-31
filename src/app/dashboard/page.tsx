@@ -37,19 +37,49 @@ export default async function DashboardPage() {
           <div>
             <h1>Halo, {profile.full_name || user.email?.split("@")[0]}! 👋</h1>
             <p>Siap untuk meningkatkan skill coding Anda hari ini?</p>
-            {(profile.role === "admin" || profile.role === "teacher") && (
+            <div
+              style={{
+                marginTop: "16px",
+                display: "flex",
+                gap: "10px",
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
               <Link
-                href="/admin/users"
-                className="btn btn-primary"
+                href="/dashboard/testimonials"
                 style={{
-                  marginTop: "16px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  backgroundColor: "rgba(255, 255, 255, 0.18)",
+                  backdropFilter: "blur(4px)",
+                  border: "1px solid rgba(255, 255, 255, 0.35)",
+                  color: "#FFFFFF",
                   padding: "8px 16px",
+                  borderRadius: "10px",
                   fontSize: "0.875rem",
+                  fontWeight: 600,
+                  textDecoration: "none",
                 }}
+                className="hover:bg-white/25 transition-colors"
               >
-                Buka Panel Admin ⚙️
+                <span>⭐</span> Beri Testimoni
               </Link>
-            )}
+
+              {(profile.role === "admin" || profile.role === "teacher") && (
+                <Link
+                  href="/admin/users"
+                  className="btn btn-primary"
+                  style={{
+                    padding: "8px 16px",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  Buka Panel Admin ⚙️
+                </Link>
+              )}
+            </div>
           </div>
           <div style={{ textAlign: "right" }}>
             <div
@@ -236,6 +266,68 @@ export default async function DashboardPage() {
             >
               Buka lebih banyak lencana dengan menyelesaikan modul!
             </p>
+          </div>
+
+          {/* Testimonial Banner Card */}
+          <div
+            style={{
+              backgroundColor: "#FFFBEB",
+              border: "1px solid #FDE68A",
+              borderRadius: "16px",
+              padding: "24px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginBottom: "10px",
+              }}
+            >
+              <span style={{ fontSize: "1.4rem" }}>💬</span>
+              <h3
+                style={{
+                  fontSize: "1.05rem",
+                  fontWeight: 700,
+                  color: "#92400E",
+                  margin: 0,
+                }}
+              >
+                Testimoni Belajar
+              </h3>
+            </div>
+            <p
+              style={{
+                fontSize: "0.85rem",
+                color: "#78350F",
+                lineHeight: 1.5,
+                marginBottom: "16px",
+              }}
+            >
+              Bagikan pengalaman dan masukan belajarmu di Supercoder untuk bantu
+              kami jadi lebih baik!
+            </p>
+            <Link
+              href="/dashboard/testimonials"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+                backgroundColor: "#F59E0B",
+                color: "#FFFFFF",
+                padding: "8px 16px",
+                borderRadius: "10px",
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                textDecoration: "none",
+                width: "100%",
+              }}
+              className="hover:bg-amber-600 transition-colors shadow-xs"
+            >
+              Beri Testimoni Sekarang →
+            </Link>
           </div>
         </div>
       </div>
