@@ -71,6 +71,53 @@ export default async function DashboardPage() {
     .order("submitted_at", { ascending: false })
     .limit(5);
 
+  // Find HTML & CSS subject for new students
+  const htmlCssSubject =
+    subjects?.find((s) => s.title.toLowerCase().includes("html")) ||
+    subjects?.find((s) => s.order_index === 1) ||
+    subjects?.[0];
+
+  // Determine if student has previous learning activity and find last lesson
+  const { data: latestSubmission } = await supabase
+    .from("submissions")
+    .select("id, type, content_id, submitted_at")
+    .eq("student_id", user.id)
+    .order("submitted_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let continueLearningUrl = htmlCssSubject ? `/subjects/${htmlCssSubject.id}` : "#";
+  let isReturningStudent = false;
+
+  if (latestSubmission) {
+    isReturningStudent = true;
+    let targetLessonId: string | null = null;
+
+    if (latestSubmission.type === "quiz") {
+      const { data: quizData } = await supabase
+        .from("quizzes")
+        .select("lesson_id")
+        .eq("id", latestSubmission.content_id)
+        .maybeSingle();
+
+      targetLessonId = quizData?.lesson_id || latestSubmission.content_id;
+    } else {
+      targetLessonId = latestSubmission.content_id;
+    }
+
+    if (targetLessonId) {
+      const { data: targetLesson } = await supabase
+        .from("lessons")
+        .select("id, title, module_id, modules ( id, title, subject_id, subjects ( id, title ) )")
+        .eq("id", targetLessonId)
+        .maybeSingle();
+
+      if (targetLesson) {
+        continueLearningUrl = `/lessons/${targetLesson.id}`;
+      }
+    }
+  }
+
   // Top leaderboard
   const { data: leaderboard } = await supabase
     .from("profiles")
@@ -163,15 +210,17 @@ export default async function DashboardPage() {
                 Halo, {firstName}! 👋
               </h1>
               <p className={styles.heroSubtitle}>
-                Siap membangun sesuatu yang keren hari ini?
+                {isReturningStudent
+                  ? "Siap melanjutkan pembelajaranmu hari ini?"
+                  : "Siap membangun sesuatu yang keren hari ini?"}
               </p>
 
               <div className={styles.heroActions}>
                 <Link
-                  href={subjects?.[0] ? `/subjects/${subjects[0].id}` : "#"}
+                  href={continueLearningUrl}
                   className={styles.heroCTA}
                 >
-                  🚀 Mulai Belajar
+                  {isReturningStudent ? "🚀 Lanjutkan Belajar" : "🚀 Mulai Belajar"}
                 </Link>
                 <Link
                   href="/dashboard/testimonials"
