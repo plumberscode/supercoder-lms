@@ -140,16 +140,20 @@ export default async function DashboardPage() {
     .eq("student_id", user.id)
     .eq("type", "quiz");
 
-  const xpToNextLevel = (profile.level + 1) * (profile.level + 1) * 100;
-  const xpThisLevel = profile.level * profile.level * 100;
+  const xpThisLevel = (profile.level - 1) * (profile.level - 1) * 100;
+  const xpToNextLevel = profile.level * profile.level * 100;
+  const xpRemaining = Math.max(0, xpToNextLevel - profile.xp);
   const xpProgress =
-    xpThisLevel >= xpToNextLevel
+    xpToNextLevel <= xpThisLevel
       ? 100
       : Math.min(
-          Math.round(
-            ((profile.xp - xpThisLevel) / (xpToNextLevel - xpThisLevel)) * 100
-          ),
-          100
+          100,
+          Math.max(
+            0,
+            Math.round(
+              ((profile.xp - xpThisLevel) / (xpToNextLevel - xpThisLevel)) * 100
+            )
+          )
         );
 
   // SVG ring params
@@ -414,7 +418,7 @@ export default async function DashboardPage() {
             </div>
 
             <p className={styles.xpCaption}>
-              {xpProgress}% menuju Level {profile.level + 1}
+              {xpRemaining}XP lagi untuk mencapai Level {profile.level + 1}
             </p>
 
             <form action={signOut} className={styles.signOutForm}>
