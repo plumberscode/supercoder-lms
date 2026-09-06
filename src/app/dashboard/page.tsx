@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./dashboard.module.css";
 import { signOut } from "@/app/auth/actions";
+import { getStudentBadges } from "@/lib/badges";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -167,6 +168,9 @@ export default async function DashboardPage() {
   const firstName = (profile.full_name || user.email?.split("@")[0] || "Coder")
     .split(" ")[0];
 
+  // Badges status based on student's XP
+  const badgeData = getStudentBadges(profile.xp);
+
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
@@ -290,6 +294,24 @@ export default async function DashboardPage() {
               </div>
             </div>
 
+            <div className={styles.statCard}>
+              <div
+                className={styles.statIcon}
+                style={{ background: "linear-gradient(135deg,#fef08a,#fde047)" }}
+              >
+                🏅
+              </div>
+              <div>
+                <p className={styles.statLabel}>Lencana XP</p>
+                <p className={styles.statValue}>
+                  {badgeData.unlockedCount}
+                  <span style={{ fontSize: "0.85rem", fontWeight: 500, color: "#64748b" }}>
+                    {" "}/ {badgeData.totalCount}
+                  </span>
+                </p>
+              </div>
+            </div>
+
             {myRank >= 0 && (
               <div className={styles.statCard}>
                 <div
@@ -307,6 +329,98 @@ export default async function DashboardPage() {
               </div>
             )}
           </div>
+
+          {/* BADGES COLLECTION */}
+          <section className={`${styles.sectionBlock} ${styles.badgeSection}`}>
+            <div className={styles.badgeHeaderFlex}>
+              <div>
+                <h2 className={styles.badgeHeaderTitle}>
+                  🏅 Koleksi Lencana Prestasi
+                </h2>
+                <p className={styles.badgeHeaderSubtitle}>
+                  Raih 1 lencana setiap kelipatan 100 XP untuk membuktikan keahlian kodingmu!
+                </p>
+              </div>
+              <div className={styles.badgeCounterPill}>
+                <span>Koleksi:</span>
+                <span className={styles.badgeCounterHighlight}>
+                  {badgeData.unlockedCount} dari {badgeData.totalCount} Terbuka
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.badgeGrid}>
+              {badgeData.badges.map((b) => (
+                <div
+                  key={b.id}
+                  className={`${styles.badgeCard} ${
+                    b.unlocked ? styles.badgeCardUnlocked : styles.badgeCardLocked
+                  }`}
+                  style={
+                    {
+                      "--badge-accent": b.themeColor,
+                      "--badge-glow": b.glowColor,
+                    } as React.CSSProperties
+                  }
+                >
+                  <div className={styles.badgeVisualContainer}>
+                    <span className={styles.badgeTagPill}>{b.badgeTag}</span>
+                    <Image
+                      src={b.image}
+                      alt={b.title}
+                      width={200}
+                      height={200}
+                      className={`${styles.badgeImage} ${
+                        !b.unlocked ? styles.badgeImageGrayscale : ""
+                      }`}
+                    />
+                    {b.unlocked ? (
+                      <span className={`${styles.badgeStatusRibbon} ${styles.ribbonUnlocked}`}>
+                        ✨ Tercapai
+                      </span>
+                    ) : (
+                      <span className={`${styles.badgeStatusRibbon} ${styles.ribbonLocked}`}>
+                        🔒 {b.xpRequired} XP
+                      </span>
+                    )}
+                  </div>
+
+                  <div className={styles.badgeCardBody}>
+                    <div className={styles.badgeTitleRow}>
+                      <h3 className={styles.badgeTitle}>{b.title}</h3>
+                      <span className={styles.badgeTargetXp}>{b.xpRequired} XP</span>
+                    </div>
+
+                    <p className={styles.badgeDesc}>{b.description}</p>
+
+                    <div className={styles.badgeFooter}>
+                      {b.unlocked ? (
+                        <div className={styles.badgeSuccessBox}>
+                          <span>🎉</span> Lencana Resmi Terbuka!
+                        </div>
+                      ) : (
+                        <div className={styles.badgeLockBox}>
+                          <div className={styles.badgeProgressTrack}>
+                            <div
+                              className={styles.badgeProgressIndicator}
+                              style={{
+                                width: `${b.progressPercent}%`,
+                                background: b.themeColor,
+                              }}
+                            />
+                          </div>
+                          <div className={styles.badgeProgressLabels}>
+                            <span>Progres {b.progressPercent}%</span>
+                            <span>Kurang {b.xpNeeded} XP</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
           {/* SUBJECT GRID */}
           <section className={styles.sectionBlock}>
@@ -420,6 +534,47 @@ export default async function DashboardPage() {
             <p className={styles.xpCaption}>
               {xpRemaining}XP lagi untuk mencapai Level {profile.level + 1}
             </p>
+
+            {/* MINI BADGE SHELF */}
+            <div className={styles.miniBadgeShelf}>
+              {badgeData.badges.map((b) => (
+                <div
+                  key={b.id}
+                  className={styles.miniBadgeItem}
+                  title={`${b.title} (${b.xpRequired} XP) - ${
+                    b.unlocked ? "Sudah Didapat" : "Belum Terbuka"
+                  }`}
+                  style={
+                    {
+                      "--badge-accent": b.themeColor,
+                      "--badge-glow": b.glowColor,
+                    } as React.CSSProperties
+                  }
+                >
+                  <div
+                    className={`${styles.miniBadgeAvatar} ${
+                      b.unlocked
+                        ? styles.miniBadgeAvatarUnlocked
+                        : styles.miniBadgeAvatarLocked
+                    }`}
+                  >
+                    <Image
+                      src={b.image}
+                      alt={b.title}
+                      width={44}
+                      height={44}
+                      className={`${styles.miniBadgeImg} ${
+                        !b.unlocked ? styles.miniBadgeImgLocked : ""
+                      }`}
+                    />
+                  </div>
+                  <span className={styles.miniBadgeLabel}>
+                    {b.unlocked ? "✓ " : "🔒 "}
+                    {b.xpRequired}
+                  </span>
+                </div>
+              ))}
+            </div>
 
             <form action={signOut} className={styles.signOutForm}>
               <button type="submit" className={styles.signOutBtn}>

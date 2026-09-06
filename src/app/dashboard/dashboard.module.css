@@ -945,3 +945,345 @@
     padding: 24px 18px;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Lencana Prestasi XP (Achievement Badges)
+   ────────────────────────────────────────────────────────────────────────── */
+
+.badgeSection {
+  margin-bottom: 32px;
+}
+
+.badgeHeaderFlex {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.badgeHeaderTitle {
+  font-family: var(--font-poppins), Poppins, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badgeHeaderSubtitle {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 2px;
+  font-family: var(--font-inter), Inter, sans-serif;
+}
+
+.badgeCounterPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-family: var(--font-poppins), Poppins, sans-serif;
+}
+
+.badgeCounterHighlight {
+  color: #f97316;
+  font-weight: 800;
+}
+
+.badgeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 1100px) {
+  .badgeGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .badgeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.badgeCard {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+.badgeCardUnlocked {
+  border-color: var(--badge-accent);
+  background: linear-gradient(
+    170deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.75) 100%
+  );
+  box-shadow:
+    0 8px 24px var(--badge-glow),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+.badgeCardUnlocked:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow:
+    0 18px 36px var(--badge-glow),
+    0 2px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+.badgeCardLocked {
+  border-color: rgba(226, 232, 240, 0.85);
+  background: rgba(248, 250, 252, 0.6);
+  opacity: 0.85;
+}
+
+.badgeCardLocked:hover {
+  transform: translateY(-3px);
+  opacity: 1;
+  border-color: #cbd5e1;
+}
+
+.badgeVisualContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 200px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) inset;
+}
+
+.badgeImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease, filter 0.3s ease;
+}
+
+.badgeCardUnlocked:hover .badgeImage {
+  transform: scale(1.06);
+}
+
+.badgeImageGrayscale {
+  filter: grayscale(100%) opacity(40%) contrast(90%);
+}
+
+.badgeTagPill {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badgeStatusRibbon {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 2;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.ribbonUnlocked {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.ribbonLocked {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.badgeCardBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.badgeTitleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.badgeTitle {
+  font-family: var(--font-poppins), Poppins, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.badgeCardLocked .badgeTitle {
+  color: #475569;
+}
+
+.badgeTargetXp {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--badge-accent);
+  white-space: nowrap;
+  font-family: var(--font-poppins), Poppins, sans-serif;
+}
+
+.badgeDesc {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #64748b;
+  margin-bottom: 12px;
+  flex: 1;
+}
+
+.badgeFooter {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.badgeSuccessBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #059669;
+}
+
+.badgeLockBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.badgeProgressTrack {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.badgeProgressIndicator {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+.badgeProgressLabels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* Sidebar Mini Badge Shelf */
+.miniBadgeShelf {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.miniBadgeItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.miniBadgeAvatar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0f172a;
+  border: 2px solid transparent;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.miniBadgeAvatarUnlocked {
+  border-color: var(--badge-accent);
+  box-shadow: 0 2px 8px var(--badge-glow);
+}
+
+.miniBadgeAvatarLocked {
+  border-color: #cbd5e1;
+  opacity: 0.5;
+}
+
+.miniBadgeItem:hover .miniBadgeAvatar {
+  transform: scale(1.08);
+}
+
+.miniBadgeImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.miniBadgeImgLocked {
+  filter: grayscale(100%);
+}
+
+.miniBadgeLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
