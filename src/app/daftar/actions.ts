@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { sendAdminRegistrationNotification } from "@/lib/email";
+import { PROMO_VOUCHER_CODE } from "@/lib/promo";
 
 export type RegistrationResult = {
   success?: boolean;
@@ -13,6 +14,8 @@ export type RegistrationResult = {
     whatsappNumber: string;
     email: string;
     selectedClass: string;
+    voucherCode: string | null;
+    voucherApplied: boolean;
   };
 };
 
@@ -25,6 +28,9 @@ export async function submitRegistration(
   const whatsappNumber = formData.get("whatsapp_number")?.toString().trim();
   const email = formData.get("email")?.toString().trim();
   const selectedClass = formData.get("selected_class")?.toString().trim();
+  const voucherCodeRaw = formData.get("voucher_code")?.toString().trim();
+  const voucherCode = voucherCodeRaw ? voucherCodeRaw.toUpperCase() : null;
+  const voucherApplied = voucherCode === PROMO_VOUCHER_CODE;
 
   if (!studentName) {
     return { error: "Nama calon siswa wajib diisi." };
@@ -61,6 +67,7 @@ export async function submitRegistration(
       whatsapp_number: whatsappNumber,
       email: email,
       selected_class: selectedClass,
+      voucher_code: voucherCode,
       status: "pending",
     });
 
@@ -77,6 +84,8 @@ export async function submitRegistration(
         whatsappNumber,
         email,
         selectedClass,
+        voucherCode,
+        voucherApplied,
         createdAt: new Date().toISOString(),
       });
     } catch (emailErr) {
@@ -92,6 +101,8 @@ export async function submitRegistration(
         whatsappNumber,
         email,
         selectedClass,
+        voucherCode,
+        voucherApplied,
       },
     };
   } catch (err: any) {

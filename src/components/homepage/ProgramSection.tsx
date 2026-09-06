@@ -15,7 +15,15 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Calendar, MapPin, Video, Sparkles, Layers } from "lucide-react";
+import {
+  Clock,
+  Calendar,
+  MapPin,
+  Video,
+  Sparkles,
+  Layers,
+  PartyPopper,
+} from "lucide-react";
 
 const programs = [
   {
@@ -32,7 +40,7 @@ const programs = [
         label: "Frekuensi",
         value: "1x seminggu (Minggu: 09.00 - 10.30)",
       },
-      { icon: MapPin, label: "Lokasi", value: "Falya Risol Mayo, Balikpapan" },
+      { icon: MapPin, label: "Lokasi", value: "Falya Risol Mayo" },
       { icon: Sparkles, label: "Investasi", value: "Rp 449.000 / bulan" },
     ],
   },
@@ -140,87 +148,102 @@ export default function ProgramSection() {
         {/* 3 Program Cards Grid */}
         <div className="program-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {programs.map((prog, index) => (
-            <Card
+            <div
               key={prog.title}
-              style={{ transitionProperty: "box-shadow" }}
-              className={`program-card group bg-white rounded-3xl border border-slate-200/80 shadow-md hover:shadow-2xl duration-300 hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between ${
+              className={`relative ${
                 index === 2
                   ? "md:col-span-2 md:max-w-md md:mx-auto lg:col-span-1 lg:max-w-none lg:mx-0 w-full"
                   : ""
               }`}
             >
-              <div>
-                {/* Image Header with Badge Overlay */}
-                <div className="relative w-full h-48 sm:h-52 overflow-hidden bg-slate-100">
-                  <Image
-                    src={prog.image}
-                    alt={prog.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 500px"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4 z-10">
-                    <Badge className="bg-slate-900/85 backdrop-blur-md text-white border-0 px-3.5 py-1 rounded-full text-xs font-semibold shadow-md">
-                      {prog.tag}
-                    </Badge>
-                  </div>
+              {/* Promo badge — pinned to the card's wrapper so it can poke out past the edges */}
+              <div className="absolute -top-4 -right-4 z-20">
+                <div className="promo-badge-99 w-16 h-16 rounded-full text-white shadow-lg shadow-orange-900/30 flex flex-col items-center justify-center leading-none">
+                  <PartyPopper className="w-4 h-4 mb-0.5" />
+                  <span className="text-[10px] font-black tracking-wide">
+                    PROMO
+                  </span>
+                  <span className="text-xs font-black tracking-wide">99</span>
                 </div>
-
-                {/* Card Header & Content */}
-                <CardHeader className="p-5 sm:p-6 pb-2 flex flex-col justify-start min-h-[135px] sm:min-h-[145px]">
-                  <CardTitle className="font-poppins text-xl sm:text-2xl font-bold text-slate-900 group-hover:text-red-600 transition-colors">
-                    {prog.title}
-                  </CardTitle>
-                  <CardDescription className="font-sans text-base text-slate-600 leading-relaxed mt-1.5">
-                    {prog.desc}
-                  </CardDescription>
-                </CardHeader>
-
-                {/* Details List */}
-                <CardContent className="px-5 sm:px-6 pt-0 pb-5">
-                  <div className="space-y-2 pt-3 border-t border-slate-100">
-                    {prog.details.map((d) => {
-                      const Icon = d.icon;
-
-                      return (
-                        <div
-                          key={d.label}
-                          className="flex items-center gap-3 py-2 px-3 rounded-xl bg-slate-50/80 transition-colors"
-                        >
-                          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-slate-200/80 text-slate-700">
-                            <Icon className="w-3.5 h-3.5" />
-                          </div>
-                          <div className="text-sm sm:text-base">
-                            <span className="text-slate-500 font-medium mr-1.5">
-                              {d.label}:
-                            </span>
-                            <span className="font-semibold text-slate-800">
-                              {d.value}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
               </div>
 
-              {/* Card Footer with CTA Button */}
-              <CardFooter className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0">
-                <Button
-                  asChild
-                  className="w-full h-11 sm:h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-poppins font-semibold text-sm sm:text-base shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/30 transition-all duration-200"
-                >
-                  <Link
-                    href={`/daftar?class=${encodeURIComponent(prog.title)}`}
-                    className="inline-flex items-center justify-center gap-2"
+              <Card
+                style={{ transitionProperty: "box-shadow" }}
+                className="program-card group bg-white rounded-3xl border border-slate-200/80 shadow-md hover:shadow-2xl duration-300 hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between"
+              >
+                <div>
+                  {/* Image Header with Badge Overlay */}
+                  <div className="relative w-full h-48 sm:h-52 overflow-hidden bg-slate-100">
+                    <Image
+                      src={prog.image}
+                      alt={prog.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 500px"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-4 left-4 z-10">
+                      <Badge className="bg-slate-900/85 backdrop-blur-md text-white border-0 px-3.5 py-1 rounded-full text-xs font-semibold shadow-md">
+                        {prog.tag}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Card Header & Content */}
+                  <CardHeader className="p-5 sm:p-6 pb-2 flex flex-col justify-start min-h-[135px] sm:min-h-[145px]">
+                    <CardTitle className="font-poppins text-xl sm:text-2xl font-bold text-slate-900 group-hover:text-red-600 transition-colors">
+                      {prog.title}
+                    </CardTitle>
+                    <CardDescription className="font-sans text-base text-slate-600 leading-relaxed mt-1.5">
+                      {prog.desc}
+                    </CardDescription>
+                  </CardHeader>
+
+                  {/* Details List */}
+                  <CardContent className="px-5 sm:px-6 pt-0 pb-5">
+                    <div className="space-y-2 pt-3 border-t border-slate-100">
+                      {prog.details.map((d) => {
+                        const Icon = d.icon;
+
+                        return (
+                          <div
+                            key={d.label}
+                            className="flex items-center gap-3 py-2 px-3 rounded-xl bg-slate-50/80 transition-colors"
+                          >
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-slate-200/80 text-slate-700">
+                              <Icon className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="text-sm sm:text-base">
+                              <span className="text-slate-500 font-medium mr-1.5">
+                                {d.label}:
+                              </span>
+                              <span className="font-semibold text-slate-800">
+                                {d.value}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </div>
+
+                {/* Card Footer with CTA Button */}
+                <CardFooter className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0">
+                  <Button
+                    asChild
+                    className="w-full h-11 sm:h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-poppins font-semibold text-sm sm:text-base shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/30 transition-all duration-200"
                   >
-                    <span>{prog.ctaText || "Daftar Sekarang"}</span>
-                    <span>&rarr;</span>
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
+                    <Link
+                      href={`/daftar?class=${encodeURIComponent(prog.title)}`}
+                      className="inline-flex items-center justify-center gap-2"
+                    >
+                      <span>{prog.ctaText || "Daftar Sekarang"}</span>
+                      <span>&rarr;</span>
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
           ))}
         </div>
       </div>

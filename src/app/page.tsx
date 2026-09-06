@@ -1,3 +1,4 @@
+import PromoStickyBar from "@/components/homepage/PromoStickyBar";
 import Navbar from "@/components/homepage/Navbar";
 import HeroSection from "@/components/homepage/HeroSection";
 import ManifestoSection from "@/components/homepage/ManifestoSection";
@@ -26,8 +27,9 @@ export default function Home() {
   return (
     <>
       <JsonLd />
+      <PromoStickyBar />
       <Navbar />
-      <main>
+      <main style={{ paddingTop: "var(--promo-bar-height, 0px)" }}>
         <HeroSection />
         <ManifestoSection />
         <ProgramSection />

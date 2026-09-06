@@ -64,7 +64,8 @@ export default function Navbar() {
   return (
     <header
       ref={headerRef}
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+      style={{ top: "var(--promo-bar-height, 0px)" }}
+      className={`fixed inset-x-0 z-50 transition-[top,background-color,box-shadow,padding] duration-300 ${
         scrolled
           ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/80 py-3 sm:py-3.5"
           : "bg-white/85 backdrop-blur-md border-b border-slate-200/60 py-4 sm:py-5"

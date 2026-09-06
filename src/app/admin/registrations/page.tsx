@@ -9,7 +9,9 @@ import {
   Clock,
   Sparkles,
   MessageCircle,
+  Ticket,
 } from "lucide-react";
+import { PROMO_VOUCHER_CODE } from "@/lib/promo";
 
 export default async function AdminRegistrationsPage() {
   const supabase = await createClient();
@@ -50,6 +52,12 @@ export default async function AdminRegistrationsPage() {
     registrations?.filter((r) => r.status === "contacted").length || 0;
   const enrolledCount =
     registrations?.filter((r) => r.status === "enrolled").length || 0;
+  const voucherCount =
+    registrations?.filter(
+      (r) =>
+        r.voucher_code?.toString().trim().toUpperCase() ===
+        PROMO_VOUCHER_CODE,
+    ).length || 0;
 
   return (
     <div>
@@ -157,6 +165,26 @@ export default async function AdminRegistrationsPage() {
             {enrolledCount}
           </div>
         </div>
+        <div
+          className="card"
+          style={{ padding: "20px", borderLeft: "4px solid #EC4899" }}
+        >
+          <div
+            style={{ fontSize: "0.85rem", color: "#DB2777", fontWeight: 600 }}
+          >
+            🎉 Pakai Voucher Promo 9.9
+          </div>
+          <div
+            style={{
+              fontSize: "1.75rem",
+              fontWeight: 800,
+              color: "#DB2777",
+              marginTop: "4px",
+            }}
+          >
+            {voucherCount}
+          </div>
+        </div>
       </div>
 
       {/* Registrations List */}
@@ -246,6 +274,10 @@ export default async function AdminRegistrationsPage() {
                     `Halo ${item.student_name}, perkenalkan kami dari Supercoder. Terima kasih telah mendaftar untuk program ${item.selected_class}. Kami ingin memberikan informasi jadwal dan detail kelas.`,
                   )}`;
 
+                  const usedVoucher =
+                    item.voucher_code?.toString().trim().toUpperCase() ===
+                    PROMO_VOUCHER_CODE;
+
                   const dateStr = item.created_at
                     ? new Date(item.created_at).toLocaleDateString("id-ID", {
                         day: "numeric",
@@ -272,6 +304,27 @@ export default async function AdminRegistrationsPage() {
                         >
                           {item.student_name}
                         </div>
+                        {usedVoucher && (
+                          <div
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              marginTop: "6px",
+                              padding: "3px 10px",
+                              borderRadius: "9999px",
+                              fontSize: "0.7rem",
+                              fontWeight: 700,
+                              backgroundColor: "#FCE7F3",
+                              color: "#DB2777",
+                              border: "1px solid #FBCFE8",
+                            }}
+                            title={`Menggunakan kode voucher: ${item.voucher_code}`}
+                          >
+                            <Ticket size={11} />
+                            Pakai Voucher Promo 9.9
+                          </div>
+                        )}
                       </td>
 
                       {/* Class */}

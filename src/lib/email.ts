@@ -6,6 +6,8 @@ interface RegistrationEmailData {
   whatsappNumber: string;
   email: string;
   selectedClass: string;
+  voucherCode?: string | null;
+  voucherApplied?: boolean;
   createdAt?: string;
 }
 
@@ -47,7 +49,23 @@ export async function sendAdminRegistrationNotification(
     `Halo ${data.studentName}, terima kasih telah mendaftar di Supercoder untuk program ${data.selectedClass}. Kami ingin mengonfirmasi detail pendaftaran Anda.`,
   )}`;
 
-  const emailSubject = `🚀 [Supercoder] Pendaftaran Siswa Baru: ${data.studentName} (${data.selectedClass})`;
+  const emailSubject = data.voucherApplied
+    ? `🎉 [Supercoder] Pendaftaran + VOUCHER PROMO 9.9: ${data.studentName} (${data.selectedClass})`
+    : `🚀 [Supercoder] Pendaftaran Siswa Baru: ${data.studentName} (${data.selectedClass})`;
+
+  const voucherRowHtml = data.voucherApplied
+    ? `
+            <tr>
+              <td class="label">Kode Voucher</td>
+              <td class="value" style="color: #db2777;">🎟️ ${data.voucherCode} (Promo 9.9 aktif — diskon Rp50.000/bulan selamanya)</td>
+            </tr>`
+    : data.voucherCode
+      ? `
+            <tr>
+              <td class="label">Kode Voucher</td>
+              <td class="value" style="color: #dc2626;">${data.voucherCode} (kode tidak valid)</td>
+            </tr>`
+      : "";
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -79,6 +97,11 @@ export async function sendAdminRegistrationNotification(
         <div class="content">
           <div style="text-align: center;">
             <span class="badge">Program: ${data.selectedClass}</span>
+            ${
+              data.voucherApplied
+                ? `<span class="badge" style="background-color: #fce7f3; color: #db2777; margin-left: 8px;">🎉 Voucher Promo 9.9</span>`
+                : ""
+            }
           </div>
 
           <table class="info-table">
@@ -105,7 +128,7 @@ export async function sendAdminRegistrationNotification(
             <tr>
               <td class="label">Waktu Pendaftaran</td>
               <td class="value">${dateFormatted} WITA</td>
-            </tr>
+            </tr>${voucherRowHtml}
           </table>
 
           <a href="${waLink}" class="action-button" target="_blank">
@@ -181,7 +204,11 @@ export async function sendAdminRegistrationNotification(
         to: adminEmail,
         subject: emailSubject,
         html: htmlContent,
-        text: `Pendaftaran Siswa Baru Supercoder:\nNama: ${data.studentName}\nKelas: ${data.selectedClass}\nWhatsApp: ${data.whatsappNumber}\nEmail: ${data.email}\nAlamat: ${data.address}\nWaktu: ${dateFormatted}`,
+        text: `Pendaftaran Siswa Baru Supercoder:\nNama: ${data.studentName}\nKelas: ${data.selectedClass}\nWhatsApp: ${data.whatsappNumber}\nEmail: ${data.email}\nAlamat: ${data.address}\nWaktu: ${dateFormatted}${
+          data.voucherCode
+            ? `\nVoucher: ${data.voucherCode}${data.voucherApplied ? " (Promo 9.9 aktif — diskon Rp50.000/bulan selamanya)" : " (tidak valid)"}`
+            : ""
+        }`,
       });
 
       console.log(
