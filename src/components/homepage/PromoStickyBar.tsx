@@ -104,23 +104,38 @@ export default function PromoStickyBar() {
       ref={barRef}
       className="fixed top-0 inset-x-0 z-[60] bg-[linear-gradient(120deg,#f97316_0%,#ec4899_45%,#a855f7_100%)] text-white shadow-md shadow-black/10"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2.5 sm:py-2 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center">
+      {/* Mobile view: ringkas satu baris, hemat tempat */}
+      <div className="flex sm:hidden items-center justify-center gap-1.5 sm:gap-2 px-3 py-1.5 text-center">
+        <span className="inline-flex items-center gap-1 bg-white/20 border border-white/30 rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wider shrink-0">
+          Promo 9.9
+        </span>
+        <span className="text-[11px] font-poppins font-bold whitespace-nowrap">
+          Diskon 50 ribu/bulan
+        </span>
+        <Link
+          href={`/daftar?voucher=${PROMO_VOUCHER_CODE}`}
+          className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white font-poppins font-bold text-[10px] px-2.5 py-1 rounded-full shadow-sm transition-all active:scale-95 whitespace-nowrap shrink-0 ml-0.5"
+        >
+          <Sparkles className="w-3 h-3" />
+          Klaim sekarang
+        </Link>
+      </div>
+
+      {/* Desktop view: lengkap */}
+      <div className="hidden sm:flex max-w-6xl mx-auto px-4 sm:px-6 py-2 items-center justify-center gap-4 text-center">
         <div className="flex items-center gap-2 flex-wrap justify-center">
-          <span className="inline-flex items-center gap-1 bg-white/20 border border-white/30 rounded-full px-2.5 py-0.5 text-[11px] sm:text-xs font-black uppercase tracking-wider backdrop-blur-xs">
+          <span className="inline-flex items-center gap-1 bg-white/20 border border-white/30 rounded-full px-2.5 py-0.5 text-xs font-black uppercase tracking-wider backdrop-blur-xs">
             <PartyPopper className="w-3.5 h-3.5" />
             Promo 9.9
           </span>
-          <p className="text-xs sm:text-sm font-poppins font-bold leading-tight">
+          <p className="text-sm font-poppins font-bold leading-tight">
             Diskon{" "}
             <span className="underline decoration-white/60 decoration-2 underline-offset-2">
               Rp50.000/bulan SELAMANYA
             </span>{" "}
             untuk pendaftar baru
             {deadlineText && (
-              <span className="hidden sm:inline">
-                {" "}
-                — berlaku hingga {deadlineText}
-              </span>
+              <span> — berlaku hingga {deadlineText}</span>
             )}
           </p>
         </div>
@@ -130,7 +145,7 @@ export default function PromoStickyBar() {
             type="button"
             onClick={handleCopyVoucher}
             title="Salin kode voucher"
-            className="inline-flex items-center gap-1.5 bg-white/95 hover:bg-white text-purple-700 font-mono font-black text-[11px] sm:text-xs tracking-wider px-2.5 py-1 rounded-lg border border-white/60 shadow-sm transition-colors"
+            className="inline-flex items-center gap-1.5 bg-white/95 hover:bg-white text-purple-700 font-mono font-black text-xs tracking-wider px-2.5 py-1 rounded-lg border border-white/60 shadow-sm transition-colors"
           >
             {copied ? (
               <Check className="w-3.5 h-3.5 text-emerald-600" />
@@ -142,19 +157,13 @@ export default function PromoStickyBar() {
 
           <Link
             href={`/daftar?voucher=${PROMO_VOUCHER_CODE}`}
-            className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white font-poppins font-bold text-[11px] sm:text-xs px-3.5 py-1.5 rounded-full shadow-sm transition-all hover:scale-[1.03]"
+            className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white font-poppins font-bold text-xs px-3.5 py-1.5 rounded-full shadow-sm transition-all hover:scale-[1.03]"
           >
             <Sparkles className="w-3.5 h-3.5" />
             Klaim Sekarang
           </Link>
         </div>
       </div>
-
-      {deadlineText && (
-        <div className="sm:hidden text-center pb-1.5 text-[11px] font-semibold">
-          Berlaku hingga {deadlineText}
-        </div>
-      )}
     </div>
   );
 }
