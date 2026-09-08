@@ -8,6 +8,7 @@ import BerkembangSection from "@/components/homepage/BerkembangSection";
 import BahasaSection from "@/components/homepage/BahasaSection";
 import JourneySection from "@/components/homepage/JourneySection";
 import TestimoniSection from "@/components/homepage/TestimoniSection";
+import KaryaSiswaSection from "@/components/homepage/KaryaSiswaSection";
 import GallerySection from "@/components/homepage/GallerySection";
 import FAQSection from "@/components/homepage/FAQSection";
 import CTASection from "@/components/homepage/CTASection";
@@ -38,6 +39,7 @@ export default function Home() {
         <BahasaSection />
         <JourneySection />
         <TestimoniSection />
+        <KaryaSiswaSection />
         <GallerySection />
         <FAQSection />
         <CTASection />

@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Star, Crown, Quote } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react";
 
 interface Testimonial {
   name: string;
@@ -78,7 +78,7 @@ const testimonials: Testimonial[] = [
 // of `testimonials`/the slide logic at all.
 const featuredTestimonial: Testimonial = {
   name: "Nararya Riffat",
-  role: "Siswa Premium Online Class",
+  role: "Siswa Kelas 9 SMP Melati Samarinda",
   highlight: "Ada leaderboard yang membuat kita bersemangat..",
   quote: [
     "Materinya sangat gampang dipahami dan metode koreksinya menggunakan AI yang sangat memudahkan dan membantu memberitahu masalah di code/script yang kita ketik.",
@@ -447,12 +447,7 @@ export default function TestimoniSection() {
             <div className="relative rounded-[26px] bg-white overflow-hidden p-6 sm:p-10 lg:p-12">
               <Quote className="pointer-events-none absolute -top-4 right-6 sm:right-10 w-24 h-24 sm:w-32 sm:h-32 text-orange-50" />
 
-              <div className="relative inline-flex items-center gap-1.5 mb-6 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold uppercase tracking-wider shadow-sm">
-                <Crown className="w-3.5 h-3.5" />
-                Testimoni Pilihan
-              </div>
-
-              <div className="relative grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 sm:gap-8 items-start">
+              <div className="relative grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 sm:gap-8 items-start md:items-center">
                 <div className="flex md:flex-col items-center md:items-start gap-3.5 md:gap-3 md:w-40 shrink-0">
                   <Avatar className="w-14 h-14 shadow-xs ring-2 ring-white">
                     <AvatarFallback
