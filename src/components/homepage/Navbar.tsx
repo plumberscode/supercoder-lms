@@ -16,12 +16,12 @@ import {
 import { Menu, MessageCircle } from "lucide-react";
 
 const navLinks = [
+  { label: "Testimoni", href: "#testimoni" },
+  { label: "Galeri", href: "#galeri" },
   { label: "Program", href: "#program" },
   { label: "Manfaat", href: "#manfaat" },
   { label: "Tech Stack", href: "#bahasa" },
   { label: "Journey", href: "#journey" },
-  { label: "Testimoni", href: "#testimoni" },
-  { label: "Galeri", href: "#galeri" },
   { label: "FAQ", href: "#faq" },
 ];
 
