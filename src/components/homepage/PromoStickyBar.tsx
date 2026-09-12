@@ -6,46 +6,50 @@ import { Sparkles, Copy, Check, PartyPopper } from "lucide-react";
 import { PROMO_VOUCHER_CODE } from "@/lib/promo";
 
 // Kampanye 9.9: diskon Rp50.000/bulan selamanya.
-// Pendaftaran ditutup H+3 dari hari ini, tapi tidak pernah melewati akhir bulan September.
-function getCampaignDeadline(now: Date): Date {
-  const rollingDeadline = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-  const endOfSeptember = new Date(
-    now.getFullYear(),
-    8, // September (0-indexed)
-    30,
+// Fase utama: 1-15 September 2026, tenggat TETAP (bukan rolling) di 15 September 2026.
+// Fase bonus: 16-30 September 2026, bar hanya tampil di tanggal GANJIL ("Hanya Hari Ini",
+// tanpa klausa tenggat) dan disembunyikan total di tanggal genap.
+// Setelah 30 September 2026 23:59:59.999, kampanye berakhir permanen — tahun di-hardcode
+// ke 2026 dan TIDAK dihitung ulang dari now.getFullYear(), sehingga bar tidak pernah
+// muncul lagi otomatis di September tahun berikutnya tanpa perubahan kode.
+type PromoPhase = "main" | "bonus-day" | "hidden-day" | "over";
+
+const CAMPAIGN_YEAR = 2026;
+const CAMPAIGN_MONTH = 8; // September, 0-indexed
+const MAIN_PHASE_END_DAY = 15;
+const BONUS_PHASE_END_DAY = 30;
+const FIXED_DEADLINE_TEXT = "15 September 2026";
+
+function getPromoPhase(now: Date): PromoPhase {
+  const campaignStart = new Date(CAMPAIGN_YEAR, CAMPAIGN_MONTH, 1, 0, 0, 0, 0);
+  const campaignEnd = new Date(
+    CAMPAIGN_YEAR,
+    CAMPAIGN_MONTH,
+    BONUS_PHASE_END_DAY,
     23,
     59,
     59,
     999,
   );
-  return rollingDeadline < endOfSeptember ? rollingDeadline : endOfSeptember;
-}
 
-function isCampaignOver(now: Date): boolean {
-  const endOfSeptember = new Date(
-    now.getFullYear(),
-    8,
-    30,
-    23,
-    59,
-    59,
-    999,
-  );
-  return now.getTime() > endOfSeptember.getTime();
-}
+  // Di luar jendela 1-30 September 2026 (sebelum mulai ATAU sesudah selesai) → tidak aktif.
+  // CAMPAIGN_YEAR adalah literal (bukan now.getFullYear()), jadi September tahun
+  // berikutnya otomatis dianggap "over" tanpa perubahan kode.
+  if (
+    now.getTime() < campaignStart.getTime() ||
+    now.getTime() > campaignEnd.getTime()
+  ) {
+    return "over";
+  }
 
-function formatDeadline(deadline: Date): string {
-  return deadline.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const day = now.getDate();
+  if (day <= MAIN_PHASE_END_DAY) return "main";
+  return day % 2 === 0 ? "hidden-day" : "bonus-day";
 }
 
 export default function PromoStickyBar() {
   const barRef = useRef<HTMLDivElement>(null);
-  const [ended, setEnded] = useState(false);
-  const [deadlineText, setDeadlineText] = useState<string | null>(null);
+  const [phase, setPhase] = useState<PromoPhase>("main");
   const [copied, setCopied] = useState(false);
 
   // Keep Navbar (and page content) offset in sync with this bar's real height.
@@ -68,25 +72,19 @@ export default function PromoStickyBar() {
       observer.disconnect();
       document.documentElement.style.setProperty("--promo-bar-height", "0px");
     };
-  }, [ended]);
+  }, [phase]);
 
   useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      if (isCampaignOver(now)) {
-        setEnded(true);
-        return;
-      }
-      const deadline = getCampaignDeadline(now);
-      setDeadlineText(formatDeadline(deadline));
-    };
+    const tick = () => setPhase(getPromoPhase(new Date()));
 
     tick();
     const interval = setInterval(tick, 30 * 1000);
     return () => clearInterval(interval);
   }, []);
 
-  if (ended) return null;
+  if (phase === "over" || phase === "hidden-day") return null;
+
+  const isBonusDay = phase === "bonus-day";
 
   const handleCopyVoucher = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -107,7 +105,7 @@ export default function PromoStickyBar() {
       {/* Mobile view: ringkas satu baris, hemat tempat */}
       <div className="flex sm:hidden items-center justify-center gap-1.5 sm:gap-2 px-3 py-1.5 text-center">
         <span className="inline-flex items-center gap-1 bg-white/20 border border-white/30 rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wider shrink-0">
-          Promo 9.9
+          {isBonusDay ? "⚡ Hanya Hari Ini" : "Promo 9.9"}
         </span>
         <span className="text-[11px] font-poppins font-bold whitespace-nowrap">
           Diskon 50 ribu/bulan
@@ -126,7 +124,7 @@ export default function PromoStickyBar() {
         <div className="flex items-center gap-2 flex-wrap justify-center">
           <span className="inline-flex items-center gap-1 bg-white/20 border border-white/30 rounded-full px-2.5 py-0.5 text-xs font-black uppercase tracking-wider backdrop-blur-xs">
             <PartyPopper className="w-3.5 h-3.5" />
-            Promo 9.9
+            {isBonusDay ? "⚡ Hanya Hari Ini" : "Promo 9.9"}
           </span>
           <p className="text-sm font-poppins font-bold leading-tight">
             Diskon{" "}
@@ -134,8 +132,8 @@ export default function PromoStickyBar() {
               Rp50.000/bulan SELAMANYA
             </span>{" "}
             untuk pendaftar baru
-            {deadlineText && (
-              <span> — berlaku hingga {deadlineText}</span>
+            {phase === "main" && (
+              <span> — berlaku hingga {FIXED_DEADLINE_TEXT}</span>
             )}
           </p>
         </div>
