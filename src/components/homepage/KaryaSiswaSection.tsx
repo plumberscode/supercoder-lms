@@ -25,7 +25,7 @@ const projects: StudentProject[] = [
     school: "Kelas 8 SMP, KPS Balikpapan",
     project: "Landing Page Matematika",
     desc: "Website pendaftaran kursus matematika dengan gaya Modern Playful UI.",
-    url: "#",
+    url: "https://rig-porto01-supercoder.netlify.app",
     gradient: "from-orange-400 via-amber-400 to-orange-300",
     image: "/images/karya/rig-mockup.webp",
   },
@@ -34,7 +34,7 @@ const projects: StudentProject[] = [
     school: "Kelas 9 SMP, AISBA Balikpapan",
     project: "Dark Luxury Website",
     desc: "Maha mengembangkan website kursus matematika dengan menggunakan gaya yang premium dan berkelas.",
-    url: "#",
+    url: "https://maha-porto01-supercoder.netlify.app",
     gradient: "from-slate-800 via-slate-700 to-slate-600",
     image: "/images/karya/mahadria-mockup.webp",
   },
@@ -43,7 +43,7 @@ const projects: StudentProject[] = [
     school: "Mahasiswa Bisnis Digital ITEKA, Balikpapan",
     project: "Friendly EdTech UI",
     desc: "Website bergaya modern dengan struktur khas landing page SaaS: Hero, Method, Features, Testimonials, CTA, Footer.",
-    url: "#",
+    url: "https://naufal-porto01-supercoder.netlify.app",
     gradient: "from-cyan-500 via-sky-500 to-blue-500",
     image: "/images/karya/naufal-mockup.webp",
   },
@@ -207,6 +207,9 @@ export default function KaryaSiswaSection() {
               <a
                 key={p.name}
                 href={p.url}
+                {...(p.url.startsWith("http")
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : {})}
                 className="group karya-card snap-start shrink-0 basis-[88%] sm:basis-[46%] lg:basis-[calc((100%-48px)/3)] flex flex-col bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-orange-500/40 transition-all duration-300"
               >
                 <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
