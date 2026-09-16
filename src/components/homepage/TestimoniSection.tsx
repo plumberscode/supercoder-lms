@@ -77,8 +77,8 @@ const testimonials: Testimonial[] = [
 // Pinned above the auto-sliding carousel — does not rotate and is not part
 // of `testimonials`/the slide logic at all.
 const featuredTestimonial: Testimonial = {
-  name: "Nararya Riffat",
-  role: "Siswa Kelas 9 SMP Melati Samarinda",
+  name: "Riffat Nararya",
+  role: "Siswa Kelas 9 SMPIT Al Firdaus, Samarinda",
   highlight: "Ada leaderboard yang membuat kita bersemangat..",
   quote: [
     "Materinya sangat gampang dipahami dan metode koreksinya menggunakan AI yang sangat memudahkan dan membantu memberitahu masalah di code/script yang kita ketik.",
@@ -87,7 +87,7 @@ const featuredTestimonial: Testimonial = {
   ].join("\n\n"),
   stars: 5,
   program: "Premium Online Class",
-  initial: "NR",
+  initial: "RN",
   color: "from-amber-500 to-orange-600",
 };
 
