@@ -102,44 +102,44 @@ export default function Footer() {
               </h4>
               <ul className="space-y-2.5 font-sans text-sm text-slate-600">
                 <li>
-                  <a
-                    href="#program"
+                  <Link
+                    href="/#program"
                     className="hover:text-red-600 transition-colors"
                   >
                     Weekend Class
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#program"
+                  <Link
+                    href="/#program"
                     className="hover:text-red-600 transition-colors"
                   >
                     Online Class
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#journey"
+                  <Link
+                    href="/#journey"
                     className="hover:text-red-600 transition-colors"
                   >
                     Junior Level
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#journey"
+                  <Link
+                    href="/#journey"
                     className="hover:text-red-600 transition-colors"
                   >
                     Builder Level
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#journey"
+                  <Link
+                    href="/#journey"
                     className="hover:text-red-600 transition-colors"
                   >
                     Elite Level
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -151,44 +151,44 @@ export default function Footer() {
               </h4>
               <ul className="space-y-2.5 font-sans text-sm text-slate-600">
                 <li>
-                  <a
-                    href="#bahasa"
+                  <Link
+                    href="/#bahasa"
                     className="hover:text-red-600 transition-colors"
                   >
                     HTML5 &amp; CSS3
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#bahasa"
+                  <Link
+                    href="/#bahasa"
                     className="hover:text-red-600 transition-colors"
                   >
                     JavaScript
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#bahasa"
+                  <Link
+                    href="/#bahasa"
                     className="hover:text-red-600 transition-colors"
                   >
                     VS Code &amp; Figma
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#bahasa"
+                  <Link
+                    href="/#bahasa"
                     className="hover:text-red-600 transition-colors"
                   >
                     Antigravity AI
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#faq"
+                  <Link
+                    href="/#faq"
                     className="hover:text-red-600 transition-colors"
                   >
                     FAQ / Bantuan
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -200,28 +200,36 @@ export default function Footer() {
               </h4>
               <ul className="space-y-2.5 font-sans text-sm text-slate-600">
                 <li>
-                  <a
-                    href="#manfaat"
+                  <Link
+                    href="/#manfaat"
                     className="hover:text-red-600 transition-colors"
                   >
                     Tentang Kami
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#galeri"
+                  <Link
+                    href="/#galeri"
                     className="hover:text-red-600 transition-colors"
                   >
                     Suasana Kelas
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#testimoni"
+                  <Link
+                    href="/#testimoni"
                     className="hover:text-red-600 transition-colors"
                   >
                     Testimoni Siswa
-                  </a>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/blog"
+                    className="hover:text-red-600 transition-colors"
+                  >
+                    Blog
+                  </Link>
                 </li>
                 <li>
                   <Link

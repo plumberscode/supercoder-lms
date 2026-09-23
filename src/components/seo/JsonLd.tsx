@@ -1,5 +1,7 @@
-﻿export default function JsonLd() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://supercoder.id";
+import { SITE_URL } from "@/lib/site";
+
+export default function JsonLd() {
+  const siteUrl = SITE_URL;
 
   const organizationSchema = {
     "@context": "https://schema.org",

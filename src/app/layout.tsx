@@ -3,6 +3,7 @@ import { Inter, Poppins, Geist } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ToastProvider";
 import { cn } from "@/lib/utils";
+import { SITE_URL } from "@/lib/site";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -17,7 +18,7 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://supercoder.id";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
