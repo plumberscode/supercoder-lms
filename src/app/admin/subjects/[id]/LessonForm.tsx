@@ -118,7 +118,9 @@ export default function LessonForm({
                 ? "Konfigurasi Soal Coding Baru"
                 : type === "css-challenge"
                   ? "Konfigurasi Soal CSS Baru"
-                  : "Konfigurasi Materi Baru"}
+                  : type === "web-challenge"
+                    ? "Konfigurasi Soal Coding Web Baru"
+                    : "Konfigurasi Materi Baru"}
         </h4>
       </div>
 
@@ -138,7 +140,8 @@ export default function LessonForm({
               type === "quiz" ||
               type === "project" ||
               type === "code" ||
-              type === "css-challenge"
+              type === "css-challenge" ||
+              type === "web-challenge"
                 ? "1fr"
                 : "1fr 1fr",
             gap: "24px",
@@ -155,7 +158,9 @@ export default function LessonForm({
                     ? "Soal Coding"
                     : type === "css-challenge"
                       ? "Soal CSS"
-                      : "Materi"}
+                      : type === "web-challenge"
+                        ? "Soal Coding Web"
+                        : "Materi"}
             </label>
             <input
               name="title"
@@ -169,7 +174,9 @@ export default function LessonForm({
                       ? "Contoh: Fungsi Python"
                       : type === "css-challenge"
                         ? "Contoh: Layout Grid"
-                        : "Contoh: Pengenalan JavaScript"
+                        : type === "web-challenge"
+                          ? "Contoh: To-Do List Interaktif"
+                          : "Contoh: Pengenalan JavaScript"
               }
               required
               style={{
@@ -183,7 +190,8 @@ export default function LessonForm({
           {type !== "quiz" &&
             type !== "project" &&
             type !== "code" &&
-            type !== "css-challenge" && (
+            type !== "css-challenge" &&
+            type !== "web-challenge" && (
               <div style={inputGroupStyle}>
                 <label style={labelStyle}>Tipe Materi</label>
                 <select
@@ -449,6 +457,43 @@ export default function LessonForm({
               </div>
             </div>
           )}
+
+          {type === "web-challenge" && (
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  padding: "16px",
+                  backgroundColor: "white",
+                  borderRadius: "8px",
+                  border: "1px solid #E2E8F0",
+                }}
+              >
+                <span style={{ fontSize: "2rem" }}>🕸️</span>
+                <div>
+                  <p style={{ margin: 0, fontWeight: 600, color: "#1E293B" }}>
+                    Soal Coding Web Interaktif
+                  </p>
+                  <p
+                    style={{
+                      margin: "4px 0 0 0",
+                      fontSize: "0.875rem",
+                      color: "#64748B",
+                    }}
+                  >
+                    Siswa akan menulis HTML/CSS/JS dengan live preview mirip
+                    CodePen. Setelah membuat lesson ini, atur mode soal (HTML
+                    saja / HTML+CSS / HTML+CSS+JS), boilerplate, dan referensi
+                    jawaban dari halaman detail materi.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div
@@ -468,7 +513,7 @@ export default function LessonForm({
           >
             {loading
               ? "Menyimpan..."
-              : `Simpan ${type === "quiz" ? "Kuis" : type === "project" ? "Tugas" : type === "code" ? "Soal Coding" : type === "css-challenge" ? "Soal CSS" : "Materi"}`}
+              : `Simpan ${type === "quiz" ? "Kuis" : type === "project" ? "Tugas" : type === "code" ? "Soal Coding" : type === "css-challenge" ? "Soal CSS" : type === "web-challenge" ? "Soal Coding Web" : "Materi"}`}
           </button>
         </div>
       </form>

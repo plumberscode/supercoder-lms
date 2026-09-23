@@ -4,6 +4,7 @@ import QuizView from "./quiz-view";
 import ProjectSubmission from "./project-submission";
 import CodeChallenge from "@/components/CodeChallenge";
 import CssChallenge from "@/components/CssChallenge";
+import WebChallenge from "@/components/WebChallenge";
 
 export default async function LessonPage({
   params,
@@ -28,6 +29,7 @@ export default async function LessonPage({
   let lessonScore = null;
   let codeSubmission = null;
   let cssSubmission: { score: number; data: any } | null = null;
+  let webSubmission: { score: number; data: any } | null = null;
   if (user) {
     const { data } = await supabase
       .from("submissions")
@@ -58,6 +60,17 @@ export default async function LessonPage({
       .maybeSingle();
     if (cssSub) {
       cssSubmission = cssSub;
+    }
+
+    const { data: webSub } = await supabase
+      .from("submissions")
+      .select("score, data")
+      .eq("student_id", user.id)
+      .eq("content_id", id)
+      .eq("type", "web")
+      .maybeSingle();
+    if (webSub) {
+      webSubmission = webSub;
     }
   }
 
@@ -92,9 +105,23 @@ export default async function LessonPage({
     if (challenge) cssChallenge = challenge;
   }
 
+  // Fetch Web challenge if lesson type is 'web-challenge'
+  let webChallenge = null;
+  if (lesson.type === "web-challenge") {
+    const { data: challenge } = await supabase
+      .from("web_challenges")
+      .select("*")
+      .eq("lesson_id", id)
+      .single();
+    if (challenge) webChallenge = challenge;
+  }
+
   const subjectId = (lesson.module_id as any).subject_id;
   const moduleTitle = (lesson.module_id as any).title;
-  const isCodingLesson = lesson.type === "code" || lesson.type === "css-challenge";
+  const isCodingLesson =
+    lesson.type === "code" ||
+    lesson.type === "css-challenge" ||
+    lesson.type === "web-challenge";
 
   // ── Shared header content (used in both layouts) ──────────────────────
   const waHref = `https://wa.me/6287788931919?text=${encodeURIComponent(`Halo Instruktur Supercoder, saya ingin bertanya seputar materi: ${lesson.title}`)}`;
@@ -178,6 +205,18 @@ export default async function LessonPage({
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#64748b", flexDirection: "column", gap: "16px" }}>
               <span style={{ fontSize: "3rem" }}>🎨</span>
               <p>Soal CSS untuk materi ini belum dibuat oleh guru.</p>
+            </div>
+          )}
+          {lesson.type === "web-challenge" && webChallenge && (
+            <WebChallenge
+              challenge={webChallenge}
+              existingSubmission={webSubmission}
+            />
+          )}
+          {lesson.type === "web-challenge" && !webChallenge && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#64748b", flexDirection: "column", gap: "16px" }}>
+              <span style={{ fontSize: "3rem" }}>🕸️</span>
+              <p>Soal Coding Web untuk materi ini belum dibuat oleh guru.</p>
             </div>
           )}
         </div>

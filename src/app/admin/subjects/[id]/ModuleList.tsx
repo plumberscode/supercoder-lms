@@ -571,6 +571,18 @@ export default function ModuleList({
                                           🎨 Kelola Soal CSS
                                         </Link>
                                       )}
+                                      {lesson.type === "web-challenge" && (
+                                        <Link
+                                          href={`/admin/web-challenges/${lesson.id}`}
+                                          className="btn btn-secondary"
+                                          style={{
+                                            padding: "6px 12px",
+                                            fontSize: "0.75rem",
+                                          }}
+                                        >
+                                          🕸️ Kelola Soal Coding Web
+                                        </Link>
+                                      )}
                                       <form
                                         action={deleteLesson.bind(
                                           null,
@@ -777,6 +789,39 @@ export default function ModuleList({
                           }}
                         >
                           🎨 Soal CSS
+                        </button>
+                        <button
+                          onClick={() =>
+                            setActiveAddForm(
+                              activeAddForm?.moduleId === module.id &&
+                                activeAddForm?.type === "web-challenge"
+                                ? null
+                                : {
+                                    moduleId: module.id,
+                                    type: "web-challenge",
+                                  },
+                            )
+                          }
+                          className="btn"
+                          style={{
+                            padding: "8px 16px",
+                            fontSize: "0.875rem",
+                            backgroundColor:
+                              activeAddForm?.moduleId === module.id &&
+                              activeAddForm?.type === "web-challenge"
+                                ? "var(--primary)"
+                                : "#F1F5F9",
+                            color:
+                              activeAddForm?.moduleId === module.id &&
+                              activeAddForm?.type === "web-challenge"
+                                ? "white"
+                                : "var(--secondary)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          🕸️ Soal Coding Web
                         </button>
                       </div>
 

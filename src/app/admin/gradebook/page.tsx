@@ -61,7 +61,7 @@ export default async function GradebookPage({
           .from("submissions")
           .select("student_id, content_id, score, type")
           .in("content_id", lessonIds)
-          .in("type", ["code", "css", "quiz", "lesson"]);
+          .in("type", ["code", "css", "quiz", "lesson", "web"]);
 
         if (submissions) {
           submissions.forEach((sub) => {
@@ -102,6 +102,7 @@ export default async function GradebookPage({
     css: "🎨",
     html: "🌐",
     project: "🗂️",
+    "web-challenge": "🕸️",
   };
 
   return (
