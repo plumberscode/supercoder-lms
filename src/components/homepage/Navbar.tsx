@@ -199,7 +199,7 @@ export default function Navbar() {
                     className="w-full rounded-2xl h-11 border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 text-emerald-700 font-poppins font-semibold text-sm"
                   >
                     <a
-                      href="https://wa.me/6287788931919"
+                      href="https://wa.me/62816331126"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-2"

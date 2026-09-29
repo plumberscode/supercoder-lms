@@ -286,7 +286,7 @@ export default async function SubjectPage({
                   hubungi instruktur via WhatsApp.
                 </p>
                 <a
-                  href={`https://wa.me/6287788931919?text=${encodeURIComponent(`Halo Instruktur Supercoder, saya ingin bertanya seputar materi: ${subject.title}`)}`}
+                  href={`https://wa.me/62816331126?text=${encodeURIComponent(`Halo Instruktur Supercoder, saya ingin bertanya seputar materi: ${subject.title}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

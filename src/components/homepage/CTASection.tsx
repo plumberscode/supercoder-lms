@@ -82,7 +82,7 @@ export default function CTASection() {
               className="w-full sm:w-auto h-auto py-3 px-6 sm:px-7 rounded-full bg-white hover:bg-slate-50 text-red-600 font-poppins font-semibold text-xs sm:text-sm shadow-xl shadow-black/15 hover:shadow-2xl hover:scale-105 transition-all duration-200"
             >
               <a
-                href="https://wa.me/6287788931919"
+                href="https://wa.me/62816331126"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 sm:gap-2.5 text-red-600 no-underline text-center"

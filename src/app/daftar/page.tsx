@@ -95,7 +95,7 @@ function RegistrationFormContent() {
 
   // Pre-generate WhatsApp direct chat link for post-submission
   const cleanPhone = submittedData?.whatsappNumber.replace(/\D/g, "") || "";
-  const waContactUrl = `https://wa.me/6287788931919?text=${encodeURIComponent(
+  const waContactUrl = `https://wa.me/62816331126?text=${encodeURIComponent(
     `Halo Supercoder, saya telah mengisi form pendaftaran atas nama ${submittedData?.studentName || ""} untuk kelas ${submittedData?.selectedClass || ""}. Mohon informasinya.`,
   )}`;
 

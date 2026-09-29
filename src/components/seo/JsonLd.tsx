@@ -14,7 +14,7 @@ export default function JsonLd() {
     image: `${siteUrl}/images/hero-image-supercoder.webp`,
     description:
       "Tempat generasi muda memahami teknologi, menguasai coding fundamentals, dan menggunakan AI untuk mengubah ide menjadi produk digital nyata di Balikpapan.",
-    telephone: "+6287788931919",
+    telephone: "+62816331126",
     priceRange: "Rp 499.000 - Rp 650.000",
     address: {
       "@type": "PostalAddress",

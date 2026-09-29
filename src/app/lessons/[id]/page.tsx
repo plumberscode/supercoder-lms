@@ -124,7 +124,7 @@ export default async function LessonPage({
     lesson.type === "web-challenge";
 
   // ── Shared header content (used in both layouts) ──────────────────────
-  const waHref = `https://wa.me/6287788931919?text=${encodeURIComponent(`Halo Instruktur Supercoder, saya ingin bertanya seputar materi: ${lesson.title}`)}`;
+  const waHref = `https://wa.me/62816331126?text=${encodeURIComponent(`Halo Instruktur Supercoder, saya ingin bertanya seputar materi: ${lesson.title}`)}`;
 
   const waButton = (
     <a
