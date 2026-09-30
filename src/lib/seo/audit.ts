@@ -65,10 +65,13 @@ export function parseRobots(txt: string): { sitemaps: string[]; disallowAll: boo
   return { sitemaps, disallowAll };
 }
 
-/** Kunci perbandingan URL: tanpa www, tanpa trailing slash, query tetap dihitung. */
+/**
+ * Kunci perbandingan URL: tanpa trailing slash, query tetap dihitung. Host dibandingkan
+ * persis — bagi Google, www dan non-www adalah URL berbeda.
+ */
 const urlKey = (u: string) => {
   const url = new URL(u);
-  return `${url.hostname.replace(/^www\./, "")}${url.pathname.replace(/\/+$/, "") || "/"}${url.search}`;
+  return `${url.hostname}${url.pathname.replace(/\/+$/, "") || "/"}${url.search}`;
 };
 
 const looksLikeHtml = (body: string) => /^\s*(<!doctype html|<html)/i.test(body.slice(0, 500));

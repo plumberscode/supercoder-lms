@@ -161,6 +161,34 @@ describe("crawlSite + summarizeAudit", () => {
   });
 });
 
+describe("crawl dari host non-www", () => {
+  it("URL awal non-www yang redirect ke www tidak dianggap URL sitemap", async () => {
+    const pages: Record<string, string> = {
+      "https://www.w.id/": page({ canonical: "https://www.w.id/" }),
+    };
+    const fetcher = async (url: string): Promise<SafeFetchResult> => {
+      const u = new URL(url);
+      const redirected = u.hostname === "w.id";
+      const finalUrl = redirected ? `https://www.w.id${u.pathname}` : url;
+      const isSitemap = u.pathname === "/sitemap.xml";
+      return {
+        requestedUrl: url,
+        finalUrl,
+        status: isSitemap || pages[finalUrl] ? 200 : 404,
+        redirects: redirected ? [{ from: url, to: finalUrl, status: 308 }] : [],
+        headers: { "content-type": isSitemap ? "application/xml" : "text/html" },
+        body: isSitemap ? "<urlset><url><loc>https://www.w.id</loc></url></urlset>" : (pages[finalUrl] ?? ""),
+        truncated: false,
+        ms: 1,
+      };
+    };
+    const crawl = await crawlSite("https://w.id", { fetcher, maxPages: 5 });
+    const codes = summarizeAudit(crawl).issues.map((i) => i.code);
+    expect(codes).not.toContain("sitemap_redirect");
+    expect(crawl.pages.find((p) => p.url === "https://w.id/")?.inSitemap).toBe(false);
+  });
+});
+
 describe("findOpportunities", () => {
   it("memisahkan striking distance & CTR rendah", () => {
     const rows = [
