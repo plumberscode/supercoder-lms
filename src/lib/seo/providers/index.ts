@@ -33,9 +33,11 @@ export function providerStatus(): ProviderStatus[] {
     {
       id: "pagespeed",
       label: "PageSpeed Insights (Core Web Vitals)",
-      configured: true,
-      env: "PAGESPEED_API_KEY (opsional)",
-      note: process.env.PAGESPEED_API_KEY ? "Pakai API key." : "Tanpa key: kuota terbatas.",
+      env: "PAGESPEED_API_KEY",
+      configured: !!process.env.PAGESPEED_API_KEY,
+      note: process.env.PAGESPEED_API_KEY
+        ? "Pakai API key."
+        : "Tanpa key, kuota gratis Google hampir selalu habis (429). Buat API key gratis di project Supercoder SEO.",
     },
     {
       id: "gsc",

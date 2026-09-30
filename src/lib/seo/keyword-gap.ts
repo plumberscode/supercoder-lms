@@ -50,7 +50,18 @@ export function rankingGap(serps: SerpResult[], ourDomain: string, competitors: 
 const STOPWORDS = new Set(
   `yang dan di ke dari untuk dengan pada ini itu atau dalam adalah akan bisa juga karena oleh sebagai tidak ada kami kamu anda kita
   cara apa bagaimana kenapa mengapa lebih paling semua para the a an of to in for and or on with by is are at from your our
-  www com id html php index page blog tag category kategori artikel post news home beranda https http amp`
+  www com id html php index page blog tag category kategori artikel post news home beranda https http amp
+  contact kontak hubungi about tentang privacy policy kebijakan privasi terms syarat ketentuan login masuk daftar register
+  faq search cari menu read more selengkapnya copyright hak cipta sitemap feed wp content uploads assets img images`
+    .split(/\s+/)
+    .filter(Boolean),
+);
+
+// Kota lain di Indonesia: frasa yang menyebut kota lain bukan gap untuk bisnis lokal kita
+const CITIES = new Set(
+  `jakarta bandung surabaya semarang jogja yogyakarta yogya solo malang medan makassar palembang denpasar bali bekasi
+  depok tangerang bogor sidoarjo batam pekanbaru padang manado pontianak banjarmasin samarinda tarakan bontang
+  balikpapan kupang mataram ambon jayapura cirebon tasikmalaya purwokerto kediri jember lampung jambi bengkulu aceh`
     .split(/\s+/)
     .filter(Boolean),
 );
@@ -86,8 +97,10 @@ export type TopicGapRow = { phrase: string; competitors: string[]; mentions: num
 export function topicGap(
   ours: string[],
   competitors: Record<string, string[]>,
-  opts: { minCompetitors?: number; limit?: number } = {},
+  opts: { minCompetitors?: number; limit?: number; ourCity?: string } = {},
 ): TopicGapRow[] {
+  const ourCity = opts.ourCity?.toLowerCase();
+  const otherCity = (phrase: string) => phrase.split(" ").some((t) => CITIES.has(t) && t !== ourCity);
   const ourPhrases = new Set(ours.flatMap(phrases));
   const ourTokens = new Set(ours.flatMap(tokenize));
   const rows = new Map<string, { competitors: Set<string>; mentions: number }>();
@@ -95,7 +108,7 @@ export function topicGap(
   for (const [domain, texts] of Object.entries(competitors)) {
     for (const text of texts) {
       for (const phrase of phrases(text)) {
-        if (ourPhrases.has(phrase)) continue;
+        if (ourPhrases.has(phrase) || otherCity(phrase)) continue;
         // Frasa 1 kata yang sudah kita pakai di mana pun bukan gap
         if (!phrase.includes(" ") && ourTokens.has(phrase)) continue;
         const row = rows.get(phrase) ?? { competitors: new Set<string>(), mentions: 0 };

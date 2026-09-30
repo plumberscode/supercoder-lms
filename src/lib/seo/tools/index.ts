@@ -363,10 +363,31 @@ const tools: SeoTool[] = [
         TTL.autocomplete,
         () => keywordIdeas(seed, { language: ctx.settings.language, expand }),
       );
+      // Seed lokal yang panjang sering tanpa saran: coba versi lebih umum (buang kata terakhir)
+      let broader: Awaited<ReturnType<typeof keywordIdeas>> | null = null;
+      const words = seed.split(/\s+/);
+      if (result.ideas.length < 5 && words.length > 2) {
+        const broaderSeed = words.slice(0, -1).join(" ");
+        broader = await withCache(
+          ctx.supabase,
+          `autocomplete:${ctx.settings.language}:${expand}:${broaderSeed.toLowerCase()}`,
+          "autocomplete",
+          TTL.autocomplete,
+          () => keywordIdeas(broaderSeed, { language: ctx.settings.language, expand }),
+        );
+      }
+      const data = { ...result, broader };
       return {
-        summary: `${result.ideas.length} ide · ${result.questions.length} pertanyaan untuk "${seed}"`,
-        llm: { ...result, note: "Tanpa data volume. Urutan tidak mencerminkan popularitas." },
-        data: result,
+        summary: `${result.ideas.length} ide · ${result.questions.length} pertanyaan untuk "${seed}"${
+          broader ? ` · +${broader.ideas.length} dari "${broader.seed}"` : ""
+        }`,
+        llm: {
+          ...data,
+          note: `Tanpa data volume. Urutan tidak mencerminkan popularitas.${
+            broader ? ` Seed "${seed}" hampir tanpa saran, jadi ditambah saran dari seed lebih umum (broader).` : ""
+          }`,
+        },
+        data,
       };
     },
   },
@@ -518,7 +539,10 @@ const tools: SeoTool[] = [
       const compTexts = Object.fromEntries(
         competitors.map((c, i) => [c, texts(comps[i])]).filter(([, t]) => t.length > 0),
       );
-      const topics = topicGap(ourTexts, compTexts, { minCompetitors: competitors.length > 2 ? 2 : 1 });
+      const topics = topicGap(ourTexts, compTexts, {
+        minCompetitors: competitors.length > 2 ? 2 : 1,
+        ourCity: cityFromLocation(ctx.settings.location),
+      });
 
       const counts = rankings?.reduce<Record<string, number>>((acc, r) => {
         acc[r.status] = (acc[r.status] ?? 0) + 1;

@@ -51,6 +51,13 @@ export async function runPageSpeed(
   const res = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${params}`, {
     signal: AbortSignal.timeout(90_000),
   });
+  if (res.status === 429) {
+    throw new Error(
+      process.env.PAGESPEED_API_KEY
+        ? "Kuota PageSpeed Insights habis untuk hari ini (429). Coba lagi besok."
+        : "Kuota PageSpeed Insights tanpa API key habis (429). Isi PAGESPEED_API_KEY (gratis, dibuat di Google Cloud project Supercoder SEO).",
+    );
+  }
   if (!res.ok) throw new Error(`PageSpeed ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const json = (await res.json()) as PsiResponse;
 

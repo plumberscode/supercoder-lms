@@ -3,6 +3,7 @@ import { providerStatus } from "@/lib/seo/providers";
 import { getSeoSettings } from "@/lib/seo/settings";
 import { importGscLinks, saveSeoSettings } from "../actions";
 import SeoTabs from "../SeoTabs";
+import GscTestButton from "./GscTestButton";
 
 export const metadata = { title: "Pengaturan SEO Agent | Admin Supercoder" };
 
@@ -41,6 +42,7 @@ export default async function SeoSettingsPage({
                 <div className="font-semibold text-slate-800">{p.label}</div>
                 <div className="text-slate-500">{p.note}</div>
                 {p.env !== "—" && <code className="text-xs text-slate-400">{p.env}</code>}
+                {p.id === "gsc" && <GscTestButton />}
               </div>
             </li>
           ))}

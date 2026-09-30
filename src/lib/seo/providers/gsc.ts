@@ -76,6 +76,40 @@ export async function gscSearchAnalytics(property: string, q: GscQuery): Promise
   return json.rows ?? [];
 }
 
+export type GscSite = { siteUrl: string; permissionLevel: string };
+
+/** Properti GSC yang bisa diakses service account. */
+export async function gscListSites(): Promise<GscSite[]> {
+  const token = await getAccessToken();
+  const res = await fetch("https://www.googleapis.com/webmasters/v3/sites", {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!res.ok) throw new Error(`GSC ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  const json = (await res.json()) as { siteEntry?: GscSite[] };
+  return (json.siteEntry ?? []).filter((s) => s.permissionLevel !== "siteUnverifiedUser");
+}
+
+/** Cocokkan properti di pengaturan dengan daftar GSC (toleran beda trailing slash & huruf besar). */
+export function matchGscProperty(sites: GscSite[], property: string): GscSite | null {
+  const norm = (p: string) => p.trim().toLowerCase().replace(/\/+$/, "");
+  return sites.find((s) => norm(s.siteUrl) === norm(property)) ?? null;
+}
+
+/** Terjemahkan error GSC/OAuth menjadi penyebab yang bisa ditindaklanjuti admin. */
+export function explainGscError(message: string): string {
+  if (/invalid_grant/i.test(message))
+    return "Kredensial ditolak (invalid_grant). Periksa GSC_CLIENT_EMAIL & GSC_PRIVATE_KEY cocok dari file JSON yang sama, dan jam komputer/server sudah benar.";
+  if (/DECODER|PEM|asn1|private key|error:1E08010C/i.test(message))
+    return "GSC_PRIVATE_KEY tidak bisa dibaca. Salin nilai private_key dari file JSON apa adanya (dengan \\n), dibungkus tanda kutip.";
+  if (/GSC 403/.test(message) && /has not been used|disabled|SERVICE_DISABLED/i.test(message))
+    return "Google Search Console API belum diaktifkan di project Google Cloud. Aktifkan di APIs & Services → Library.";
+  if (/GSC 403/.test(message))
+    return "Akses ditolak (403). Tambahkan email service account sebagai user di properti Search Console (Settings → Users and permissions).";
+  if (/GSC 404/.test(message)) return "Properti tidak ditemukan (404). Periksa penulisan Properti GSC di pengaturan.";
+  return message;
+}
+
 /** Rentang tanggal N hari terakhir (data GSC tertunda ±2 hari). */
 export function lastDays(days: number): { startDate: string; endDate: string } {
   const end = new Date(Date.now() - 2 * 86_400_000);

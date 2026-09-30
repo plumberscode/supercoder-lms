@@ -11,6 +11,7 @@ import { assertPublicUrl, isPrivateIp, type SafeFetchResult } from "@/lib/seo/fe
 import { parseGscLinksCsv } from "@/lib/seo/gsc-links";
 import { matchesDomain, rankingGap, topicGap } from "@/lib/seo/keyword-gap";
 import { findOpportunities } from "@/lib/seo/opportunities";
+import { explainGscError, matchGscProperty } from "@/lib/seo/providers/gsc";
 import type { SerpResult } from "@/lib/seo/providers/types";
 import { renderAgentMarkdown } from "@/lib/seo/render-markdown";
 import { classifyDomain, type SeoTool } from "@/lib/seo/tools";
@@ -221,6 +222,44 @@ describe("keyword gap", () => {
   });
 });
 
+describe("perbaikan dari tes data asli", () => {
+  it("robots.txt & sitemap soft 404 (HTML 200) dilaporkan, bukan diam-diam kosong", async () => {
+    const { fetchSitemapUrls } = await import("@/lib/seo/audit");
+    const html = "<!DOCTYPE html><html><head><title></title></head><body>home</body></html>";
+    const fetcher = async (url: string) => ({
+      requestedUrl: url,
+      finalUrl: url,
+      status: 200,
+      redirects: [],
+      headers: { "content-type": "text/html" },
+      body: html,
+      truncated: false,
+      ms: 1,
+    });
+    const r = await fetchSitemapUrls("https://soft.id", fetcher);
+    expect(r.robots.found).toBe(false);
+    expect(r.urls).toEqual([]);
+    expect(r.errors[0]).toContain("soft 404");
+  });
+
+  it("topicGap membuang kota lain & kata menu", () => {
+    const gap = topicGap(
+      ["kursus coding balikpapan"],
+      {
+        "a.com": ["kursus android semarang", "contact us", "biaya kursus coding balikpapan"],
+        "b.com": ["kursus web semarang", "contact", "biaya kursus coding"],
+      },
+      { ourCity: "Balikpapan" },
+    ).map((g) => g.phrase);
+    expect(top(gap)).toContain("biaya kursus coding");
+    expect(gap.some((p) => p.includes("semarang"))).toBe(false);
+    expect(gap).not.toContain("contact");
+    function top(list: string[]) {
+      return list.slice(0, 5);
+    }
+  });
+});
+
 describe("helper lain", () => {
   it("compactJson tetap di bawah batas", () => {
     const big = { rows: Array.from({ length: 500 }, (_, i) => ({ i, text: "x".repeat(100) })) };
@@ -347,5 +386,26 @@ describe("runSeoAgent", () => {
     expect(choices).toEqual(["auto", "auto", "none"]);
     expect(created.filter((m) => m.role === "tool")[0].meta?.ok).toBe(false);
     expect(created.at(-1)?.content).toContain("Batas langkah");
+  });
+});
+
+describe("koneksi GSC", () => {
+  const sites = [
+    { siteUrl: "sc-domain:supercoder.id", permissionLevel: "siteRestrictedUser" },
+    { siteUrl: "https://www.supercoder.id/", permissionLevel: "siteFullUser" },
+  ];
+
+  it("mencocokkan properti dengan toleransi slash & huruf", () => {
+    expect(matchGscProperty(sites, "SC-DOMAIN:supercoder.id")?.siteUrl).toBe("sc-domain:supercoder.id");
+    expect(matchGscProperty(sites, "https://www.supercoder.id")?.siteUrl).toBe("https://www.supercoder.id/");
+    expect(matchGscProperty(sites, "https://supercoder.id/")).toBeNull();
+  });
+
+  it("menjelaskan error umum", () => {
+    expect(explainGscError('GSC auth 400: {"error":"invalid_grant"}')).toContain("invalid_grant");
+    expect(explainGscError("error:1E08010C:DECODER routines::unsupported")).toContain("GSC_PRIVATE_KEY");
+    expect(explainGscError("GSC 403: User does not have sufficient permission")).toContain("Users and permissions");
+    expect(explainGscError("GSC 403: Google Search Console API has not been used in project 123")).toContain("belum diaktifkan");
+    expect(explainGscError("lain")).toBe("lain");
   });
 });

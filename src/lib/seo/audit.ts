@@ -71,6 +71,8 @@ const urlKey = (u: string) => {
   return `${url.hostname.replace(/^www\./, "")}${url.pathname.replace(/\/+$/, "") || "/"}${url.search}`;
 };
 
+const looksLikeHtml = (body: string) => /^\s*(<!doctype html|<html)/i.test(body.slice(0, 500));
+
 const SKIP_EXT = /\.(jpe?g|png|gif|webp|svg|ico|pdf|zip|mp4|webm|mp3|css|js|xml|txt|woff2?)$/i;
 
 export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
@@ -96,7 +98,8 @@ export async function fetchSitemapUrls(
   const robots: CrawlResult["robotsTxt"] = { found: false, sitemaps: [], disallowAll: false };
   try {
     const res = await fetcher(`${origin}/robots.txt`, { accept: "text/plain" });
-    if (res.status === 200) {
+    // Situs dengan "soft 404" membalas HTML 200 untuk file yang tidak ada
+    if (res.status === 200 && !looksLikeHtml(res.body)) {
       Object.assign(robots, { found: true, ...parseRobots(res.body) });
     }
   } catch {
@@ -115,6 +118,10 @@ export async function fetchSitemapUrls(
       const res = await fetcher(sm, { accept: "application/xml,text/xml" });
       if (res.status !== 200) {
         errors.push(`${sm}: HTTP ${res.status}`);
+        continue;
+      }
+      if (!/<(urlset|sitemapindex)[\s>]/i.test(res.body)) {
+        errors.push(`${sm}: bukan sitemap XML${looksLikeHtml(res.body) ? " (halaman HTML / soft 404)" : ""}`);
         continue;
       }
       const parsed = parseSitemap(res.body);
