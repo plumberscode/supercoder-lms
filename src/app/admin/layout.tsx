@@ -66,6 +66,11 @@ export default async function AdminLayout({
               <span>✍️</span> Blog
             </Link>
           )}
+          {profile?.role === "admin" && (
+            <Link href="/admin/seo" className={styles.navLink}>
+              <span>🔎</span> SEO Agent
+            </Link>
+          )}
         </nav>
 
         <div
