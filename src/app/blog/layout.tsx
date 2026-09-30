@@ -1,5 +1,4 @@
 import "highlight.js/styles/github-dark.css";
-import PromoStickyBar from "@/components/homepage/PromoStickyBar";
 import Navbar from "@/components/homepage/Navbar";
 import Footer from "@/components/homepage/Footer";
 
@@ -10,7 +9,6 @@ export default function BlogLayout({
 }) {
   return (
     <>
-      <PromoStickyBar />
       <Navbar />
       <main
         className="bg-white min-h-screen"

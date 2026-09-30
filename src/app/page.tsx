@@ -1,4 +1,3 @@
-import PromoStickyBar from "@/components/homepage/PromoStickyBar";
 import Navbar from "@/components/homepage/Navbar";
 import HeroSection from "@/components/homepage/HeroSection";
 import ManifestoSection from "@/components/homepage/ManifestoSection";
@@ -14,11 +13,12 @@ import FAQSection from "@/components/homepage/FAQSection";
 import CTASection from "@/components/homepage/CTASection";
 import Footer from "@/components/homepage/Footer";
 import JsonLd from "@/components/seo/JsonLd";
+import { HOME_TITLE, HOME_DESCRIPTION } from "@/lib/site";
 
 export const metadata = {
-  title: "Supercoder - Belajar Coding & AI",
-  description:
-    "Tempat generasi muda memahami teknologi, menguasai coding fundamentals, dan menggunakan AI untuk mengubah ide menjadi produk digital nyata di Balikpapan.",
+  // absolute: judul sudah memuat brand, jangan ditambah template "| Supercoder" lagi
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESCRIPTION,
   alternates: {
     canonical: "/",
   },
@@ -28,7 +28,6 @@ export default function Home() {
   return (
     <>
       <JsonLd />
-      <PromoStickyBar />
       <Navbar />
       <main style={{ paddingTop: "var(--promo-bar-height, 0px)" }}>
         <HeroSection />

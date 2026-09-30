@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
+import { MapPin, Clock, Phone } from "lucide-react";
+import { BUSINESS, BUSINESS_MAPS_EMBED_URL } from "@/lib/site";
 
 export default function Footer() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -66,11 +68,61 @@ export default function Footer() {
               mengubah ide menjadi produk digital nyata.
             </p>
 
+            {/* NAP: harus identik dengan Google Business Profile */}
+            <address className="not-italic font-sans text-sm text-slate-600 space-y-2.5 max-w-sm mb-6">
+              <p className="font-poppins font-bold text-slate-900">
+                Kursus Coding Balikpapan
+              </p>
+              <p className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-orange-500" />
+                <span>
+                  {BUSINESS.streetAddress}, {BUSINESS.city}, {BUSINESS.region}
+                </span>
+              </p>
+              {BUSINESS.schedule.map((item) => (
+                <p key={item.label} className="flex items-start gap-2">
+                  <Clock className="w-4 h-4 mt-0.5 shrink-0 text-orange-500" />
+                  <span>
+                    {item.label}: {item.value}
+                  </span>
+                </p>
+              ))}
+              <p className="flex items-start gap-2">
+                <Phone className="w-4 h-4 mt-0.5 shrink-0 text-orange-500" />
+                <a
+                  href={BUSINESS.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-red-600 transition-colors"
+                >
+                  {BUSINESS.phoneDisplay} (WhatsApp)
+                </a>
+              </p>
+            </address>
+
+            <div className="w-full max-w-sm mb-6">
+              <iframe
+                src={BUSINESS_MAPS_EMBED_URL}
+                title="Lokasi Supercoder di Google Maps"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full h-40 rounded-xl border border-slate-200"
+              />
+              <a
+                href={BUSINESS.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-2 font-sans text-sm font-medium text-orange-600 hover:text-red-600 transition-colors"
+              >
+                Buka di Google Maps &rarr;
+              </a>
+            </div>
+
             {/* Social Icons Row */}
             <div className="flex items-center justify-start gap-3 w-full">
               {/* Instagram */}
               <a
-                href="https://www.instagram.com/supercoder_id/"
+                href={BUSINESS.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"

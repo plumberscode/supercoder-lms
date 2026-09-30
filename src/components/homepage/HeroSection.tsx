@@ -113,14 +113,12 @@ export default function HeroSection() {
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 pt-4 pb-14 relative z-10">
         {/* Left Content */}
         <div className="w-full lg:w-[48%] flex flex-col items-start text-left">
-          <div className="hero-elem inline-flex items-center gap-2 mb-6">
-            <span className="w-2 h-2 rounded-full bg-red-500" />
-            <span className="font-poppins text-xs font-bold text-slate-500 uppercase tracking-widest">
-              Kelas Coding dan AI di Balikpapan
-            </span>
-          </div>
-
+          {/* Eyebrow berada di dalam H1 agar keyword lokal masuk ke heading utama */}
           <h1 className="hero-elem font-poppins text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15] mb-5">
+            <span className="flex items-center gap-2 mb-6 text-xs font-bold text-slate-500 uppercase tracking-widest leading-normal">
+              <span className="w-2 h-2 rounded-full bg-red-500" />
+              Kursus Coding &amp; AI Balikpapan
+            </span>
             Belajar Membangun{" "}
             <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
               Aplikasi Web

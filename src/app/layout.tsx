@@ -3,7 +3,7 @@ import { Inter, Poppins, Geist } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ToastProvider";
 import { cn } from "@/lib/utils";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, HOME_TITLE, HOME_DESCRIPTION } from "@/lib/site";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -23,11 +23,10 @@ const siteUrl = SITE_URL;
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Supercoder - Belajar Coding & AI",
+    default: HOME_TITLE,
     template: "%s | Supercoder",
   },
-  description:
-    "Tempat generasi muda memahami teknologi, menguasai coding fundamentals, dan menggunakan AI untuk mengubah ide menjadi produk digital nyata di Balikpapan.",
+  description: HOME_DESCRIPTION,
   keywords: [
     "kursus coding balikpapan",
     "les coding anak balikpapan",
@@ -56,9 +55,8 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: siteUrl,
     siteName: "Supercoder",
-    title: "Supercoder - Belajar Coding & AI",
-    description:
-      "Tempat generasi muda memahami teknologi, menguasai coding fundamentals, dan menggunakan AI untuk mengubah ide menjadi produk digital nyata di Balikpapan.",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     images: [
       {
         url: "/images/hero-image-supercoder.webp",
@@ -70,9 +68,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Supercoder - Belajar Coding & AI",
-    description:
-      "Kuasai coding fundamentals dan manfaatkan modern AI workflow untuk membangun aplikasi web dan project digital nyata.",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     images: ["/images/hero-image-supercoder.webp"],
   },
   robots: {

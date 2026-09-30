@@ -49,7 +49,9 @@ function getPromoPhase(now: Date): PromoPhase {
 
 export default function PromoStickyBar() {
   const barRef = useRef<HTMLDivElement>(null);
-  const [phase, setPhase] = useState<PromoPhase>("main");
+  // Mulai dari "over" agar HTML hasil SSR tidak memuat promo (crawler tidak menjalankan JS);
+  // fase sebenarnya ditentukan di client oleh tick() di bawah.
+  const [phase, setPhase] = useState<PromoPhase>("over");
   const [copied, setCopied] = useState(false);
 
   // Keep Navbar (and page content) offset in sync with this bar's real height.

@@ -14,6 +14,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { BUSINESS } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import {
   Clock,
@@ -22,7 +23,6 @@ import {
   Video,
   Sparkles,
   Layers,
-  PartyPopper,
 } from "lucide-react";
 
 const programs = [
@@ -40,7 +40,7 @@ const programs = [
         label: "Frekuensi",
         value: "1x seminggu (Minggu: 09.00 - 10.30)",
       },
-      { icon: MapPin, label: "Lokasi", value: "Falya Risol Mayo" },
+      { icon: MapPin, label: "Lokasi", value: BUSINESS.shortAddress },
       { icon: Sparkles, label: "Investasi", value: "Rp 449.000 / bulan" },
     ],
   },
@@ -156,17 +156,6 @@ export default function ProgramSection() {
                   : ""
               }`}
             >
-              {/* Promo badge — pinned to the card's wrapper so it can poke out past the edges */}
-              <div className="absolute -top-4 -right-4 z-20">
-                <div className="promo-badge-99 w-16 h-16 rounded-full text-white shadow-lg shadow-orange-900/30 flex flex-col items-center justify-center leading-none">
-                  <PartyPopper className="w-4 h-4 mb-0.5" />
-                  <span className="text-[10px] font-black tracking-wide">
-                    PROMO
-                  </span>
-                  <span className="text-xs font-black tracking-wide">99</span>
-                </div>
-              </div>
-
               <Card
                 style={{ transitionProperty: "box-shadow" }}
                 className="program-card group bg-white rounded-3xl border border-slate-200/80 shadow-md hover:shadow-2xl duration-300 hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between"
