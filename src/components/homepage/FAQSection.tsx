@@ -1,8 +1,3 @@
-"use client";
-
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import {
   Accordion,
   AccordionContent,
@@ -14,51 +9,8 @@ import { HelpCircle } from "lucide-react";
 import { faqs } from "./faq-data";
 
 export default function FAQSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".faq-header",
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-
-      gsap.fromTo(
-        ".faq-item",
-        { y: 18, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.55,
-          stagger: 0.05,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: ".faq-accordion",
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-    },
-    { scope: sectionRef },
-  );
-
   return (
     <section
-      ref={sectionRef}
       className="py-24 px-5 bg-slate-50 relative overflow-hidden"
       id="faq"
     >

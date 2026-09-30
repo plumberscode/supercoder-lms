@@ -1,9 +1,4 @@
-"use client";
-
-import { useRef } from "react";
 import Image from "next/image";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import Link from "next/link";
 import {
   Card,
@@ -79,51 +74,8 @@ const programs = [
 ];
 
 export default function ProgramSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".program-header",
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-
-      gsap.fromTo(
-        ".program-card",
-        { y: 24, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.07,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: ".program-grid",
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-    },
-    { scope: sectionRef },
-  );
-
   return (
     <section
-      ref={sectionRef}
       className="py-24 px-5 bg-slate-50 relative"
       id="program"
     >

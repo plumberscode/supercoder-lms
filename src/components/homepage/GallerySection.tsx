@@ -1,9 +1,4 @@
-"use client";
-
-import { useRef } from "react";
 import Image from "next/image";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -31,52 +26,8 @@ const photos = [
 ];
 
 export default function GallerySection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".gallery-header",
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-
-      gsap.fromTo(
-        ".gallery-card",
-        { y: 22, opacity: 0, scale: 0.97 },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.6,
-          stagger: 0.06,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: ".gallery-grid",
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-    },
-    { scope: sectionRef },
-  );
-
   return (
     <section
-      ref={sectionRef}
       className="py-24 px-5 bg-white relative overflow-hidden"
       id="galeri"
     >

@@ -1,9 +1,4 @@
-"use client";
-
-import { useRef } from "react";
 import Image from "next/image";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import {
   Card,
   CardContent,
@@ -68,51 +63,8 @@ const levels = [
 ];
 
 export default function JourneySection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".journey-header",
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-
-      gsap.fromTo(
-        ".journey-card",
-        { y: 24, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.07,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: ".journey-grid",
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-    },
-    { scope: sectionRef },
-  );
-
   return (
     <section
-      ref={sectionRef}
       className="py-24 px-5 bg-white relative overflow-hidden"
       id="journey"
     >

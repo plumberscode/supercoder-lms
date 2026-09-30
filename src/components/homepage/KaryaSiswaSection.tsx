@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import { ChevronLeft, ChevronRight, ArrowRight, Code2 } from "lucide-react";
 
 interface StudentProject {
@@ -60,50 +58,10 @@ const projects: StudentProject[] = [
 ];
 
 export default function KaryaSiswaSection() {
-  const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".karya-header",
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-
-      gsap.fromTo(
-        ".karya-track-wrap",
-        { y: 24, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: ".karya-track-wrap",
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-    },
-    { scope: sectionRef },
-  );
 
   const handleScroll = () => {
     const el = trackRef.current;
@@ -153,7 +111,6 @@ export default function KaryaSiswaSection() {
 
   return (
     <section
-      ref={sectionRef}
       className="py-24 sm:py-28 lg:py-32 px-5 bg-white relative overflow-hidden"
       id="karya-siswa"
     >

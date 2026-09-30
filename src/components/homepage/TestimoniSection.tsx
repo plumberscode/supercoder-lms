@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import {
   Card,
   CardContent,
@@ -111,13 +109,12 @@ export default function TestimoniSection() {
     direction: 1 | -1;
   } | null>(null);
 
-  const sectionRef = useRef<HTMLElement>(null);
   const currentPanelRef = useRef<HTMLDivElement>(null);
   const outgoingPanelRef = useRef<HTMLDivElement>(null);
   const quoteRefs = useRef<Record<string, HTMLParagraphElement | null>>({});
   const [truncatedMap, setTruncatedMap] = useState<Record<string, boolean>>({});
 
-  // Kept in refs so the autoplay timer and GSAP callbacks always read the
+  // Kept in refs so the autoplay timer and animation callbacks always read the
   // latest value without stale closures.
   const currentIndexRef = useRef(currentIndex);
   const isAnimatingRef = useRef(false);
@@ -126,62 +123,6 @@ export default function TestimoniSection() {
   useEffect(() => {
     currentIndexRef.current = currentIndex;
   }, [currentIndex]);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".testi-header",
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-
-      gsap.fromTo(
-        ".testi-featured",
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: ".testi-featured",
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-
-      gsap.fromTo(
-        ".testi-cards-wrap",
-        { y: 24, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: ".testi-cards-wrap",
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-    },
-    { scope: sectionRef },
-  );
 
   // Kicks off a slide: the current testimonials become the "outgoing"
   // snapshot (rendered on top, about to exit) while the new testimonials
@@ -212,21 +153,31 @@ export default function TestimoniSection() {
       return;
     }
 
-    gsap.set(currentEl, { xPercent: dir * 100 });
-    gsap.set(outgoingEl, { xPercent: 0 });
-
-    const tl = gsap.timeline({
-      defaults: { duration: 0.6, ease: "power3.inOut" },
-      onComplete: () => {
-        setOutgoing(null);
-        isAnimatingRef.current = false;
-      },
-    });
-    tl.to(currentEl, { xPercent: 0 }, 0);
-    tl.to(outgoingEl, { xPercent: dir * -100 }, 0);
+    // Web Animations API (bawaan browser) — setara timeline GSAP sebelumnya:
+    // 0,6 dtk, easing power3.inOut, kedua panel bergeser bersamaan.
+    const timing: KeyframeAnimationOptions = {
+      duration: 600,
+      easing: "cubic-bezier(0.645, 0.045, 0.355, 1)",
+      fill: "both",
+    };
+    const incoming = currentEl.animate(
+      [{ transform: `translateX(${dir * 100}%)` }, { transform: "translateX(0)" }],
+      timing,
+    );
+    const leaving = outgoingEl.animate(
+      [{ transform: "translateX(0)" }, { transform: `translateX(${dir * -100}%)` }],
+      timing,
+    );
+    incoming.onfinish = () => {
+      incoming.cancel();
+      setOutgoing(null);
+      isAnimatingRef.current = false;
+    };
 
     return () => {
-      tl.kill();
+      incoming.onfinish = null;
+      incoming.cancel();
+      leaving.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex]);
@@ -420,7 +371,6 @@ export default function TestimoniSection() {
 
   return (
     <section
-      ref={sectionRef}
       className="py-28 sm:py-36 lg:py-44 px-5 bg-slate-50 relative overflow-hidden"
       id="testimoni"
     >

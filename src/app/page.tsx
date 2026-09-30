@@ -13,6 +13,7 @@ import FAQSection from "@/components/homepage/FAQSection";
 import CTASection from "@/components/homepage/CTASection";
 import Footer from "@/components/homepage/Footer";
 import JsonLd from "@/components/seo/JsonLd";
+import ScrollReveal from "@/components/homepage/ScrollReveal";
 import { HOME_TITLE, HOME_DESCRIPTION } from "@/lib/site";
 
 export const metadata = {
@@ -28,6 +29,7 @@ export default function Home() {
   return (
     <>
       <JsonLd />
+      <ScrollReveal />
       <Navbar />
       <main style={{ paddingTop: "var(--promo-bar-height, 0px)" }}>
         <HeroSection />

@@ -1,42 +1,11 @@
-"use client";
-
-import { useRef } from "react";
 import Image from "next/image";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 
 export default function CTASection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".cta-card",
-        { y: 24, opacity: 0, scale: 0.97 },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-    },
-    { scope: sectionRef },
-  );
-
   return (
     <section
-      ref={sectionRef}
       className="py-20 sm:py-24 px-5 bg-white relative overflow-hidden"
     >
       <div className="max-w-6xl mx-auto">

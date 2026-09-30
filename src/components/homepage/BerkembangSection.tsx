@@ -1,8 +1,3 @@
-"use client";
-
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gamepad2, Zap, FolderGit2, Rocket } from "lucide-react";
 
@@ -34,70 +29,8 @@ const boxes = [
 ];
 
 export default function BerkembangSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".value-header",
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-
-      gsap.fromTo(
-        ".value-card",
-        { y: 24, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.06,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: ".value-grid",
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-
-      gsap.fromTo(
-        ".value-icon",
-        { scale: 0.75, opacity: 0 },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 0.55,
-          stagger: 0.06,
-          delay: 0.15,
-          ease: "back.out(1.4)",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: ".value-grid",
-            start: "top 85%",
-            once: true,
-          },
-        },
-      );
-    },
-    { scope: sectionRef },
-  );
-
   return (
     <section
-      ref={sectionRef}
       className="py-28 sm:py-36 lg:py-44 px-5 bg-gradient-to-b from-white via-orange-50/25 to-slate-50 relative overflow-hidden"
     >
       {/* Soft ambient background glows */}

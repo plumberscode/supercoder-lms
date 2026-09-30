@@ -1,41 +1,11 @@
-"use client";
-
-import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import { MapPin, Clock, Phone } from "lucide-react";
 import { BUSINESS, BUSINESS_MAPS_EMBED_URL } from "@/lib/site";
 
 export default function Footer() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        ".footer-content",
-        { y: 18, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 90%",
-            once: true,
-          },
-        },
-      );
-    },
-    { scope: sectionRef },
-  );
-
   return (
     <footer
-      ref={sectionRef}
       className="bg-slate-50 border-t border-slate-200/80 pt-16 pb-16 px-5 relative overflow-hidden"
     >
       {/* Giant Background Watermark Text */}

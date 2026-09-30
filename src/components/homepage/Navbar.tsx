@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -29,27 +27,6 @@ const navLinks = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const headerRef = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      if (headerRef.current) {
-        gsap.fromTo(
-          headerRef.current,
-          { y: -20, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.5,
-            ease: "power2.out",
-            clearProps: "transform,opacity",
-          },
-        );
-      }
-    },
-    { scope: headerRef },
-  );
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -58,15 +35,14 @@ export default function Navbar() {
         setScrolled(false);
       }
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header
-      ref={headerRef}
       style={{ top: "var(--promo-bar-height, 0px)" }}
-      className={`fixed inset-x-0 z-50 transition-[top,background-color,box-shadow,padding] duration-300 ${
+      className={`nav-in fixed inset-x-0 z-50 transition-[top,background-color,box-shadow,padding] duration-300 ${
         scrolled
           ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/80 py-3 sm:py-3.5"
           : "bg-white/85 backdrop-blur-md border-b border-slate-200/60 py-4 sm:py-5"

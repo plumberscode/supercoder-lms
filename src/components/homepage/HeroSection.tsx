@@ -1,11 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { preload } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 const schoolLogos = [
@@ -41,56 +39,60 @@ const schoolLogos = [
   },
 ];
 
+const HERO_POSTER = "/images/hero-video-poster.webp";
+// Detik video yang paling mirip dengan poster (dicocokkan dari frame video)
+const HERO_POSTER_TIME = 0.5;
+
 export default function HeroSection() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  useGSAP(
-    () => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+  // Poster = elemen LCP di mobile: minta browser mengunduhnya lebih dulu
+  preload(HERO_POSTER, { as: "image", fetchPriority: "high" });
 
-      tl.fromTo(
-        ".hero-elem",
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.65,
-          stagger: 0.06,
-          clearProps: "transform,opacity",
-        },
-      )
-        .fromTo(
-          ".hero-video-box",
-          { scale: 0.96, opacity: 0, y: 15 },
-          {
-            scale: 1,
-            opacity: 1,
-            y: 0,
-            duration: 0.7,
-            ease: "power3.out",
-            clearProps: "transform,opacity",
-          },
-          "-=0.6",
-        )
-        .fromTo(
-          ".school-logo-item",
-          { y: 12, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.55,
-            stagger: 0.04,
-            clearProps: "transform,opacity",
-          },
-          "-=0.5",
-        );
-    },
-    { scope: sectionRef },
-  );
+  // Teks & video hero dianimasikan lewat CSS (.hero-elem / .hero-video-box di globals.css)
+  // supaya tampil di frame pertama tanpa menunggu JS. GSAP hanya untuk logo di bawahnya.
+  // Video baru diputar setelah halaman selesai load agar tidak berebut bandwidth dengan
+  // JS & font. Hemat data / reduced motion: cukup poster.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (connection?.saveData || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const start = () => {
+      const play = () => {
+        // Poster = frame di detik ~0,5: mulai dari sana agar tidak "melompat" saat video diputar
+        video.currentTime = HERO_POSTER_TIME;
+        video.play().catch(() => {
+          // Autoplay diblokir browser: poster tetap tampil
+        });
+      };
+      if (video.readyState >= HTMLMediaElement.HAVE_METADATA) play();
+      else {
+        video.addEventListener("loadedmetadata", play, { once: true });
+        video.preload = "auto";
+        video.load();
+      }
+    };
+    const schedule = () => {
+      if ("requestIdleCallback" in window) idleId = window.requestIdleCallback(start, { timeout: 2000 });
+      else timeoutId = setTimeout(start, 200);
+    };
+
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+
+    return () => {
+      window.removeEventListener("load", schedule);
+      if (idleId !== undefined) window.cancelIdleCallback(idleId);
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
+  }, []);
 
   return (
     <section
-      ref={sectionRef}
       className="relative overflow-hidden pt-32 sm:pt-36 pb-20 px-5 bg-gradient-to-b from-white via-slate-50/50 to-slate-50"
     >
       {/* Neutral ambient background glows */}
@@ -114,7 +116,7 @@ export default function HeroSection() {
         {/* Left Content */}
         <div className="w-full lg:w-[48%] flex flex-col items-start text-left">
           {/* Eyebrow berada di dalam H1 agar keyword lokal masuk ke heading utama */}
-          <h1 className="hero-elem font-poppins text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15] mb-5">
+          <h1 style={{ animationDelay: "0ms" }} className="hero-elem font-poppins text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15] mb-5">
             <span className="flex items-center gap-2 mb-6 text-xs font-bold text-slate-500 uppercase tracking-widest leading-normal">
               <span className="w-2 h-2 rounded-full bg-red-500" />
               Kursus Coding &amp; AI Balikpapan
@@ -125,19 +127,19 @@ export default function HeroSection() {
             </span>
           </h1>
 
-          <p className="hero-elem font-sans text-base sm:text-lg lg:text-xl text-slate-600 leading-relaxed mb-4 max-w-lg">
+          <p style={{ animationDelay: "60ms" }} className="hero-elem font-sans text-base sm:text-lg lg:text-xl text-slate-600 leading-relaxed mb-4 max-w-lg">
             Kuasai coding fundamentals dan manfaatkan AI untuk mengubah ide
             menjadi website, aplikasi, dan project digital nyata.
           </p>
 
-          <p className="hero-elem font-sans text-base sm:text-lg font-medium text-slate-700 mb-8 max-w-lg">
+          <p style={{ animationDelay: "120ms" }} className="hero-elem font-sans text-base sm:text-lg font-medium text-slate-700 mb-8 max-w-lg">
             Bukan sekadar menghafal sintaks atau meminta AI membuatkan sesuatu —
             kamu belajar memahami teknologi, melatih logika, dan membangun
             secara mandiri.
           </p>
 
           {/* Action Buttons */}
-          <div className="hero-elem flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
+          <div style={{ animationDelay: "180ms" }} className="hero-elem flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
             <Button
               asChild
               size="lg"
@@ -179,12 +181,12 @@ export default function HeroSection() {
         <div className="w-full lg:w-[48%] flex justify-center">
           <div className="hero-video-box relative w-full max-w-lg lg:max-w-none">
             <video
-              autoPlay
+              ref={videoRef}
               loop
               muted
               playsInline
-              poster="/images/hero-video-poster.webp"
-              preload="auto"
+              poster={HERO_POSTER}
+              preload="none"
               className="w-full h-auto rounded-3xl object-cover"
             >
               <source src="/videos/hero-video.webm" type="video/webm" />
@@ -212,7 +214,7 @@ export default function HeroSection() {
                 alt={logo.alt}
                 width={logo.width}
                 height={logo.height}
-                sizes="(max-width: 640px) 50vw, 220px"
+                sizes="200px"
                 className="h-[46px] w-auto"
               />
             </div>

@@ -83,6 +83,72 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Animasi masuk hero dengan CSS murni: jalan di frame pertama tanpa menunggu JS (LCP).
+   Opacity mulai 0.01 (bukan 0) agar browser sudah menghitung elemen sebagai tampil. */
+@keyframes hero-in {
+  from {
+    opacity: 0.01;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hero-media-in {
+  from {
+    transform: scale(0.97) translateY(12px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.hero-elem {
+  animation: hero-in 0.55s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+}
+
+.hero-video-box {
+  animation: hero-media-in 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) 0.08s both;
+}
+
+/* Navbar turun halus saat halaman dibuka (pengganti GSAP) */
+@keyframes nav-in {
+  from {
+    opacity: 0.01;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.nav-in {
+  animation: nav-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-elem,
+  .hero-video-box,
+  .nav-in {
+    animation: none;
+  }
+}
+
+/* Muncul saat di-scroll — dikendalikan src/components/homepage/ScrollReveal.tsx */
+.reveal-pending {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 24px)) scale(var(--reveal-scale, 1));
+}
+
+.reveal-anim {
+  transition:
+    opacity var(--reveal-dur, 0.6s) cubic-bezier(0.215, 0.61, 0.355, 1) var(--reveal-delay, 0s),
+    transform var(--reveal-dur, 0.6s) cubic-bezier(0.215, 0.61, 0.355, 1) var(--reveal-delay, 0s) !important;
+}
+
 /* GPU Hardware Acceleration for buttery-smooth animations */
 .hero-elem,
 .hero-video-box,
