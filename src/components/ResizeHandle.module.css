@@ -1,0 +1,54 @@
+.handleX,
+.handleY {
+  position: relative;
+  flex-shrink: 0;
+  background: #2d2d2d;
+  touch-action: none;
+  transition: background 0.15s ease;
+  z-index: 5;
+}
+
+.handleX {
+  width: 6px;
+  cursor: col-resize;
+}
+
+.handleY {
+  height: 6px;
+  cursor: row-resize;
+}
+
+/* Area klik lebih lebar daripada garis yang terlihat */
+.handleX::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  right: -4px;
+}
+
+.handleY::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4px;
+  bottom: -4px;
+}
+
+.handleX:hover,
+.handleY:hover,
+.handleX:focus-visible,
+.handleY:focus-visible,
+.active {
+  background: #8b5cf6;
+  outline: none;
+}
+
+/* Layout bertumpuk di mobile: pembatas kiri-kanan tidak relevan */
+@media (max-width: 768px) {
+  .handleX {
+    display: none;
+  }
+}

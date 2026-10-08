@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback } from "react";
 import CodeEditor from "./CodeEditor";
+import ChallengeDescription from "./ChallengeDescription";
+import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 import styles from "./code-challenge.module.css";
 import {
   submitHtmlJsSolution,
@@ -46,6 +48,8 @@ export default function HtmlJsChallenge({
   testCases,
   existingSubmission,
 }: Props) {
+  const descPanel = usePanelSize("lms:panel:desc-w");
+  const bottomPanel = usePanelSize("lms:panel:bottom-h");
   const initialHtml =
     existingSubmission?.data?.html || challenge.starter_html || "";
   const initialJs =
@@ -211,17 +215,31 @@ export default function HtmlJsChallenge({
 
       <div className={styles.splitLayout}>
         {/* Left Panel: Description */}
-        <div className={styles.descriptionPanel}>
+        <div
+          className={styles.descriptionPanel}
+          style={
+            descPanel.size !== null
+              ? ({
+                  "--desc-w": `${descPanel.size}px`,
+                  "--desc-max": "calc(100% - 360px)",
+                } as React.CSSProperties)
+              : undefined
+          }
+        >
           <h2 className={styles.challengeTitle}>{challenge.title}</h2>
           <span
             className={`${styles.languageBadge} ${styles.languageBadgeHtmlJs}`}
           >
             🌐 HTML + JavaScript
           </span>
-          <div className={styles.description}>{challenge.description}</div>
+          <ChallengeDescription
+            description={challenge.description}
+            className={styles.description}
+          />
         </div>
 
         {/* Right Panel: Editor + Preview */}
+        <ResizeHandle axis="x" panel={descPanel} label="Ubah lebar panel soal" min={280} reserve={360} />
         <div className={styles.editorPanel}>
           {/* Header with buttons */}
           <div className={styles.editorHeader}>
@@ -286,7 +304,15 @@ export default function HtmlJsChallenge({
           </div>
 
           {/* Live Preview */}
-          <div className={styles.previewPanel}>
+          <ResizeHandle axis="y" panel={bottomPanel} label="Ubah tinggi preview" min={120} reserve={260} />
+          <div
+            className={styles.previewPanel}
+            style={
+              bottomPanel.size !== null
+                ? { flex: "none", height: bottomPanel.size, maxHeight: "calc(100% - 260px)" }
+                : undefined
+            }
+          >
             <div className={styles.previewHeader}>
               <span>🖥️ Preview</span>
               {previewActive && (

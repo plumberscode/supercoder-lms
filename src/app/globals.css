@@ -384,3 +384,21 @@ input:focus {
   color: #94a3b8;
   pointer-events: none;
 }
+
+/* Deskripsi soal coding (HTML rich text). Selector digandakan untuk mengalahkan
+   `white-space: pre-wrap` di module CSS tiap komponen challenge. */
+.challenge-rich.challenge-rich { white-space: normal; }
+.challenge-rich > * + * { margin-top: 0.75em; }
+.challenge-rich h1 { font-size: 1.35rem; font-weight: 700; line-height: 1.3; color: #0f172a; }
+.challenge-rich h2 { font-size: 1.15rem; font-weight: 700; line-height: 1.35; color: #0f172a; }
+.challenge-rich h3 { font-size: 1rem; font-weight: 700; line-height: 1.4; color: #1e293b; }
+.challenge-rich ul { list-style: disc; padding-left: 1.4em; }
+.challenge-rich ol { list-style: decimal; padding-left: 1.4em; }
+.challenge-rich li + li { margin-top: 0.25em; }
+.challenge-rich strong { font-weight: 700; color: #0f172a; }
+.challenge-rich a { color: #dc2626; text-decoration: underline; }
+.challenge-rich blockquote { border-left: 3px solid #cbd5e1; padding-left: 0.9em; color: #475569; }
+.challenge-rich hr { border: 0; border-top: 1px solid #e2e8f0; }
+.challenge-rich code { background: #e2e8f0; border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.challenge-rich pre { background: #0d1117; color: #e6edf3; border-radius: 8px; padding: 12px 14px; overflow-x: auto; white-space: pre; }
+.challenge-rich pre code { background: none; padding: 0; color: inherit; font-size: 0.85em; }

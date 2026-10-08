@@ -1,5 +1,7 @@
 "use server";
 
+import { descriptionToPlainText } from "@/lib/challenge-description";
+
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import OpenAI from "openai";
@@ -61,7 +63,7 @@ export async function submitWebChallengeSolution(params: {
   const prompt = `Kamu adalah penilai proyek Web (HTML${includeCss ? "[+ CSS]" : ""}${includeJs ? "[+ JavaScript]" : ""}) untuk siswa pemula.
 
 ## Soal / Deskripsi
-${params.description}
+${descriptionToPlainText(params.description)}
 
 ## Mode Soal
 ${modeLabel}
@@ -243,7 +245,7 @@ export async function getWebChallengeHint(params: {
 
     const prompt = `Kamu adalah tutor Web (HTML${includeCss ? "/CSS" : ""}${includeJs ? "/JS" : ""}) yang ramah dan sabar untuk siswa pemula.
 
-Soal: ${params.description}
+Soal: ${descriptionToPlainText(params.description)}
 
 ## Jawaban HTML Siswa
 \`\`\`html

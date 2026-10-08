@@ -5,6 +5,8 @@ import CodeEditor from "./CodeEditor";
 import styles from "./CssChallenge.module.css";
 import { submitCssSolution, getCssHint } from "@/app/lessons/css-actions";
 import { buildCssPreview } from "@/lib/css-preview";
+import ChallengeDescription from "./ChallengeDescription";
+import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 
 interface CssChallenge {
   id: string;
@@ -27,6 +29,8 @@ export default function CssChallengeComponent({
   challenge,
   existingSubmission,
 }: Props) {
+  const descPanel = usePanelSize("lms:panel:desc-w");
+  const bottomPanel = usePanelSize("lms:panel:bottom-h");
   const [cssCode, setCssCode] = useState(
     existingSubmission?.data?.css || challenge.starter_css || "",
   );
@@ -162,10 +166,23 @@ export default function CssChallengeComponent({
 
       <div className={styles.splitLayout}>
         {/* Left: Description, Hints & Feedback Panel */}
-        <div className={styles.descriptionPanel}>
+        <div
+          className={styles.descriptionPanel}
+          style={
+            descPanel.size !== null
+              ? ({
+                  "--desc-w": `${descPanel.size}px`,
+                  "--desc-max": "calc(100% - 360px)",
+                } as React.CSSProperties)
+              : undefined
+          }
+        >
           <h2 className={styles.challengeTitle}>{challenge.title}</h2>
           <span className={styles.languageBadge}>🎨 CSS Challenge</span>
-          <div className={styles.description}>{challenge.description}</div>
+          <ChallengeDescription
+            description={challenge.description}
+            className={styles.description}
+          />
 
           {outputError && (
             <div
@@ -279,6 +296,7 @@ export default function CssChallengeComponent({
         </div>
 
         {/* Right: Editor + Live Preview */}
+        <ResizeHandle axis="x" panel={descPanel} label="Ubah lebar panel soal" min={280} reserve={360} />
         <div className={styles.editorPanel}>
           <div className={styles.editorHeader}>
             <div className={styles.tabBar}>
@@ -333,7 +351,15 @@ export default function CssChallengeComponent({
           </div>
 
           {/* Live Preview */}
-          <div className={styles.previewPanel}>
+          <ResizeHandle axis="y" panel={bottomPanel} label="Ubah tinggi live preview" min={120} reserve={240} />
+          <div
+            className={styles.previewPanel}
+            style={
+              bottomPanel.size !== null
+                ? ({ "--preview-h": `${bottomPanel.size}px`, maxHeight: "calc(100% - 240px)" } as React.CSSProperties)
+                : undefined
+            }
+          >
             <div className={styles.previewHeader}>
               <span>🖥️ Live Preview</span>
               <span style={{ color: "#10B981", fontSize: "0.6875rem" }}>

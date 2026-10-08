@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { saveCssChallenge } from "./actions";
 import { useToast } from "@/components/ToastProvider";
+import ChallengeRichEditor from "@/components/admin/ChallengeRichEditor";
 
 interface Props {
   lessonId: string;
@@ -117,13 +118,10 @@ export default function CssChallengeEditor({
             <label style={labelStyle}>
               Deskripsi / Instruksi (untuk siswa)
             </label>
-            <textarea
+            <ChallengeRichEditor
               name="description"
               placeholder="Buatlah 3 kotak sejajar menggunakan display flex"
-              defaultValue={existingChallenge?.description || ""}
-              required
-              rows={6}
-              style={inputStyle}
+              initialValue={existingChallenge?.description || ""}
             />
           </div>
 

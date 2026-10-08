@@ -5,6 +5,7 @@ import ProjectSubmission from "./project-submission";
 import CodeChallenge from "@/components/CodeChallenge";
 import CssChallenge from "@/components/CssChallenge";
 import WebChallenge from "@/components/WebChallenge";
+import { prepareChallengeDescription } from "@/lib/challenge-description";
 
 export default async function LessonPage({
   params,
@@ -84,7 +85,10 @@ export default async function LessonPage({
       .eq("lesson_id", id)
       .single();
     if (challenge) {
-      codingChallenge = challenge;
+      codingChallenge = {
+        ...challenge,
+        description: prepareChallengeDescription(challenge.description),
+      };
       const { data: cases } = await supabase
         .from("test_cases")
         .select("*")
@@ -102,7 +106,12 @@ export default async function LessonPage({
       .select("*")
       .eq("lesson_id", id)
       .single();
-    if (challenge) cssChallenge = challenge;
+    if (challenge) {
+      cssChallenge = {
+        ...challenge,
+        description: prepareChallengeDescription(challenge.description),
+      };
+    }
   }
 
   // Fetch Web challenge if lesson type is 'web-challenge'
@@ -113,7 +122,12 @@ export default async function LessonPage({
       .select("*")
       .eq("lesson_id", id)
       .single();
-    if (challenge) webChallenge = challenge;
+    if (challenge) {
+      webChallenge = {
+        ...challenge,
+        description: prepareChallengeDescription(challenge.description),
+      };
+    }
   }
 
   const subjectId = (lesson.module_id as any).subject_id;

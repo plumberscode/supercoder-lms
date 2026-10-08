@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { isEmptyDescription, prepareChallengeDescription } from "@/lib/challenge-description";
 
 export async function saveWebChallenge(lessonId: string, formData: FormData) {
   const supabase = await createClient();
@@ -11,7 +12,9 @@ export async function saveWebChallenge(lessonId: string, formData: FormData) {
   if (!user) throw new Error("Not authenticated");
 
   const title = formData.get("title") as string;
-  const description = formData.get("description") as string;
+  const rawDescription = (formData.get("description") as string) || "";
+  if (isEmptyDescription(rawDescription)) throw new Error("Deskripsi soal wajib diisi");
+  const description = prepareChallengeDescription(rawDescription);
   const mode = (formData.get("mode") as string) || "html-css-js";
   const starterHtml = (formData.get("starterHtml") as string) || "";
   const starterCss = (formData.get("starterCss") as string) || "";

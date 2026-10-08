@@ -1,3 +1,4 @@
+import { descriptionToPlainText } from "@/lib/challenge-description";
 import OpenAI from "openai";
 
 interface HintParams {
@@ -43,7 +44,7 @@ export async function getAIHint(params: HintParams): Promise<string> {
 
     const prompt = `Kamu adalah tutor coding yang ramah dan sabar untuk siswa pemula.
 
-Soal: ${params.challengeDescription}
+Soal: ${descriptionToPlainText(params.challengeDescription)}
 
 Bahasa: ${params.language}
 

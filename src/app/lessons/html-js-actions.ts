@@ -1,5 +1,7 @@
 "use server";
 
+import { descriptionToPlainText } from "@/lib/challenge-description";
+
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import OpenAI from "openai";
@@ -45,7 +47,7 @@ export async function submitHtmlJsSolution(params: {
   const prompt = `Kamu adalah penilai kode HTML dan Javascript untuk siswa.
 
 ## Soal / Deskripsi
-${params.description}
+${descriptionToPlainText(params.description)}
 
 ## Jawaban HTML Siswa
 \`\`\`html
@@ -176,7 +178,7 @@ export async function getHtmlJsHint(params: {
 
     const prompt = `Kamu adalah tutor Javascript & HTML untuk siswa pemula.
 
-Soal: ${params.description}
+Soal: ${descriptionToPlainText(params.description)}
 
 Kode HTML siswa:
 \`\`\`html

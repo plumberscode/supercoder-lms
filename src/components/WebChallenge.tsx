@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import CodeEditor from "./CodeEditor";
+import ChallengeDescription from "./ChallengeDescription";
+import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 import styles from "./WebChallenge.module.css";
 import {
   submitWebChallengeSolution,
@@ -33,6 +35,8 @@ interface Props {
 }
 
 export default function WebChallenge({ challenge, existingSubmission }: Props) {
+  const descPanel = usePanelSize("lms:panel:desc-w");
+  const bottomPanel = usePanelSize("lms:panel:bottom-h");
   const includeCss = challenge.mode === "html-css" || challenge.mode === "html-css-js";
   const includeJs = challenge.mode === "html-css-js";
 
@@ -205,10 +209,23 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
 
       <div className={styles.splitLayout}>
         {/* Left: Description, Hints & Feedback Panel */}
-        <div className={styles.descriptionPanel}>
+        <div
+          className={styles.descriptionPanel}
+          style={
+            descPanel.size !== null
+              ? ({
+                  "--desc-w": `${descPanel.size}px`,
+                  "--desc-max": "calc(100% - 360px)",
+                } as React.CSSProperties)
+              : undefined
+          }
+        >
           <h2 className={styles.challengeTitle}>{challenge.title}</h2>
           <span className={styles.languageBadge}>{modeLabel}</span>
-          <div className={styles.description}>{challenge.description}</div>
+          <ChallengeDescription
+            description={challenge.description}
+            className={styles.description}
+          />
 
           {outputError && (
             <div
@@ -322,6 +339,7 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
         </div>
 
         {/* Right: Editor + Live Preview */}
+        <ResizeHandle axis="x" panel={descPanel} label="Ubah lebar panel soal" min={280} reserve={360} />
         <div className={styles.editorPanel}>
           <div className={styles.editorHeader}>
             <div className={styles.tabBar}>
@@ -382,7 +400,15 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
           </div>
 
           {/* Live Preview */}
-          <div className={styles.previewPanel}>
+          <ResizeHandle axis="y" panel={bottomPanel} label="Ubah tinggi live preview" min={120} reserve={240} />
+          <div
+            className={styles.previewPanel}
+            style={
+              bottomPanel.size !== null
+                ? ({ "--preview-h": `${bottomPanel.size}px`, maxHeight: "calc(100% - 240px)" } as React.CSSProperties)
+                : undefined
+            }
+          >
             <div className={styles.previewHeader}>
               <span>🖥️ Live Preview</span>
               <span style={{ color: "#10B981", fontSize: "0.6875rem" }}>

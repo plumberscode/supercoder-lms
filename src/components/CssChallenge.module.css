@@ -30,9 +30,9 @@
 
 /* ── Left: Description & Feedback Panel ───────────────────────────────── */
 .descriptionPanel {
-  width: 40%;
+  width: var(--desc-w, 40%);
   min-width: 280px;
-  max-width: 480px;
+  max-width: var(--desc-max, 480px);
   background: #fafafa;
   border-right: 1px solid #2d2d2d;
   overflow-y: auto;
@@ -172,7 +172,7 @@
 
 /* ── Live Preview ────────────────────────────────────────────────────── */
 .previewPanel {
-  height: 42%;
+  height: var(--preview-h, 42%);
   min-height: 160px;
   flex-shrink: 0;
   background: white;

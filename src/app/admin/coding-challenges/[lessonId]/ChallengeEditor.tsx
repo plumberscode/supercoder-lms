@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { saveChallenge, addTestCase, deleteTestCase } from "./actions";
 import { useToast } from "@/components/ToastProvider";
+import ChallengeRichEditor from "@/components/admin/ChallengeRichEditor";
 
 interface Props {
   lessonId: string;
@@ -179,15 +180,10 @@ export default function ChallengeEditor({
             <label style={labelStyle}>
               Deskripsi Soal (Instruksi untuk siswa)
             </label>
-            <textarea
+            <ChallengeRichEditor
               name="description"
-              placeholder={
-                "Buatlah sebuah fungsi bernama `tambah` yang menerima dua parameter angka dan mengembalikan hasil penjumlahan keduanya.\n\nContoh:\n- tambah(2, 3) → 5\n- tambah(-1, 1) → 0"
-              }
-              defaultValue={existingChallenge?.description || ""}
-              required
-              rows={6}
-              style={inputStyle}
+              placeholder="Buatlah sebuah fungsi bernama tambah yang menerima dua parameter angka dan mengembalikan hasil penjumlahan keduanya."
+              initialValue={existingChallenge?.description || ""}
             />
           </div>
 

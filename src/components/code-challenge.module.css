@@ -31,9 +31,9 @@
 
 /* ── Description Panel (Left 45%) ────────────────────────────────────── */
 .descriptionPanel {
-  width: 45%;
+  width: var(--desc-w, 45%);
   min-width: 280px;
-  max-width: 520px;
+  max-width: var(--desc-max, 520px);
   background: #fafafa;
   border-right: 1px solid #2d2d2d;
   overflow-y: auto;

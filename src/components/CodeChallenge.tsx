@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import CodeEditor from "./CodeEditor";
 import styles from "./code-challenge.module.css";
 import { submitCodeSolution, getCodeHint } from "@/app/lessons/code-actions";
 import { runCode } from "@/lib/code-runner";
 import { runTestCases, type GradingResult } from "@/lib/test-runner";
 import HtmlJsChallenge from "./HtmlJsChallenge";
+import ChallengeDescription from "./ChallengeDescription";
+import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 
 interface CodingChallenge {
   id: string;
@@ -64,6 +66,9 @@ function StandardCodeChallenge({
   testCases,
   existingSubmission,
 }: Props) {
+  const descPanel = usePanelSize("lms:panel:desc-w");
+  const bottomPanel = usePanelSize("lms:panel:bottom-h");
+  const bottomPanelRef = useRef<HTMLDivElement>(null);
   const initialCode =
     existingSubmission?.data?.code || challenge.starter_code || "";
 
@@ -187,14 +192,27 @@ function StandardCodeChallenge({
 
       <div className={styles.splitLayout}>
         {/* Left Panel: Description */}
-        <div className={styles.descriptionPanel}>
+        <div
+          className={styles.descriptionPanel}
+          style={
+            descPanel.size !== null
+              ? ({
+                  "--desc-w": `${descPanel.size}px`,
+                  "--desc-max": "calc(100% - 360px)",
+                } as React.CSSProperties)
+              : undefined
+          }
+        >
           <h2 className={styles.challengeTitle}>{challenge.title}</h2>
           <span
             className={`${styles.languageBadge} ${challenge.language === "python" ? styles.languageBadgePython : styles.languageBadgeJavascript}`}
           >
             {langIcon} {langLabel}
           </span>
-          <div className={styles.description}>{challenge.description}</div>
+          <ChallengeDescription
+            description={challenge.description}
+            className={styles.description}
+          />
 
           {visibleTests.length > 0 && (
             <>
@@ -247,6 +265,7 @@ function StandardCodeChallenge({
         </div>
 
         {/* Right Panel: Editor + Bottom Tabs */}
+        <ResizeHandle axis="x" panel={descPanel} label="Ubah lebar panel soal" min={280} reserve={360} />
         <div className={styles.editorPanel}>
           <div className={styles.editorHeader}>
             <span className={styles.editorLabel}>
@@ -282,6 +301,8 @@ function StandardCodeChallenge({
             />
           </div>
 
+          <ResizeHandle axis="y" panel={bottomPanel} targetRef={bottomPanelRef} label="Ubah tinggi panel output" min={60} reserve={210} />
+
           {/* Bottom Tab Bar */}
           <div className={styles.bottomTabBar}>
             <button
@@ -305,7 +326,11 @@ function StandardCodeChallenge({
           </div>
 
           {/* Bottom Panel Content */}
-          <div className={styles.bottomPanel}>
+          <div
+            ref={bottomPanelRef}
+            className={styles.bottomPanel}
+            style={bottomPanel.size !== null ? { height: bottomPanel.size } : undefined}
+          >
             {activeBottomTab === "console" && (
               <div className={styles.consolePanel}>
                 <span className={styles.consoleLabel}>

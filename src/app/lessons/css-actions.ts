@@ -1,5 +1,7 @@
 "use server";
 
+import { descriptionToPlainText } from "@/lib/challenge-description";
+
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import OpenAI from "openai";
@@ -46,7 +48,7 @@ export async function submitCssSolution(params: {
   const prompt = `Kamu adalah penilai CSS untuk siswa pemula.
 
 ## Soal
-${params.description}
+${descriptionToPlainText(params.description)}
 
 ## Referensi Jawaban CSS (dari guru)
 \`\`\`css
@@ -184,7 +186,7 @@ export async function getCssHint(params: {
 
     const prompt = `Kamu adalah tutor CSS yang ramah dan sabar untuk siswa pemula.
 
-Soal: ${params.description}
+Soal: ${descriptionToPlainText(params.description)}
 
 HTML Template:
 \`\`\`html
