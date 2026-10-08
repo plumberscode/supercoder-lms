@@ -65,16 +65,9 @@ export default function GallerySection() {
           {photos.map((photo, i) => (
             <Dialog key={photo.src}>
               <DialogTrigger asChild>
-                <Card
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      e.currentTarget.click();
-                    }
-                  }}
-                  className="gallery-card group bg-white rounded-3xl border border-slate-200/80 shadow-md hover:shadow-2xl duration-300 hover:-translate-y-2 overflow-hidden cursor-pointer flex flex-col justify-between"
+                <button
+                  type="button"
+                  className="gallery-card group w-full text-left text-card-foreground bg-white rounded-3xl border border-slate-200/80 shadow-md hover:shadow-2xl duration-300 hover:-translate-y-2 overflow-hidden cursor-pointer flex flex-col justify-between"
                   style={{ transitionProperty: "box-shadow" }}
                 >
                   <CardContent className="p-0 flex flex-col h-full">
@@ -107,7 +100,7 @@ export default function GallerySection() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </button>
               </DialogTrigger>
 
               {/* Lightbox Dialog Popup */}
