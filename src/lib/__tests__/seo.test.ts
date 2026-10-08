@@ -447,3 +447,23 @@ describe("metadata homepage", () => {
     expect(SITE_URL).toMatch(/^https?:\/\//);
   });
 });
+
+describe("SITE_URL", () => {
+  it("apex supercoder.id dinormalisasi ke www; localhost tidak diubah", async () => {
+    const orig = process.env.NEXT_PUBLIC_SITE_URL;
+    try {
+      for (const [env, want] of [
+        ["https://supercoder.id", "https://www.supercoder.id"],
+        ["https://supercoder.id/", "https://www.supercoder.id"],
+        ["http://localhost:3000", "http://localhost:3000"],
+      ]) {
+        process.env.NEXT_PUBLIC_SITE_URL = env;
+        vi.resetModules();
+        expect((await import("@/lib/site")).SITE_URL).toBe(want);
+      }
+    } finally {
+      if (orig === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+      else process.env.NEXT_PUBLIC_SITE_URL = orig;
+    }
+  });
+});
