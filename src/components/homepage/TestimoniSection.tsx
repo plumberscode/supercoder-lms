@@ -254,9 +254,9 @@ export default function TestimoniSection() {
                 </AvatarFallback>
               </Avatar>
               <div className="text-left">
-                <h4 className="font-poppins text-base font-bold text-slate-900 leading-snug">
+                <h3 className="font-poppins text-base font-bold text-slate-900 leading-snug">
                   {item.name}
-                </h4>
+                </h3>
                 <p className="font-sans text-sm text-slate-500">{item.role}</p>
               </div>
             </div>
@@ -308,9 +308,9 @@ export default function TestimoniSection() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="text-left">
-                        <h4 className="font-poppins text-base font-bold text-slate-900 leading-snug">
+                        <h3 className="font-poppins text-base font-bold text-slate-900 leading-snug">
                           {item.name}
-                        </h4>
+                        </h3>
                         <p className="font-sans text-sm text-slate-500">
                           {item.role}
                         </p>
@@ -407,9 +407,9 @@ export default function TestimoniSection() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="text-left">
-                    <h4 className="font-poppins text-base font-bold text-slate-900 leading-snug">
+                    <h3 className="font-poppins text-base font-bold text-slate-900 leading-snug">
                       {featuredTestimonial.name}
-                    </h4>
+                    </h3>
                     <p className="font-sans text-sm text-slate-500">
                       {featuredTestimonial.role}
                     </p>
@@ -518,12 +518,16 @@ export default function TestimoniSection() {
               key={i}
               onClick={() => goTo(i, i >= currentIndex ? 1 : -1)}
               aria-label={`Testimoni slide ${i + 1}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === currentIndex
-                  ? "w-8 bg-red-500"
-                  : "w-2 bg-slate-300 hover:bg-slate-400"
-              }`}
-            />
+              className="group flex h-6 min-w-6 items-center justify-center"
+            >
+              <span
+                className={`block h-2 rounded-full transition-all duration-300 ${
+                  i === currentIndex
+                    ? "w-8 bg-red-500"
+                    : "w-2 bg-slate-300 group-hover:bg-slate-400"
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>

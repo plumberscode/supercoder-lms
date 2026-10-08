@@ -223,12 +223,16 @@ export default function KaryaSiswaSection() {
               key={p.name}
               onClick={() => goToSlide(i)}
               aria-label={`Portofolio slide ${i + 1}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === activeIndex
-                  ? "w-6 bg-orange-500"
-                  : "w-2 bg-slate-300 hover:bg-slate-400"
-              }`}
-            />
+              className="group flex h-6 min-w-6 items-center justify-center"
+            >
+              <span
+                className={`block h-2 rounded-full transition-all duration-300 ${
+                  i === activeIndex
+                    ? "w-6 bg-orange-500"
+                    : "w-2 bg-slate-300 group-hover:bg-slate-400"
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>

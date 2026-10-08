@@ -11,10 +11,8 @@ export default function Footer() {
       {/* Giant Background Watermark Text */}
       <div
         aria-hidden="true"
-        className="absolute -bottom-6 left-1/2 -translate-x-1/2 select-none pointer-events-none font-poppins font-black text-[90px] sm:text-[150px] lg:text-[210px] text-slate-200/50 tracking-tighter leading-none whitespace-nowrap z-0"
-      >
-        SUPERCODER
-      </div>
+        className="absolute -bottom-6 left-1/2 -translate-x-1/2 select-none pointer-events-none font-poppins font-black text-[90px] sm:text-[150px] lg:text-[210px] text-slate-200/50 tracking-tighter leading-none whitespace-nowrap z-0 after:content-['SUPERCODER']"
+      />
 
       {/* Main Content - Full max-w-6xl Width, Flush with Sections Above */}
       <div className="footer-content relative z-10 max-w-6xl mx-auto">
@@ -119,9 +117,9 @@ export default function Footer() {
           <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8 text-left">
             {/* Column 1: Product / Program */}
             <div>
-              <h4 className="font-poppins font-bold text-sm text-slate-900 mb-4 tracking-wide">
+              <h3 className="font-poppins font-bold text-sm text-slate-900 mb-4 tracking-wide">
                 Program
-              </h4>
+              </h3>
               <ul className="space-y-2.5 font-sans text-sm text-slate-600">
                 <li>
                   <Link
@@ -168,9 +166,9 @@ export default function Footer() {
 
             {/* Column 2: Resources */}
             <div>
-              <h4 className="font-poppins font-bold text-sm text-slate-900 mb-4 tracking-wide">
+              <h3 className="font-poppins font-bold text-sm text-slate-900 mb-4 tracking-wide">
                 Resources
-              </h4>
+              </h3>
               <ul className="space-y-2.5 font-sans text-sm text-slate-600">
                 <li>
                   <Link
@@ -217,9 +215,9 @@ export default function Footer() {
 
             {/* Column 3: Company */}
             <div>
-              <h4 className="font-poppins font-bold text-sm text-slate-900 mb-4 tracking-wide">
+              <h3 className="font-poppins font-bold text-sm text-slate-900 mb-4 tracking-wide">
                 Supercoder
-              </h4>
+              </h3>
               <ul className="space-y-2.5 font-sans text-sm text-slate-600">
                 <li>
                   <Link

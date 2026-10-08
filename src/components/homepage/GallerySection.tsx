@@ -66,6 +66,14 @@ export default function GallerySection() {
             <Dialog key={photo.src}>
               <DialogTrigger asChild>
                 <Card
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      e.currentTarget.click();
+                    }
+                  }}
                   className="gallery-card group bg-white rounded-3xl border border-slate-200/80 shadow-md hover:shadow-2xl duration-300 hover:-translate-y-2 overflow-hidden cursor-pointer flex flex-col justify-between"
                   style={{ transitionProperty: "box-shadow" }}
                 >
@@ -90,9 +98,9 @@ export default function GallerySection() {
                     {/* Caption Block */}
                     <div className="p-6 flex flex-col justify-between grow">
                       <div>
-                        <h4 className="font-poppins text-base font-bold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
+                        <h3 className="font-poppins text-base font-bold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
                           {photo.title}
-                        </h4>
+                        </h3>
                         <p className="font-sans text-sm text-slate-600 leading-relaxed">
                           {photo.caption}
                         </p>

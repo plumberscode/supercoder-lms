@@ -13,13 +13,13 @@ const stackGroups = [
   {
     title: "Core Web Languages",
     icon: Code2,
-    badgeColor: "border-red-200 bg-red-50 text-red-600",
+    badgeColor: "border-red-200 bg-red-50 text-red-700",
     items: [
       {
         src: "/images/html-logo-transparent.webp",
         name: "HTML5",
         type: "Struktur Web",
-        tagColor: "bg-orange-50 text-orange-600 border-orange-200",
+        tagColor: "bg-orange-50 text-orange-700 border-orange-200",
         desc: "Fondasi utama untuk menyusun struktur, kerangka, dan konten halaman web.",
         tooltip: "Struktur, Semantik & Elemen Web Modern",
       },
@@ -44,7 +44,7 @@ const stackGroups = [
   {
     title: "Industry Standard Tools",
     icon: Wrench,
-    badgeColor: "border-orange-200 bg-orange-50 text-orange-600",
+    badgeColor: "border-orange-200 bg-orange-50 text-orange-700",
     items: [
       {
         src: "/images/vs-code-logo.webp",
