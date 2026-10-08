@@ -3,7 +3,9 @@ import Link from "next/link";
 import { MapPin, Clock, Phone } from "lucide-react";
 import { BUSINESS, BUSINESS_MAPS_EMBED_URL } from "@/lib/site";
 
-export default function Footer() {
+// showLocalLinks: tautan ke halaman lokal /kursus-komputer-balikpapan. Sengaja tidak aktif di
+// homepage (default) supaya halaman itu tidak ditautkan dari "/".
+export default function Footer({ showLocalLinks = false }: { showLocalLinks?: boolean }) {
   return (
     <footer
       className="bg-slate-50 border-t border-slate-200/80 pt-16 pb-16 px-5 relative overflow-hidden"
@@ -259,15 +261,34 @@ export default function Footer() {
                     Portal LMS
                   </Link>
                 </li>
+                {showLocalLinks && (
+                  <li>
+                    <Link
+                      href="/kursus-komputer-balikpapan"
+                      className="hover:text-red-600 transition-colors"
+                    >
+                      Kursus Komputer Balikpapan
+                    </Link>
+                  </li>
+                )}
                 <li>
-                  <a
-                    href="https://wa.me/62816331126"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-red-600 transition-colors"
-                  >
-                    Kontak &amp; Lokasi
-                  </a>
+                  {showLocalLinks ? (
+                    <Link
+                      href="/kursus-komputer-balikpapan#lokasi"
+                      className="hover:text-red-600 transition-colors"
+                    >
+                      Kontak &amp; Lokasi
+                    </Link>
+                  ) : (
+                    <a
+                      href="https://wa.me/62816331126"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-red-600 transition-colors"
+                    >
+                      Kontak &amp; Lokasi
+                    </a>
+                  )}
                 </li>
               </ul>
             </div>

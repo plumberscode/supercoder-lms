@@ -16,7 +16,7 @@ export default function BlogLayout({
       >
         {children}
       </main>
-      <Footer />
+      <Footer showLocalLinks />
     </>
   );
 }
