@@ -8,16 +8,16 @@ import { Button } from "@/components/ui/button";
 
 const schoolLogos = [
   {
-    src: "/images/logo-islamicglobalschool-dark.png",
+    src: "/images/partner-islamic-global.webp",
     alt: "Partner Sekolah Islamic Global School Balikpapan",
-    width: 250,
-    height: 120,
+    width: 208,
+    height: 100,
   },
   {
-    src: "/images/logo_aisba.png",
+    src: "/images/partner-aisba.webp",
     alt: "Partner Sekolah Al-Azhar Syifa Budi Balikpapan AISBA",
-    width: 900,
-    height: 900,
+    width: 100,
+    height: 100,
   },
   {
     src: "/images/logo-SMP-KPS-gray.webp",
@@ -26,16 +26,16 @@ const schoolLogos = [
     height: 149,
   },
   {
-    src: "/images/sma3balikpapan.png",
+    src: "/images/partner-sma3.webp",
     alt: "Partner Sekolah SMA Negeri 3 Balikpapan",
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
   },
   {
-    src: "/images/sd cahaya ilmu.png",
+    src: "/images/partner-sd-cahaya-ilmu.webp",
     alt: "Partner Sekolah SD Cahaya Ilmu Balikpapan",
-    width: 2048,
-    height: 1329,
+    width: 154,
+    height: 100,
   },
 ];
 
@@ -214,7 +214,9 @@ export default function HeroSection() {
                 alt={logo.alt}
                 width={logo.width}
                 height={logo.height}
-                sizes="200px"
+                sizes="(min-width: 640px) 160px, 120px"
+                // Logo ini sering menjadi elemen LCP di mobile: jangan lazy-load
+                loading="eager"
                 className="h-[46px] w-auto"
               />
             </div>
