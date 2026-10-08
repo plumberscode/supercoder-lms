@@ -20,7 +20,7 @@ const rows = [
   {
     badge: "02. CRITICAL THINKING",
     icon: Brain,
-    badgeColor: "border-orange-200 bg-orange-50 text-orange-600",
+    badgeColor: "border-orange-200 bg-orange-50 text-orange-700",
     title: "Melatih Logika dan Problem Solving",
     text: "Coding mengajarkan cara memecah masalah besar menjadi langkah-langkah terstruktur yang logis, mencari sumber error, dan merancang solusi yang sistematis dan teruji.",
     points: [
@@ -34,7 +34,7 @@ const rows = [
   {
     badge: "03. BUILD WITH AI",
     icon: Sparkles,
-    badgeColor: "border-red-200 bg-red-50 text-red-600",
+    badgeColor: "border-red-200 bg-red-50 text-red-700",
     title: "Mengubah Ide Menjadi Nyata Lebih Cepat",
     text: "Kombinasi coding fundamentals dan AI membuka kekuatan penuh seorang Digital Builder. Kamu bisa mengeksplorasi ide, membuat prototype, dan membangun project nyata jauh lebih cepat.",
     points: [

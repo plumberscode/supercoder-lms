@@ -48,7 +48,7 @@ export default function ArticleView({ post, article, related, url, banner }: Pro
           {post.category && (
             <Link
               href={`/blog/kategori/${post.category.slug}`}
-              className="inline-block mb-4 px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-bold uppercase tracking-wide hover:bg-red-100 transition-colors"
+              className="inline-block mb-4 px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-bold uppercase tracking-wide hover:bg-red-100 transition-colors"
             >
               {post.category.name}
             </Link>
