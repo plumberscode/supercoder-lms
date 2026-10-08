@@ -11,6 +11,8 @@ type Props = {
   posts: BlogPostSummary[];
   categories: BlogCategory[];
   activeCategory?: string;
+  /** Paragraf pengantar tambahan (konten unik untuk SEO) */
+  intro?: string[];
 };
 
 export default function BlogListing({
@@ -20,6 +22,7 @@ export default function BlogListing({
   posts,
   categories,
   activeCategory,
+  intro,
 }: Props) {
   const chip = (active: boolean) =>
     `px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
@@ -39,6 +42,11 @@ export default function BlogListing({
           {title}
         </h1>
         <p className="text-lg text-slate-600 leading-relaxed">{description}</p>
+        {intro?.map((para) => (
+          <p key={para} className="mt-4 text-slate-600 leading-relaxed">
+            {para}
+          </p>
+        ))}
       </header>
 
       {categories.length > 0 && (

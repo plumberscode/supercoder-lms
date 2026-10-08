@@ -31,6 +31,13 @@ function describe(name: string, description: string | null) {
   );
 }
 
+function introFor(name: string) {
+  return [
+    `Halaman ini mengumpulkan artikel ${name} dari mentor Supercoder, kursus coding dan AI di Balikpapan untuk pelajar SMP, SMA, dan umum. Setiap tulisan disusun dari pengalaman mengajar langsung, sehingga saran yang diberikan praktis dan bisa langsung diterapkan.`,
+    `Gunakan daftar di bawah untuk membaca artikel ${name} terbaru. Jika ingin berkonsultasi soal kelas yang cocok untuk anak Anda, kunjungi halaman pendaftaran Supercoder atau hubungi kami lewat WhatsApp.`,
+  ];
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const category = await getCategoryBySlug(slug);
@@ -88,6 +95,7 @@ export default async function BlogCategoryPage({ params }: Props) {
         posts={posts}
         categories={categories}
         activeCategory={category.slug}
+        intro={introFor(category.name)}
       />
     </>
   );

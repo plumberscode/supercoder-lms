@@ -437,3 +437,13 @@ describe("koneksi GSC", () => {
     expect(explainGscError("lain")).toBe("lain");
   });
 });
+
+describe("metadata homepage", () => {
+  it("title ≤60 dan description ≤160 karakter, SITE_URL memakai www", async () => {
+    const { HOME_TITLE, HOME_DESCRIPTION, SITE_URL } = await import("@/lib/site");
+    expect(HOME_TITLE.length).toBeLessThanOrEqual(60);
+    expect(HOME_DESCRIPTION.length).toBeLessThanOrEqual(160);
+    expect(HOME_DESCRIPTION.length).toBeGreaterThanOrEqual(120);
+    expect(SITE_URL).toMatch(/^https?:\/\//);
+  });
+});

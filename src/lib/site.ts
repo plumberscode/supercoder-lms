@@ -1,5 +1,5 @@
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://supercoder.id"
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.supercoder.id"
 ).replace(/\/+$/, "");
 
 export const SITE_NAME = "Supercoder";
@@ -11,10 +11,10 @@ export const SITE_LOGO = `${SITE_URL}/images/Logo%20transparent%20orange.webp`;
 export const DEFAULT_OG_IMAGE = "/images/hero-image-supercoder.webp";
 
 export const HOME_TITLE =
-  "Kursus Coding & AI di Balikpapan untuk SMP, SMA & Umum | Supercoder";
+  "Kursus Coding & AI Balikpapan | SMP, SMA & Umum";
 
 export const HOME_DESCRIPTION =
-  "Kursus coding Balikpapan untuk SMP, SMA & umum. Kuasai coding fundamentals dan gunakan AI untuk mengubah ide menjadi website dan aplikasi nyata. Kelas tatap muka & online.";
+  "Kursus coding Balikpapan untuk SMP, SMA & umum. Kuasai coding dasar dan AI untuk membuat website & aplikasi nyata. Kelas tatap muka & online.";
 
 // Satu sumber data NAP (Name, Address, Phone) — harus identik dengan Google Business Profile.
 export const BUSINESS = {

@@ -11,6 +11,11 @@ const TITLE = "Blog Coding & AI";
 const DESCRIPTION =
   "Tips belajar coding, web development, dan AI untuk pelajar & orang tua. Panduan praktis dari mentor Supercoder Balikpapan.";
 
+const INTRO = [
+  "Blog Supercoder berisi panduan praktis seputar belajar coding, pengembangan web, dan pemanfaatan AI untuk pelajar SMP, SMA, dan umum di Balikpapan maupun seluruh Indonesia. Setiap artikel ditulis oleh mentor yang mengajar langsung di kelas, sehingga contoh dan sarannya berangkat dari pengalaman nyata siswa.",
+  "Orang tua dapat menemukan tips memilih kursus coding, cara mendampingi anak belajar, dan gambaran kemampuan yang realistis di setiap tahap. Siswa dapat menemukan kisah prestasi, ide project, serta langkah belajar yang bisa langsung dipraktikkan. Pilih kategori di bawah untuk mempersempit topik, atau mulai dari artikel terbaru.",
+];
+
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
@@ -58,6 +63,7 @@ export default async function BlogIndexPage() {
         breadcrumbs={[{ name: "Beranda", href: "/" }, { name: "Blog" }]}
         posts={posts}
         categories={categories}
+        intro={INTRO}
       />
     </>
   );
