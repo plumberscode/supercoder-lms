@@ -12,12 +12,23 @@ export function gscConfigured(): boolean {
 
 const b64url = (input: string) => Buffer.from(input).toString("base64url");
 
+/**
+ * Toleran terhadap cara env diisi: tanda kutip ikut ter-paste (umum di dashboard hosting),
+ * "\n" literal, atau JSON-escaped "\\n". Tanpa ini OpenSSL 3 melempar DECODER ... unsupported.
+ */
+export function normalizePrivateKey(raw: string): string {
+  let k = raw.trim();
+  if ((k.startsWith('"') && k.endsWith('"')) || (k.startsWith("'") && k.endsWith("'"))) k = k.slice(1, -1);
+  k = k.replace(/\\+n/g, "\n").replace(/\r/g, "").trim();
+  return k + "\n";
+}
+
 /** Access token service account via JWT bearer (RS256), tanpa dependency Google SDK. */
 async function getAccessToken(): Promise<string> {
   if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) return cachedToken.token;
 
   const email = process.env.GSC_CLIENT_EMAIL!;
-  const key = process.env.GSC_PRIVATE_KEY!.replace(/\\n/g, "\n");
+  const key = normalizePrivateKey(process.env.GSC_PRIVATE_KEY!);
   const now = Math.floor(Date.now() / 1000);
   const header = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const claims = b64url(
