@@ -29,6 +29,9 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  /* Let the menu scroll when it is taller than the viewport, so the bottom
+     links (Tampilan Siswa, Keluar) stay reachable on short screens. */
+  overflow-y: auto;
 }
 
 .sidebarLogo {
