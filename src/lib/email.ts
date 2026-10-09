@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-interface RegistrationEmailData {
+export interface RegistrationEmailData {
   studentName: string;
   address: string;
   whatsappNumber: string;
@@ -9,6 +9,18 @@ interface RegistrationEmailData {
   voucherCode?: string | null;
   voucherApplied?: boolean;
   createdAt?: string;
+}
+
+// Build a wa.me link (Indonesian numbers: leading 0 -> 62) with a greeting prefilled.
+export function toWaLink(data: RegistrationEmailData) {
+  let cleanPhone = data.whatsappNumber.replace(/\D/g, "");
+  if (cleanPhone.startsWith("0")) {
+    cleanPhone = "62" + cleanPhone.substring(1);
+  }
+
+  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+    `Halo ${data.studentName}, terima kasih telah mendaftar di Supercoder untuk program ${data.selectedClass}. Kami ingin mengonfirmasi detail pendaftaran Anda.`,
+  )}`;
 }
 
 export async function sendAdminRegistrationNotification(
@@ -39,15 +51,7 @@ export async function sendAdminRegistrationNotification(
       })
     : new Date().toLocaleString("id-ID", { timeZone: "Asia/Makassar" });
 
-  // Clean WhatsApp phone number for link
-  let cleanPhone = data.whatsappNumber.replace(/\D/g, "");
-  if (cleanPhone.startsWith("0")) {
-    cleanPhone = "62" + cleanPhone.substring(1);
-  }
-
-  const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-    `Halo ${data.studentName}, terima kasih telah mendaftar di Supercoder untuk program ${data.selectedClass}. Kami ingin mengonfirmasi detail pendaftaran Anda.`,
-  )}`;
+  const waLink = toWaLink(data);
 
   const emailSubject = data.voucherApplied
     ? `🎉 [Supercoder] Pendaftaran + VOUCHER PROMO 9.9: ${data.studentName} (${data.selectedClass})`

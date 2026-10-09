@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { sendAdminRegistrationNotification } from "@/lib/email";
+import { sendAdminRegistrationTelegram } from "@/lib/telegram";
 import { PROMO_VOUCHER_CODE } from "@/lib/promo";
 
 export type RegistrationResult = {
@@ -76,21 +77,30 @@ export async function submitRegistration(
       return { error: `Gagal menyimpan pendaftaran: ${insertError.message}` };
     }
 
-    // Trigger Admin Email Notification asynchronously in the background
-    try {
-      await sendAdminRegistrationNotification({
-        studentName,
-        address,
-        whatsappNumber,
-        email,
-        selectedClass,
-        voucherCode,
-        voucherApplied,
-        createdAt: new Date().toISOString(),
-      });
-    } catch (emailErr) {
-      console.error("Failed to dispatch admin notification email:", emailErr);
-    }
+    // Notify admin via Telegram (primary) and email (backup). A failed
+    // notification is logged but never fails the registration itself.
+    const notification = {
+      studentName,
+      address,
+      whatsappNumber,
+      email,
+      selectedClass,
+      voucherCode,
+      voucherApplied,
+      createdAt: new Date().toISOString(),
+    };
+    const channels = ["Telegram", "email"];
+    const results = await Promise.allSettled([
+      sendAdminRegistrationTelegram(notification),
+      sendAdminRegistrationNotification(notification),
+    ]);
+    results.forEach((result, i) => {
+      if (result.status === "rejected") {
+        console.error(`Admin ${channels[i]} notification threw:`, result.reason);
+      } else if (!result.value.success) {
+        console.error(`Admin ${channels[i]} notification failed:`, result.value);
+      }
+    });
 
     return {
       success: true,
