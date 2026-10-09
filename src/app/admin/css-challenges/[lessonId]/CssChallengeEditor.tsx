@@ -19,10 +19,18 @@ export default function CssChallengeEditor({
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    if (!String(formData.get("description") || "").trim()) {
+      showToast("Deskripsi soal wajib diisi", "error");
+      return;
+    }
     setSaving(true);
     try {
-      const formData = new FormData(e.currentTarget);
-      await saveCssChallenge(lessonId, formData);
+      const res = await saveCssChallenge(lessonId, formData);
+      if (res.error) {
+        showToast(res.error, "error");
+        return;
+      }
       showToast("Soal CSS berhasil disimpan!", "success");
       window.location.reload();
     } catch (err: any) {

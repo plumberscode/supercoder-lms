@@ -25,10 +25,18 @@ export default function ChallengeEditor({
 
   const handleSaveChallenge = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    if (!String(formData.get("description") || "").trim()) {
+      showToast("Deskripsi soal wajib diisi", "error");
+      return;
+    }
     setSaving(true);
     try {
-      const formData = new FormData(e.currentTarget);
-      await saveChallenge(lessonId, formData);
+      const res = await saveChallenge(lessonId, formData);
+      if (res.error) {
+        showToast(res.error, "error");
+        return;
+      }
       showToast("Soal coding berhasil disimpan!", "success");
       window.location.reload();
     } catch (err: any) {

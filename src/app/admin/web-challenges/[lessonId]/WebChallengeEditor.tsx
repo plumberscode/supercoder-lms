@@ -25,10 +25,18 @@ export default function WebChallengeEditor({
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    if (!String(formData.get("description") || "").trim()) {
+      showToast("Deskripsi soal wajib diisi", "error");
+      return;
+    }
     setSaving(true);
     try {
-      const formData = new FormData(e.currentTarget);
-      await saveWebChallenge(lessonId, formData);
+      const res = await saveWebChallenge(lessonId, formData);
+      if (res.error) {
+        showToast(res.error, "error");
+        return;
+      }
       showToast("Soal Coding Web berhasil disimpan!", "success");
       window.location.reload();
     } catch (err: any) {

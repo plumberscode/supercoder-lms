@@ -4,16 +4,19 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { isEmptyDescription, prepareChallengeDescription } from "@/lib/challenge-description";
 
-export async function saveChallenge(lessonId: string, formData: FormData) {
+export async function saveChallenge(
+  lessonId: string,
+  formData: FormData,
+): Promise<{ error?: string }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
+  if (!user) return { error: "Not authenticated" };
 
   const title = formData.get("title") as string;
   const rawDescription = (formData.get("description") as string) || "";
-  if (isEmptyDescription(rawDescription)) throw new Error("Deskripsi soal wajib diisi");
+  if (isEmptyDescription(rawDescription)) return { error: "Deskripsi soal wajib diisi" };
   const description = prepareChallengeDescription(rawDescription);
   const language = formData.get("language") as string;
   const starterCode = formData.get("starterCode") as string;
@@ -34,7 +37,7 @@ export async function saveChallenge(lessonId: string, formData: FormData) {
     .from("coding_challenges")
     .select("id")
     .eq("lesson_id", lessonId)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     const { error } = await supabase
@@ -50,7 +53,7 @@ export async function saveChallenge(lessonId: string, formData: FormData) {
         max_score: maxScore,
       })
       .eq("id", existing.id);
-    if (error) throw new Error("Gagal memperbarui soal: " + error.message);
+    if (error) return { error: "Gagal memperbarui soal: " + error.message };
   } else {
     const { error } = await supabase.from("coding_challenges").insert({
       lesson_id: lessonId,
@@ -64,10 +67,11 @@ export async function saveChallenge(lessonId: string, formData: FormData) {
       max_score: maxScore,
       created_by: user.id,
     });
-    if (error) throw new Error("Gagal membuat soal: " + error.message);
+    if (error) return { error: "Gagal membuat soal: " + error.message };
   }
 
   revalidatePath(`/admin/coding-challenges/${lessonId}`);
+  return {};
 }
 
 export async function addTestCase(challengeId: string, formData: FormData) {
