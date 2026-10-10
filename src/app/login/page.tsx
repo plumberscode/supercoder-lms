@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import styles from "./login.module.css";
+import GoogleOneTap from "@/components/GoogleOneTap";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -35,6 +36,7 @@ export default function LoginPage() {
 
   return (
     <div className={styles.loginContainer}>
+      <GoogleOneTap />
       <div className={styles.loginCard}>
         <div className={styles.logo}>
           Super<span>coder</span>
