@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { prepareChallengeDescription } from "@/lib/challenge-description";
 
 export async function createModule(subjectId: string, formData: FormData) {
   const supabase = await createClient();
@@ -27,7 +28,10 @@ export async function createLesson(
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const type = formData.get("type") as any;
-  const contentUrl = formData.get("contentUrl") as string;
+  const rawContent = (formData.get("contentUrl") as string) ?? "";
+  // Materi teks disimpan sebagai HTML dari editor; sanitasi sebelum masuk DB.
+  const contentUrl =
+    type === "text" ? prepareChallengeDescription(rawContent) : rawContent;
   const orderIndex = parseInt((formData.get("orderIndex") as string) || "0");
 
   const { data: lesson, error } = await supabase

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { createLesson } from "./actions";
 import { useToast } from "@/components/ToastProvider";
+import ChallengeRichEditor from "@/components/admin/ChallengeRichEditor";
 
 export default function LessonForm({
   moduleId,
@@ -206,7 +207,7 @@ export default function LessonForm({
                     backgroundColor: "white",
                   }}
                 >
-                  <option value="text">📖 Teks / Markdown</option>
+                  <option value="text">📖 Teks</option>
                   <option value="video">📹 Link Video</option>
                   <option value="pdf">📄 Unggah PDF</option>
                   <option value="link">🔗 Link Eksternal</option>
@@ -295,12 +296,10 @@ export default function LessonForm({
 
           {type === "text" && (
             <div style={inputGroupStyle}>
-              <textarea
+              <ChallengeRichEditor
                 name="contentUrl"
                 placeholder="Tulis teks materi Anda di sini..."
-                rows={4}
-                style={{ width: "100%" }}
-              ></textarea>
+              />
             </div>
           )}
 

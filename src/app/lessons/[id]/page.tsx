@@ -6,6 +6,7 @@ import CodeChallenge from "@/components/CodeChallenge";
 import CssChallenge from "@/components/CssChallenge";
 import WebChallenge from "@/components/WebChallenge";
 import { prepareChallengeDescription } from "@/lib/challenge-description";
+import ChallengeDescription from "@/components/ChallengeDescription";
 
 export default async function LessonPage({
   params,
@@ -443,7 +444,14 @@ export default async function LessonPage({
 
           {lesson.type === "text" && (
             <div style={{ padding: "20px", lineHeight: 1.8 }}>
-              <p>{lesson.content_url || "Konten teks akan muncul di sini."}</p>
+              {lesson.content_url ? (
+                <ChallengeDescription
+                  description={prepareChallengeDescription(lesson.content_url)}
+                  className="whitespace-pre-wrap"
+                />
+              ) : (
+                <p>Konten teks akan muncul di sini.</p>
+              )}
             </div>
           )}
 
