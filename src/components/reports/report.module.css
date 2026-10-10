@@ -1,0 +1,286 @@
+.report {
+  max-width: 760px;
+  margin: 0 auto;
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.header {
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+  color: #ffffff;
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 1rem;
+  opacity: 0.95;
+}
+
+.brand span {
+  font-weight: 400;
+}
+
+.headerTitle {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.9;
+}
+
+.studentName {
+  margin: 6px 0 4px;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.period {
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.stat {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.statValue {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.statLabel {
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.section {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  break-inside: avoid;
+}
+
+.sectionTitle {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.empty {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.note {
+  background: #fff7ed;
+  border-left: 4px solid #f97316;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  break-inside: avoid;
+}
+
+.noteTitle {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.noteBody {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.subject {
+  margin-bottom: 16px;
+  break-inside: avoid;
+}
+
+.subjectRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.subjectTitle {
+  font-weight: 600;
+}
+
+.subjectMeta {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.barFill {
+  height: 100%;
+  background: #10b981;
+  border-radius: 99px;
+}
+
+.activityList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activity {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  break-inside: avoid;
+}
+
+.activity:last-child {
+  border-bottom: none;
+}
+
+.activityMain {
+  min-width: 0;
+}
+
+.activityTitle {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.activityMeta {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.activityFeedback {
+  margin-top: 6px;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: #475569;
+}
+
+.score {
+  flex-shrink: 0;
+  min-width: 52px;
+  text-align: center;
+  font-weight: 800;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.95rem;
+}
+
+.scoreGood {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.scoreLow {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.scorePending {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.badge {
+  background: #fefce8;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.badgeTitle {
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.badgeDesc {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.footer {
+  padding: 16px 24px;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  text-align: center;
+  background: #f8fafc;
+}
+
+@media (max-width: 600px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 16px;
+  }
+
+  .section {
+    padding: 16px;
+  }
+
+  .header {
+    padding: 24px 16px;
+  }
+}
+
+@media print {
+  .report {
+    max-width: none;
+    border: none;
+    border-radius: 0;
+  }
+
+  .header,
+  .stat,
+  .note,
+  .barFill,
+  .score,
+  .badge {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

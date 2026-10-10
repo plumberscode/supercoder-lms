@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import styles from "../admin.module.css";
-import { approveUser } from "./actions";
+import { approveUser, updateParentContact } from "./actions";
 import RoleSelector from "./RoleSelector";
 
 export default async function AdminUsersPage() {
@@ -12,6 +12,27 @@ export default async function AdminUsersPage() {
     .order("created_at", { ascending: false });
 
   if (error) return <div>Gagal memuat data pengguna: {error.message}</div>;
+
+  // Nomor WA dari formulir pendaftaran dipakai sebagai saran bila WA orang tua belum diisi.
+  const { data: registrations } = await supabase
+    .from("registrations")
+    .select("email, whatsapp_number")
+    .order("created_at", { ascending: false });
+  const waFromRegistration = new Map<string, string>();
+  registrations?.forEach((r) => {
+    const email = r.email?.toLowerCase();
+    if (email && r.whatsapp_number && !waFromRegistration.has(email)) {
+      waFromRegistration.set(email, r.whatsapp_number);
+    }
+  });
+
+  const inputStyle = {
+    padding: "6px 10px",
+    borderRadius: "6px",
+    border: "1px solid var(--border)",
+    fontSize: "0.8rem",
+    width: "100%",
+  };
 
   return (
     <div>
@@ -35,6 +56,7 @@ export default async function AdminUsersPage() {
               <th style={{ padding: "16px 24px" }}>Nama / Email</th>
               <th style={{ padding: "16px 24px" }}>Peran</th>
               <th style={{ padding: "16px 24px" }}>Status</th>
+              <th style={{ padding: "16px 24px" }}>Orang Tua (untuk Rapor)</th>
               <th style={{ padding: "16px 24px" }}>Aksi</th>
             </tr>
           </thead>
@@ -66,6 +88,45 @@ export default async function AdminUsersPage() {
                   >
                     {user.status === "approved" ? "Disetujui" : "Menunggu"}
                   </span>
+                </td>
+                <td style={{ padding: "16px 24px", minWidth: "220px" }}>
+                  {user.role === "student" && (
+                    <form
+                      action={updateParentContact.bind(null, user.id)}
+                      style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+                    >
+                      <input
+                        name="parent_name"
+                        defaultValue={user.parent_name || ""}
+                        placeholder="Nama orang tua"
+                        style={inputStyle}
+                      />
+                      <input
+                        name="parent_whatsapp"
+                        defaultValue={user.parent_whatsapp || ""}
+                        placeholder={
+                          waFromRegistration.get(user.email?.toLowerCase()) ||
+                          "No. WA orang tua"
+                        }
+                        style={inputStyle}
+                      />
+                      {!user.parent_whatsapp &&
+                        waFromRegistration.has(user.email?.toLowerCase()) && (
+                          <div style={{ fontSize: "0.7rem", color: "#64748B" }}>
+                            Saran dari pendaftaran:{" "}
+                            {waFromRegistration.get(user.email?.toLowerCase())}{" "}
+                            (cek apakah ini nomor orang tua)
+                          </div>
+                        )}
+                      <button
+                        type="submit"
+                        className="btn"
+                        style={{ padding: "4px 10px", fontSize: "0.75rem", alignSelf: "flex-start" }}
+                      >
+                        Simpan
+                      </button>
+                    </form>
+                  )}
                 </td>
                 <td style={{ padding: "16px 24px" }}>
                   {user.status === "pending" && (

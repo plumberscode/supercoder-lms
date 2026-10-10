@@ -52,6 +52,9 @@ export default async function AdminLayout({
           <Link href="/admin/gradebook" className={styles.navLink}>
             <span>📊</span> Buku Nilai
           </Link>
+          <Link href="/admin/reports" className={styles.navLink}>
+            <span>📝</span> Rapor Bulanan
+          </Link>
           <Link href="/admin/question-bank" className={styles.navLink}>
             <span>🧠</span> Bank Soal
           </Link>

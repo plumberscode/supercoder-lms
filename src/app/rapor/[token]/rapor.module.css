@@ -1,0 +1,63 @@
+.page {
+  min-height: 100vh;
+  background: #f1f5f9;
+  padding: 24px 16px 40px;
+}
+
+.toolbar {
+  max-width: 760px;
+  margin: 0 auto 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.printBtn {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.printBtn:hover {
+  background: #1e293b;
+}
+
+.contact {
+  max-width: 760px;
+  margin: 20px auto 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.contact a {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  .page {
+    background: #ffffff;
+    padding: 0;
+    min-height: 0;
+  }
+
+  .toolbar,
+  .contact {
+    display: none;
+  }
+}

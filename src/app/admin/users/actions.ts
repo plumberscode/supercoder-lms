@@ -27,3 +27,20 @@ export async function updateUserRole(userId: string, formData: FormData) {
   if (error) throw new Error(error.message);
   revalidatePath("/admin/users");
 }
+
+export async function updateParentContact(userId: string, formData: FormData) {
+  const supabase = await createClient();
+  const read = (key: string) => ((formData.get(key) as string) || "").trim() || null;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      parent_name: read("parent_name"),
+      parent_whatsapp: read("parent_whatsapp"),
+    })
+    .eq("id", userId);
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/users");
+  revalidatePath("/admin/reports");
+}
