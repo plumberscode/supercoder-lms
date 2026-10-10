@@ -10,6 +10,7 @@ import {
 import {
   reorderModules,
   reorderLessons,
+  moveLesson,
   deleteLesson,
   deleteModule,
   updateModule,
@@ -64,6 +65,39 @@ export default function ModuleList({
         await reorderModules(subjectId, items);
       } catch (error) {
         console.error("Failed to reorder modules:", error);
+        setModules(initialModules);
+      }
+    } else if (type === "lesson" && destination.droppableId !== source.droppableId) {
+      const sourceModule = modules.find((m) => m.id === source.droppableId);
+      const destModule = modules.find((m) => m.id === destination.droppableId);
+      if (!sourceModule || !destModule) return;
+
+      const sourceLessons = Array.from(sourceModule.lessons || []);
+      const [movedLesson] = sourceLessons.splice(source.index, 1) as any[];
+      const destLessons = Array.from(destModule.lessons || []);
+      destLessons.splice(destination.index, 0, {
+        ...movedLesson,
+        module_id: destModule.id,
+      });
+
+      setModules(
+        modules.map((m) => {
+          if (m.id === sourceModule.id) return { ...m, lessons: sourceLessons };
+          if (m.id === destModule.id) return { ...m, lessons: destLessons };
+          return m;
+        }),
+      );
+
+      try {
+        await moveLesson(
+          subjectId,
+          movedLesson.id,
+          destModule.id,
+          sourceLessons,
+          destLessons,
+        );
+      } catch (error) {
+        console.error("Failed to move lesson:", error);
         setModules(initialModules);
       }
     } else if (type === "lesson") {
@@ -348,7 +382,7 @@ export default function ModuleList({
                     </div>
 
                     <Droppable droppableId={module.id} type="lesson">
-                      {(provided) => (
+                      {(provided, snapshot) => (
                         <div
                           {...provided.droppableProps}
                           ref={provided.innerRef}
@@ -357,6 +391,12 @@ export default function ModuleList({
                             flexDirection: "column",
                             gap: "12px",
                             marginBottom: "24px",
+                            // Area kosong tetap punya tinggi agar materi bisa dijatuhkan ke modul tanpa materi
+                            minHeight: "48px",
+                            borderRadius: "8px",
+                            backgroundColor: snapshot.isDraggingOver
+                              ? "#F1F5F9"
+                              : undefined,
                           }}
                         >
                           {(module.lessons || []).map(

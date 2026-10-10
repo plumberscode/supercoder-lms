@@ -104,6 +104,36 @@ export async function reorderLessons(subjectId: string, lessons: any[]) {
 
   revalidatePath(`/admin/subjects/${subjectId}`);
 }
+export async function moveLesson(
+  subjectId: string,
+  lessonId: string,
+  toModuleId: string,
+  sourceLessons: any[],
+  destLessons: any[],
+) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("lessons")
+    .update({ module_id: toModuleId })
+    .eq("id", lessonId);
+
+  if (error) throw new Error(error.message);
+
+  await Promise.all(
+    [sourceLessons, destLessons].flatMap((lessons) =>
+      lessons.map((l, index) =>
+        supabase
+          .from("lessons")
+          .update({ order_index: index + 1 })
+          .eq("id", l.id),
+      ),
+    ),
+  );
+
+  revalidatePath(`/admin/subjects/${subjectId}`);
+}
+
 export async function updateModule(
   moduleId: string,
   subjectId: string,
