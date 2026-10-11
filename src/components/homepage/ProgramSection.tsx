@@ -26,7 +26,7 @@ const programs = [
     badgeVariant: "default" as const,
     title: "Weekend Coding Class",
     desc: "Belajar langsung bersama mentor untuk menguasai coding fundamentals, memahami logika teknologi, dan memanfaatkan AI sebagai bagian dari workflow modern untuk mengembangkan project nyata.",
-    image: "/images/weekend-coding-class.webp",
+    image: "/images/weekend-coding-class-offline.webp",
     ctaText: "Amankan Seat",
     details: [
       { icon: Clock, label: "Durasi", value: "90 menit per sesi" },

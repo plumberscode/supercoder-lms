@@ -37,7 +37,7 @@ export const programs = [
     priceLabel: "Rp 449.000 / bulan",
     price: "449000" as string | null,
     cta: "Amankan seat",
-    image: "/images/weekend-coding-class.webp",
+    image: "/images/weekend-coding-class-offline.webp",
     alt: "Weekend Coding Class tatap muka di Balikpapan, kelas kursus komputer Supercoder",
     schemaDescription:
       "Kelas coding dan AI tatap muka di Balikpapan, maksimal 6 siswa per sesi, 1x seminggu setiap Minggu 09.00–10.30 WITA.",
