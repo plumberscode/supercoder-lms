@@ -1,7 +1,8 @@
 import { createClient } from "@/utils/supabase/server";
 import styles from "../admin.module.css";
-import { approveUser, updateParentContact } from "./actions";
+import { approveUser } from "./actions";
 import RoleSelector from "./RoleSelector";
+import ParentContactForm from "./ParentContactForm";
 
 export default async function AdminUsersPage() {
   const supabase = await createClient();
@@ -25,14 +26,6 @@ export default async function AdminUsersPage() {
       waFromRegistration.set(email, r.whatsapp_number);
     }
   });
-
-  const inputStyle = {
-    padding: "6px 10px",
-    borderRadius: "6px",
-    border: "1px solid var(--border)",
-    fontSize: "0.8rem",
-    width: "100%",
-  };
 
   return (
     <div>
@@ -91,45 +84,16 @@ export default async function AdminUsersPage() {
                 </td>
                 <td style={{ padding: "16px 24px", minWidth: "220px" }}>
                   {user.role === "student" && (
-                    <form
-                      action={updateParentContact.bind(null, user.id)}
-                      style={{ display: "flex", flexDirection: "column", gap: "6px" }}
-                    >
-                      <input
-                        name="parent_name"
-                        defaultValue={user.parent_name || ""}
-                        placeholder="Nama orang tua"
-                        style={inputStyle}
-                      />
-                      <input
-                        name="parent_whatsapp"
-                        defaultValue={user.parent_whatsapp || ""}
-                        placeholder={
-                          waFromRegistration.get(user.email?.toLowerCase()) ||
-                          "No. WA orang tua"
-                        }
-                        style={inputStyle}
-                      />
-                      {!user.parent_whatsapp &&
-                        waFromRegistration.has(user.email?.toLowerCase()) && (
-                          <div style={{ fontSize: "0.7rem", color: "#64748B" }}>
-                            Saran dari pendaftaran:{" "}
-                            {waFromRegistration.get(user.email?.toLowerCase())}{" "}
-                            (cek apakah ini nomor orang tua)
-                          </div>
-                        )}
-                      <button
-                        type="submit"
-                        className="btn"
-                        style={{ padding: "4px 10px", fontSize: "0.75rem", alignSelf: "flex-start" }}
-                      >
-                        Simpan
-                      </button>
-                    </form>
+                    <ParentContactForm
+                      userId={user.id}
+                      parentName={user.parent_name}
+                      parentWhatsapp={user.parent_whatsapp}
+                      suggestedWhatsapp={waFromRegistration.get(user.email?.toLowerCase())}
+                    />
                   )}
                 </td>
                 <td style={{ padding: "16px 24px" }}>
-                  {user.status === "pending" && (
+                  {user.status === "pending" ? (
                     <form action={approveUser.bind(null, user.id)}>
                       <button
                         className="btn btn-primary"
@@ -138,6 +102,8 @@ export default async function AdminUsersPage() {
                         Setujui
                       </button>
                     </form>
+                  ) : (
+                    <span style={{ color: "#CBD5E1" }}>—</span>
                   )}
                 </td>
               </tr>
