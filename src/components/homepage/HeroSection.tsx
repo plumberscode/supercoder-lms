@@ -1,10 +1,7 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-import { preload } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import HeroVisual from "./HeroVisual";
 
 const schoolLogos = [
   {
@@ -39,58 +36,7 @@ const schoolLogos = [
   },
 ];
 
-const HERO_POSTER = "/images/hero-video-poster.webp";
-// Detik video yang paling mirip dengan poster (dicocokkan dari frame video)
-const HERO_POSTER_TIME = 0.5;
-
 export default function HeroSection() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Poster = elemen LCP di mobile: minta browser mengunduhnya lebih dulu
-  preload(HERO_POSTER, { as: "image", fetchPriority: "high" });
-
-  // Teks & video hero dianimasikan lewat CSS (.hero-elem / .hero-video-box di globals.css)
-  // supaya tampil di frame pertama tanpa menunggu JS. GSAP hanya untuk logo di bawahnya.
-  // Video baru diputar setelah halaman selesai load agar tidak berebut bandwidth dengan
-  // JS & font. Hemat data / reduced motion: cukup poster.
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-    if (connection?.saveData || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let idleId: number | undefined;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    const start = () => {
-      const play = () => {
-        // Poster = frame di detik ~0,5: mulai dari sana agar tidak "melompat" saat video diputar
-        video.currentTime = HERO_POSTER_TIME;
-        video.play().catch(() => {
-          // Autoplay diblokir browser: poster tetap tampil
-        });
-      };
-      if (video.readyState >= HTMLMediaElement.HAVE_METADATA) play();
-      else {
-        video.addEventListener("loadedmetadata", play, { once: true });
-        video.preload = "auto";
-        video.load();
-      }
-    };
-    const schedule = () => {
-      if ("requestIdleCallback" in window) idleId = window.requestIdleCallback(start, { timeout: 2000 });
-      else timeoutId = setTimeout(start, 200);
-    };
-
-    if (document.readyState === "complete") schedule();
-    else window.addEventListener("load", schedule, { once: true });
-
-    return () => {
-      window.removeEventListener("load", schedule);
-      if (idleId !== undefined) window.cancelIdleCallback(idleId);
-      if (timeoutId !== undefined) clearTimeout(timeoutId);
-    };
-  }, []);
-
   return (
     <section
       className="relative overflow-hidden pt-32 sm:pt-36 pb-20 px-5 bg-gradient-to-b from-white via-slate-50/50 to-slate-50"
@@ -177,23 +123,9 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Right Hero Video */}
-        <div className="w-full lg:w-[48%] flex justify-center">
-          <div className="hero-video-box relative w-full max-w-lg lg:max-w-none">
-            <video
-              ref={videoRef}
-              loop
-              muted
-              playsInline
-              poster={HERO_POSTER}
-              preload="none"
-              className="w-full h-auto rounded-3xl object-cover"
-            >
-              <source src="/videos/hero-video.webm" type="video/webm" />
-              <source src="/videos/hero-video.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
+        {/* Right Hero Visual: foto siswa + arch + kartu prestasi */}
+        <div className="w-full lg:w-[48%] flex justify-center lg:justify-start">
+          <HeroVisual />
         </div>
       </div>
 
