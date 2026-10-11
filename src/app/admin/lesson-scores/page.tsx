@@ -50,6 +50,7 @@ export default async function LessonScoresPage({
       .from("profiles")
       .select("id, full_name, email")
       .eq("role", "student")
+      .neq("status", "inactive")
       .order("full_name");
     students = allStudents || [];
 

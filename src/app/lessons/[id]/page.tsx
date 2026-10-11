@@ -1,4 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { blockedStudentPath } from "@/lib/student-access";
 import Link from "next/link";
 import QuizView from "./quiz-view";
 import ProjectSubmission from "./project-submission";
@@ -19,6 +21,17 @@ export default async function LessonPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: viewer } = await supabase
+      .from("profiles")
+      .select("role, status")
+      .eq("id", user.id)
+      .single();
+    if (viewer?.role === "student" && viewer.status !== "approved") {
+      redirect(blockedStudentPath(viewer.status));
+    }
+  }
 
   const { data: lesson } = await supabase
     .from("lessons")

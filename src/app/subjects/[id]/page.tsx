@@ -1,4 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { blockedStudentPath } from "@/lib/student-access";
 import Link from "next/link";
 import styles from "./subject.module.css";
 
@@ -34,6 +36,17 @@ export default async function SubjectPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: viewer } = await supabase
+      .from("profiles")
+      .select("role, status")
+      .eq("id", user.id)
+      .single();
+    if (viewer?.role === "student" && viewer.status !== "approved") {
+      redirect(blockedStudentPath(viewer.status));
+    }
+  }
 
   const userScores: Record<string, number> = {};
 

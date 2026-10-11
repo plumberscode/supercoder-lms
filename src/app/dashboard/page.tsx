@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { blockedStudentPath } from "@/lib/student-access";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,7 +47,7 @@ export default async function DashboardPage() {
     .single();
 
   if (!profile || profile.status !== "approved") {
-    redirect("/pending-approval");
+    redirect(blockedStudentPath(profile?.status));
   }
 
   // Subjects

@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { blockedStudentPath } from "@/lib/student-access";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, MessageSquareHeart } from "lucide-react";
@@ -25,7 +26,7 @@ export default async function StudentTestimonialsPage() {
     .single();
 
   if (!profile || profile.status !== "approved") {
-    redirect("/pending-approval");
+    redirect(blockedStudentPath(profile?.status));
   }
 
   // Check if student has already submitted testimonials
