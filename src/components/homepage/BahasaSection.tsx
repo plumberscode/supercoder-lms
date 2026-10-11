@@ -167,7 +167,7 @@ export default function BahasaSection() {
                               <h4 className="font-poppins text-lg font-bold text-slate-900 mb-2 group-hover:text-red-600 transition-colors">
                                 {item.name}
                               </h4>
-                              <p className="font-sans text-base text-slate-600 leading-relaxed">
+                              <p className="font-sans text-sm text-slate-600 leading-relaxed">
                                 {item.desc}
                               </p>
                             </CardContent>

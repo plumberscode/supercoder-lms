@@ -137,7 +137,7 @@ export default function JourneySection() {
                   <CardTitle className="font-poppins text-xl font-bold text-slate-900 group-hover:text-red-600 transition-colors">
                     {lvl.title}
                   </CardTitle>
-                  <CardDescription className="font-sans text-base text-slate-600 leading-relaxed mt-2">
+                  <CardDescription className="font-sans text-sm text-slate-600 leading-relaxed mt-2">
                     {lvl.desc}
                   </CardDescription>
                 </CardHeader>

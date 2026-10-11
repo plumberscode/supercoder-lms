@@ -97,7 +97,7 @@ export default function BerkembangSection() {
                   </CardTitle>
 
                   <CardContent className="p-0">
-                    <p className="font-sans text-base text-slate-600 leading-relaxed">
+                    <p className="font-sans text-sm text-slate-600 leading-relaxed">
                       {box.text}
                     </p>
                   </CardContent>

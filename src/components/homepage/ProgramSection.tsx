@@ -134,7 +134,7 @@ export default function ProgramSection() {
                     <CardTitle className="font-poppins text-xl sm:text-2xl font-bold text-slate-900 group-hover:text-red-600 transition-colors">
                       {prog.title}
                     </CardTitle>
-                    <CardDescription className="font-sans text-base text-slate-600 leading-relaxed mt-1.5">
+                    <CardDescription className="font-sans text-sm text-slate-600 leading-relaxed mt-1.5">
                       {prog.desc}
                     </CardDescription>
                   </CardHeader>
@@ -153,7 +153,7 @@ export default function ProgramSection() {
                             <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-slate-200/80 text-slate-700">
                               <Icon className="w-3.5 h-3.5" />
                             </div>
-                            <div className="text-sm sm:text-base">
+                            <div className="text-sm">
                               <span className="text-slate-500 font-medium mr-1.5">
                                 {d.label}:
                               </span>
