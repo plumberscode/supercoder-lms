@@ -13,7 +13,8 @@
 
 @media (min-width: 1024px) {
   .stage {
-    --aw: min(450px, 31.25vw);
+    /* 400×500 di desktop agar tombol CTA hero tetap di layar pertama (mis. 1366×650) */
+    --aw: min(400px, 31.25vw);
     /* kartu medali menjorok ke kiri: geser arch agar kartu tidak menabrak kolom teks.
        -40px: kartu boleh masuk ke celah antar kolom (gap-12 = 48px) supaya kartu nama
        di kanan tetap muat di dalam viewport. */
@@ -140,6 +141,16 @@
   .sub,
   .accent {
     font-size: 12px;
+  }
+}
+
+/* Desktop lebar: tepi kanan kartu medali tetap (aman dari wajah), lebar mengikuti isi
+   agar "International Coding Olympiad 2026" muat satu baris. Kartu melebar ke kiri. */
+@media (min-width: 1280px) {
+  .medal {
+    left: auto;
+    right: calc(100% - var(--u) * 162);
+    width: max-content;
   }
 }
 

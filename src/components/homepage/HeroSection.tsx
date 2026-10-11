@@ -39,7 +39,7 @@ const schoolLogos = [
 export default function HeroSection() {
   return (
     <section
-      className="relative overflow-hidden pt-32 sm:pt-36 pb-20 px-5 bg-gradient-to-b from-white via-slate-50/50 to-slate-50"
+      className="relative overflow-hidden pt-32 sm:pt-36 lg:pt-[112px] xl:pt-[92px] pb-20 px-5 bg-gradient-to-b from-white via-slate-50/50 to-slate-50"
     >
       {/* Neutral ambient background glows */}
       <div
@@ -58,7 +58,7 @@ export default function HeroSection() {
       />
 
       {/* Main Hero Container */}
-      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 pt-4 pb-14 relative z-10">
+      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 pt-4 pb-14 lg:pb-10 relative z-10">
         {/* Left Content */}
         <div className="w-full lg:w-[48%] flex flex-col items-start text-left">
           {/* Eyebrow berada di dalam H1 agar keyword lokal masuk ke heading utama */}
