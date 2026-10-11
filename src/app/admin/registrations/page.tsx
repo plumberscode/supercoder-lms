@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import styles from "../admin.module.css";
-import { updateRegistrationStatus, deleteRegistration } from "./actions";
+import { deleteRegistration } from "./actions";
+import StatusSelect from "./StatusSelect";
 import {
   Phone,
   Mail,
@@ -407,35 +408,10 @@ export default async function AdminRegistrationsPage() {
 
                       {/* Status */}
                       <td style={{ padding: "16px 20px" }}>
-                        <form
-                          action={async (formData: FormData) => {
-                            "use server";
-                            const newStatus =
-                              formData.get("status")?.toString() || "pending";
-                            await updateRegistrationStatus(item.id, newStatus);
-                          }}
-                        >
-                          <select
-                            name="status"
-                            defaultValue={item.status || "pending"}
-                            style={{
-                              padding: "6px 10px",
-                              borderRadius: "8px",
-                              border: "1px solid #CBD5E1",
-                              fontSize: "0.8rem",
-                              fontWeight: 600,
-                              backgroundColor: "#FFFFFF",
-                              cursor: "pointer",
-                            }}
-                            // @ts-ignore
-                            onChange="this.form.requestSubmit()"
-                          >
-                            <option value="pending">⏳ Menunggu</option>
-                            <option value="contacted">📞 Dihubungi</option>
-                            <option value="enrolled">✅ Terdaftar</option>
-                            <option value="cancelled">❌ Batal</option>
-                          </select>
-                        </form>
+                        <StatusSelect
+                          id={item.id}
+                          status={item.status || "pending"}
+                        />
                       </td>
 
                       {/* Actions */}
