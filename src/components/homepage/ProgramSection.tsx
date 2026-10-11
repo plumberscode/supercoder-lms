@@ -62,7 +62,7 @@ const programs = [
     badgeVariant: "default" as const,
     title: "Custom Project Class",
     desc: "Punya ide website atau aplikasi yang ingin kamu buat? Bawa idemu ke kelas. Pelajari fundamental yang dibutuhkan sambil langsung membangun project secara bertahap bersama mentor dengan bantuan coding dan AI.",
-    image: "/images/custom-project-class.webp",
+    image: "/images/custom-project-class-mentoring.webp",
     ctaText: "Diskusikan Projectmu",
     details: [
       { icon: Clock, label: "Durasi", value: "90 menit per sesi" },

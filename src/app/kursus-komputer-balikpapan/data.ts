@@ -61,7 +61,7 @@ export const programs = [
     priceLabel: "Menyesuaikan project",
     price: null as string | null,
     cta: "Diskusikan project",
-    image: "/images/custom-project-class.webp",
+    image: "/images/custom-project-class-mentoring.webp",
     alt: "Custom Project Class: mentorship membangun website dan aplikasi dari Balikpapan",
     schemaDescription:
       "Mentorship project via Google Meet, 2x seminggu, untuk membangun ide website atau aplikasi bersama mentor.",
