@@ -49,7 +49,7 @@ export const programs = [
     priceLabel: "Rp 499.000 / bulan",
     price: "499000" as string | null,
     cta: "Amankan seat",
-    image: "/images/premium-online-class.webp",
+    image: "/images/premium-online-class-1on1.webp",
     alt: "Premium Online Class privat 1-on-1, kursus komputer online dari Balikpapan",
     schemaDescription:
       "Kelas coding dan AI online privat 1-on-1 via Google Meet, 1x seminggu dengan jadwal fleksibel.",

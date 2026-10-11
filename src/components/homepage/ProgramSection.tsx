@@ -44,7 +44,7 @@ const programs = [
     badgeVariant: "secondary" as const,
     title: "Premium Online Class",
     desc: "Pembelajaran privat bersama mentor dengan kurikulum adaptif. Bangun fundamental coding yang kokoh sekaligus kuasai cara memanfaatkan AI secara efektif untuk mempercepat pembuatan project digital.",
-    image: "/images/premium-online-class.webp",
+    image: "/images/premium-online-class-1on1.webp",
     ctaText: "Amankan Seat",
     details: [
       { icon: Clock, label: "Durasi", value: "90 menit per sesi" },
