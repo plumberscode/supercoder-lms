@@ -1,0 +1,53 @@
+/* Latar "canvas": titik halus, warnanya diatur lewat --dot dari VisualFrame */
+.canvas {
+  background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+
+/* Elemen muncul bertahap saat visual masuk viewport (urutan lewat --i) */
+.item {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+.in .item {
+  opacity: 1;
+  transform: none;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.95em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: #2563eb;
+  animation: blink 1.4s ease-in-out infinite;
+}
+.liveDot {
+  animation: blink 2.2s ease-in-out infinite;
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .cursor,
+  .liveDot {
+    animation: none;
+  }
+}

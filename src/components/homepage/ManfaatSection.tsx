@@ -1,5 +1,7 @@
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import UnderstandTechVisual from "@/components/manfaat/UnderstandTechVisual";
+import LogicVisual from "@/components/manfaat/LogicVisual";
+import BuildWithAIVisual from "@/components/manfaat/BuildWithAIVisual";
 import { Globe2, Brain, Sparkles, CheckCircle2 } from "lucide-react";
 
 const rows = [
@@ -14,7 +16,7 @@ const rows = [
       "Mampu mengevaluasi dan memperbaiki error secara mandiri",
       "Memegang kendali penuh atas produk teknologi yang dibuat",
     ],
-    image: "/images/coding-future.webp",
+    Visual: UnderstandTechVisual,
     imageLeft: false,
   },
   {
@@ -28,7 +30,7 @@ const rows = [
       "Meningkatkan fokus dan ketelitian berpikir",
       "Terbiasa mencari solusi saat menemui error/kegagalan",
     ],
-    image: "/images/sistematis.webp",
+    Visual: LogicVisual,
     imageLeft: true,
   },
   {
@@ -42,7 +44,7 @@ const rows = [
       "Menggabungkan fondasi solid dengan modern AI tools",
       "Membangun portofolio karya digital nyata yang membanggakan",
     ],
-    image: "/images/belajar-seru.webp",
+    Visual: BuildWithAIVisual,
     imageLeft: false,
   },
 ];
@@ -92,6 +94,7 @@ export default function ManfaatSection() {
         <div className="space-y-20 lg:space-y-28">
           {rows.map((row, idx) => {
             const Icon = row.icon;
+            const Visual = row.Visual;
 
             return (
               <div
@@ -135,17 +138,9 @@ export default function ManfaatSection() {
                   </div>
                 </div>
 
-                {/* Image Container */}
+                {/* Visual (Mini UI berbasis ikon) */}
                 <div className="w-full lg:w-1/2">
-                  <div className="relative w-full h-[280px] sm:h-[360px] rounded-3xl overflow-hidden shadow-xl ring-1 ring-slate-200/80 bg-slate-100">
-                    <Image
-                      src={row.image}
-                      alt={row.title}
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 550px"
-                      className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                    />
-                  </div>
+                  <Visual />
                 </div>
               </div>
             );
