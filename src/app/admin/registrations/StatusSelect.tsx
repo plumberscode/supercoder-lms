@@ -2,13 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { updateRegistrationStatus } from "./actions";
+import styles from "./registrations.module.css";
 
 export default function StatusSelect({
   id,
   status,
+  label,
 }: {
   id: string;
   status: string;
+  label: string;
 }) {
   const [value, setValue] = useState(status);
   const [pending, startTransition] = useTransition();
@@ -18,6 +21,9 @@ export default function StatusSelect({
     <div>
       <select
         name="status"
+        aria-label={label}
+        className={styles.select}
+        data-status={value}
         value={value}
         disabled={pending}
         onChange={(e) => {
@@ -34,27 +40,13 @@ export default function StatusSelect({
             }
           });
         }}
-        style={{
-          padding: "6px 10px",
-          borderRadius: "8px",
-          border: "1px solid #CBD5E1",
-          fontSize: "0.8rem",
-          fontWeight: 600,
-          backgroundColor: "#FFFFFF",
-          cursor: pending ? "wait" : "pointer",
-          opacity: pending ? 0.6 : 1,
-        }}
       >
         <option value="pending">⏳ Menunggu</option>
         <option value="contacted">📞 Dihubungi</option>
         <option value="enrolled">✅ Terdaftar</option>
         <option value="cancelled">❌ Batal</option>
       </select>
-      {error && (
-        <div style={{ fontSize: "0.7rem", color: "#DC2626", marginTop: "4px" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className={styles.selectError}>{error}</div>}
     </div>
   );
 }
