@@ -199,6 +199,11 @@ export default async function DashboardPage() {
               <span className={styles.levelIcon}>⚡</span>
               <span>Level {profile.level}</span>
             </div>
+            <form action={signOut} className={styles.signOutForm}>
+              <button type="submit" className={styles.signOutBtn}>
+                Keluar 🚪
+              </button>
+            </form>
             <div className={styles.userAvatar}>
               {firstName.charAt(0).toUpperCase()}
             </div>
@@ -576,12 +581,6 @@ export default async function DashboardPage() {
                 </div>
               ))}
             </div>
-
-            <form action={signOut} className={styles.signOutForm}>
-              <button type="submit" className={styles.signOutBtn}>
-                Keluar 🚪
-              </button>
-            </form>
           </div>
 
           {/* RECENT ACTIVITY */}

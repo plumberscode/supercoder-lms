@@ -618,13 +618,16 @@
 }
 
 .signOutForm {
-  width: 100%;
+  display: inline-flex;
 }
 
 .signOutBtn {
-  width: 100%;
-  padding: 8px;
-  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   color: #64748b;
@@ -937,6 +940,16 @@
 }
 
 @media (max-width: 480px) {
+  .topBarRight {
+    gap: 8px;
+  }
+
+  .levelPill,
+  .adminPill,
+  .signOutBtn {
+    padding: 6px 10px;
+  }
+
   .statRow {
     grid-template-columns: 1fr 1fr;
   }
