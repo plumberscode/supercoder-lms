@@ -1,4 +1,5 @@
-import { toWaLink, type RegistrationEmailData } from "@/lib/email";
+import { toWaLink, type RegistrationEmailData, type PaymentNotificationData } from "@/lib/email";
+import { formatRupiah } from "@/lib/pricing";
 
 // Telegram's HTML parse mode only requires these three to be escaped.
 function escapeHtml(value: string) {
@@ -15,31 +16,36 @@ export function buildRegistrationTelegramText(data: RegistrationEmailData) {
     { timeZone: "Asia/Makassar" },
   );
 
-  const title = data.voucherApplied
-    ? "🎉 <b>Pendaftaran + VOUCHER PROMO 9.9</b>"
-    : "🚀 <b>Pendaftaran Siswa Baru</b>";
-
-  const voucherLine = data.voucherCode
-    ? `\n🎟️ <b>Voucher:</b> ${e(data.voucherCode)} ${
-        data.voucherApplied ? "(Promo 9.9 aktif)" : "(kode tidak valid)"
-      }`
+  const paymentLine = data.paymentAmount
+    ? data.paymentLinkCreated
+      ? `\n💳 <b>Pembayaran:</b> menunggu ${formatRupiah(data.paymentAmount)} (Mayar)`
+      : `\n⚠️ <b>Pembayaran:</b> link Mayar gagal dibuat — kirim tagihan ${formatRupiah(data.paymentAmount)} manual`
     : "";
 
   return (
-    `${title}\n\n` +
+    `🚀 <b>Pendaftaran Siswa Baru</b>\n\n` +
     `👤 <b>Nama:</b> ${e(data.studentName)}\n` +
     `📚 <b>Kelas:</b> ${e(data.selectedClass)}\n` +
     `📱 <b>WhatsApp:</b> ${e(data.whatsappNumber)}\n` +
     `✉️ <b>Email:</b> ${e(data.email)}\n` +
     `🏠 <b>Alamat:</b> ${e(data.address)}\n` +
     `🕒 <b>Waktu:</b> ${dateFormatted} WITA` +
-    voucherLine
+    paymentLine
   );
 }
 
-export async function sendAdminRegistrationTelegram(
-  data: RegistrationEmailData,
-) {
+export function buildPaymentTelegramText(data: PaymentNotificationData) {
+  const e = escapeHtml;
+  return (
+    `💰 <b>Pembayaran Diterima</b>\n\n` +
+    `👤 <b>Nama:</b> ${e(data.studentName)}\n` +
+    `📚 <b>Kelas:</b> ${e(data.selectedClass)}\n` +
+    `💳 <b>Nominal:</b> ${formatRupiah(data.amount)} (bulan pertama)\n` +
+    `📱 <b>WhatsApp:</b> ${e(data.whatsappNumber)}`
+  );
+}
+
+async function sendAdminTelegram(text: string, waLink: string) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -58,13 +64,11 @@ export async function sendAdminRegistrationTelegram(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
-          text: buildRegistrationTelegramText(data),
+          text,
           parse_mode: "HTML",
           disable_web_page_preview: true,
           reply_markup: {
-            inline_keyboard: [
-              [{ text: "💬 Chat WhatsApp", url: toWaLink(data) }],
-            ],
+            inline_keyboard: [[{ text: "💬 Chat WhatsApp", url: waLink }]],
           },
         }),
         signal: AbortSignal.timeout(8000),
@@ -77,10 +81,18 @@ export async function sendAdminRegistrationTelegram(
       return { success: false, error: errorText };
     }
 
-    console.log("✅ Admin registration notification sent via Telegram");
+    console.log("✅ Admin notification sent via Telegram");
     return { success: true };
   } catch (err) {
     console.error("❌ Telegram dispatch error:", err);
     return { success: false, error: err };
   }
+}
+
+export function sendAdminRegistrationTelegram(data: RegistrationEmailData) {
+  return sendAdminTelegram(buildRegistrationTelegramText(data), toWaLink(data));
+}
+
+export function sendAdminPaymentTelegram(data: PaymentNotificationData) {
+  return sendAdminTelegram(buildPaymentTelegramText(data), toWaLink(data));
 }

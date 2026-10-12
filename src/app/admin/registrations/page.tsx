@@ -9,11 +9,14 @@ import {
   MessageCircle,
   Phone,
   Ticket,
+  CreditCard,
+  Clock,
   Trash2,
   Users,
 } from "lucide-react";
 import { PROMO_VOUCHER_CODE } from "@/lib/promo";
 import { buildWaLink } from "@/lib/whatsapp";
+import { formatRupiah } from "@/lib/pricing";
 import styles from "./registrations.module.css";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["300", "400", "500", "600"] });
@@ -85,9 +88,7 @@ export default async function AdminRegistrationsPage({
   const counts = Object.fromEntries(
     STATUSES.map((s) => [s.key, all.filter((r) => r.status === s.key).length]),
   ) as Record<StatusKey, number>;
-  const voucherCount = all.filter(
-    (r) => r.voucher_code?.toString().trim().toUpperCase() === PROMO_VOUCHER_CODE,
-  ).length;
+  const paidCount = all.filter((r) => r.payment_status === "paid").length;
 
   const activeFilter = STATUSES.some((s) => s.key === params.status)
     ? (params.status as StatusKey)
@@ -143,10 +144,10 @@ export default async function AdminRegistrationsPage({
           </div>
           <div className={styles.kpi}>
             <span className={styles.kpiIcon}>
-              <Ticket size={14} />
+              <CreditCard size={14} />
             </span>
-            <span className={styles.kpiValue}>{voucherCount}</span>
-            <span className={styles.kpiLabel}>Voucher Promo 9.9</span>
+            <span className={styles.kpiValue}>{paidCount}</span>
+            <span className={styles.kpiLabel}>Sudah Bayar</span>
           </div>
         </div>
       </header>
@@ -230,6 +231,30 @@ export default async function AdminRegistrationsPage({
                           >
                             <Ticket size={10} /> Promo 9.9
                           </span>
+                        )}
+                        {item.payment_status === "paid" && (
+                          <span
+                            className={`${styles.chip} ${styles.chipPaid}`}
+                            title={item.paid_at ? `Dibayar ${formatDate(item.paid_at)}` : undefined}
+                          >
+                            <CreditCard size={10} /> Lunas
+                            {item.payment_amount ? ` ${formatRupiah(item.payment_amount)}` : ""}
+                          </span>
+                        )}
+                        {item.payment_status === "unpaid" && (
+                          <a
+                            className={`${styles.chip} ${styles.chipUnpaid}`}
+                            href={item.mayar_payment_link || undefined}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={
+                              item.mayar_payment_link
+                                ? "Buka link pembayaran Mayar (bisa dikirim ulang ke siswa)"
+                                : "Link Mayar gagal dibuat — kirim tagihan manual"
+                            }
+                          >
+                            <Clock size={10} /> Belum bayar
+                          </a>
                         )}
                       </div>
                     </div>

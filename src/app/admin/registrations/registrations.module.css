@@ -310,6 +310,25 @@
   gap: 4px;
 }
 
+.chipPaid,
+.chipUnpaid {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chipPaid {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.chipUnpaid {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #9a3412;
+}
+
 .contact,
 .when,
 .status,

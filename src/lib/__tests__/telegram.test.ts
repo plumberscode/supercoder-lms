@@ -7,8 +7,8 @@ const data = {
   whatsappNumber: "0812-3456-7890",
   email: "budi@example.com",
   selectedClass: "Weekend Coding Class",
-  voucherCode: null,
-  voucherApplied: false,
+  paymentAmount: 399000,
+  paymentLinkCreated: true,
   createdAt: "2026-10-09T02:00:00.000Z",
 };
 
@@ -54,6 +54,7 @@ describe("sendAdminRegistrationTelegram", () => {
     expect(body.parse_mode).toBe("HTML");
     expect(body.text).toContain("Budi &lt;b&gt;&amp; Co");
     expect(body.text).toContain("Weekend Coding Class");
+    expect(body.text).toContain("menunggu Rp399.000 (Mayar)");
     expect(body.reply_markup.inline_keyboard[0][0].url).toMatch(
       /^https:\/\/wa\.me\/6281234567890\?text=/,
     );

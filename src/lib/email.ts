@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { buildWaLink } from "./whatsapp";
+import { formatRupiah } from "./pricing";
 
 export interface RegistrationEmailData {
   studentName: string;
@@ -7,13 +8,22 @@ export interface RegistrationEmailData {
   whatsappNumber: string;
   email: string;
   selectedClass: string;
-  voucherCode?: string | null;
-  voucherApplied?: boolean;
+  // Diisi untuk kelas yang dibayar online lewat Mayar.
+  paymentAmount?: number | null;
+  paymentLinkCreated?: boolean;
   createdAt?: string;
 }
 
+export interface PaymentNotificationData {
+  studentName: string;
+  whatsappNumber: string;
+  email: string;
+  selectedClass: string;
+  amount: number;
+}
+
 // Build a wa.me link (Indonesian numbers: leading 0 -> 62) with a greeting prefilled.
-export function toWaLink(data: RegistrationEmailData) {
+export function toWaLink(data: Pick<RegistrationEmailData, "studentName" | "whatsappNumber" | "selectedClass">) {
   return buildWaLink(
     data.whatsappNumber,
     `Halo ${data.studentName}, terima kasih telah mendaftar di Supercoder untuk program ${data.selectedClass}. Kami ingin mengonfirmasi detail pendaftaran Anda.`,
@@ -23,25 +33,6 @@ export function toWaLink(data: RegistrationEmailData) {
 export async function sendAdminRegistrationNotification(
   data: RegistrationEmailData,
 ) {
-  // Destination email: configured in .env.local or fallback
-  const adminEmail = process.env.ADMIN_EMAIL || "henry.ferdiansyah@gmail.com";
-
-  // Resend API Key option
-  const resendApiKey = process.env.RESEND_API_KEY;
-
-  // SMTP options (e.g. Gmail, Brevo, AWS SES, etc.)
-  const smtpHost =
-    process.env.SMTP_HOST ||
-    (process.env.SMTP_USER?.includes("@gmail.com")
-      ? "smtp.gmail.com"
-      : undefined);
-  const smtpPort = parseInt(process.env.SMTP_PORT || "465", 10);
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-  const smtpFrom =
-    process.env.SMTP_FROM ||
-    `"Supercoder" <${smtpUser || "onboarding@resend.dev"}>`;
-
   const dateFormatted = data.createdAt
     ? new Date(data.createdAt).toLocaleString("id-ID", {
         timeZone: "Asia/Makassar",
@@ -50,23 +41,21 @@ export async function sendAdminRegistrationNotification(
 
   const waLink = toWaLink(data);
 
-  const emailSubject = data.voucherApplied
-    ? `🎉 [Supercoder] Pendaftaran + VOUCHER PROMO 9.9: ${data.studentName} (${data.selectedClass})`
-    : `🚀 [Supercoder] Pendaftaran Siswa Baru: ${data.studentName} (${data.selectedClass})`;
+  const emailSubject = `🚀 [Supercoder] Pendaftaran Siswa Baru: ${data.studentName} (${data.selectedClass})`;
 
-  const voucherRowHtml = data.voucherApplied
+  const paymentText = data.paymentAmount
+    ? data.paymentLinkCreated
+      ? `Menunggu pembayaran ${formatRupiah(data.paymentAmount)} (Mayar)`
+      : `Link Mayar gagal dibuat — kirim tagihan ${formatRupiah(data.paymentAmount)} manual`
+    : "";
+
+  const paymentRowHtml = paymentText
     ? `
             <tr>
-              <td class="label">Kode Voucher</td>
-              <td class="value" style="color: #db2777;">🎟️ ${data.voucherCode} (Promo 9.9 aktif — diskon Rp50.000/bulan selamanya)</td>
+              <td class="label">Pembayaran</td>
+              <td class="value" style="color: ${data.paymentLinkCreated ? "#b45309" : "#dc2626"};">${paymentText}</td>
             </tr>`
-    : data.voucherCode
-      ? `
-            <tr>
-              <td class="label">Kode Voucher</td>
-              <td class="value" style="color: #dc2626;">${data.voucherCode} (kode tidak valid)</td>
-            </tr>`
-      : "";
+    : "";
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -98,11 +87,6 @@ export async function sendAdminRegistrationNotification(
         <div class="content">
           <div style="text-align: center;">
             <span class="badge">Program: ${data.selectedClass}</span>
-            ${
-              data.voucherApplied
-                ? `<span class="badge" style="background-color: #fce7f3; color: #db2777; margin-left: 8px;">🎉 Voucher Promo 9.9</span>`
-                : ""
-            }
           </div>
 
           <table class="info-table">
@@ -129,7 +113,7 @@ export async function sendAdminRegistrationNotification(
             <tr>
               <td class="label">Waktu Pendaftaran</td>
               <td class="value">${dateFormatted} WITA</td>
-            </tr>${voucherRowHtml}
+            </tr>${paymentRowHtml}
           </table>
 
           <a href="${waLink}" class="action-button" target="_blank">
@@ -144,6 +128,72 @@ export async function sendAdminRegistrationNotification(
     </html>
   `;
 
+  const text = `Pendaftaran Siswa Baru Supercoder:\nNama: ${data.studentName}\nKelas: ${data.selectedClass}\nWhatsApp: ${data.whatsappNumber}\nEmail: ${data.email}\nAlamat: ${data.address}\nWaktu: ${dateFormatted}${
+    paymentText ? `\nPembayaran: ${paymentText}` : ""
+  }`;
+
+  return deliverAdminEmail(emailSubject, htmlContent, text, {
+    studentName: data.studentName,
+    selectedClass: data.selectedClass,
+    whatsappNumber: data.whatsappNumber,
+    email: data.email,
+  });
+}
+
+export function sendAdminPaymentNotification(data: PaymentNotificationData) {
+  const waLink = toWaLink(data);
+  const amount = formatRupiah(data.amount);
+  const subject = `💰 [Supercoder] Pembayaran Diterima: ${data.studentName} (${data.selectedClass}) ${amount}`;
+  const html = `
+    <!DOCTYPE html>
+    <html lang="id">
+    <head><meta charset="utf-8"></head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 24px;">
+      <div style="max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 28px;">
+        <h1 style="margin: 0 0 16px; font-size: 20px; color: #15803d;">💰 Pembayaran Diterima</h1>
+        <p style="margin: 0 0 6px;"><strong>Nama:</strong> ${data.studentName}</p>
+        <p style="margin: 0 0 6px;"><strong>Kelas:</strong> ${data.selectedClass}</p>
+        <p style="margin: 0 0 6px;"><strong>Nominal:</strong> ${amount} (bulan pertama, via Mayar)</p>
+        <p style="margin: 0 0 20px;"><strong>WhatsApp:</strong> <a href="${waLink}" style="color: #16a34a;">${data.whatsappNumber}</a></p>
+        <a href="${waLink}" style="display: block; text-align: center; background-color: #22c55e; color: #ffffff; text-decoration: none; padding: 14px 20px; border-radius: 12px; font-weight: 700;">💬 Hubungi Siswa untuk Jadwal</a>
+      </div>
+    </body>
+    </html>
+  `;
+  const text = `Pembayaran Diterima:\nNama: ${data.studentName}\nKelas: ${data.selectedClass}\nNominal: ${amount}\nWhatsApp: ${data.whatsappNumber}`;
+
+  return deliverAdminEmail(subject, html, text, {
+    studentName: data.studentName,
+    selectedClass: data.selectedClass,
+    amount: data.amount,
+  });
+}
+
+async function deliverAdminEmail(
+  subject: string,
+  html: string,
+  text: string,
+  logContext: Record<string, unknown>,
+) {
+  // Destination email: configured in .env.local or fallback
+  const adminEmail = process.env.ADMIN_EMAIL || "henry.ferdiansyah@gmail.com";
+
+  // Resend API Key option
+  const resendApiKey = process.env.RESEND_API_KEY;
+
+  // SMTP options (e.g. Gmail, Brevo, AWS SES, etc.)
+  const smtpHost =
+    process.env.SMTP_HOST ||
+    (process.env.SMTP_USER?.includes("@gmail.com")
+      ? "smtp.gmail.com"
+      : undefined);
+  const smtpPort = parseInt(process.env.SMTP_PORT || "465", 10);
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpFrom =
+    process.env.SMTP_FROM ||
+    `"Supercoder" <${smtpUser || "onboarding@resend.dev"}>`;
+
   // 1. If Resend API Key is provided:
   if (resendApiKey) {
     try {
@@ -156,8 +206,8 @@ export async function sendAdminRegistrationNotification(
         body: JSON.stringify({
           from: smtpFrom || "Supercoder <onboarding@resend.dev>",
           to: [adminEmail],
-          subject: emailSubject,
-          html: htmlContent,
+          subject,
+          html,
         }),
       });
 
@@ -203,19 +253,12 @@ export async function sendAdminRegistrationNotification(
       const info = await transporter.sendMail({
         from: smtpFrom,
         to: adminEmail,
-        subject: emailSubject,
-        html: htmlContent,
-        text: `Pendaftaran Siswa Baru Supercoder:\nNama: ${data.studentName}\nKelas: ${data.selectedClass}\nWhatsApp: ${data.whatsappNumber}\nEmail: ${data.email}\nAlamat: ${data.address}\nWaktu: ${dateFormatted}${
-          data.voucherCode
-            ? `\nVoucher: ${data.voucherCode}${data.voucherApplied ? " (Promo 9.9 aktif — diskon Rp50.000/bulan selamanya)" : " (tidak valid)"}`
-            : ""
-        }`,
+        subject,
+        html,
+        text,
       });
 
-      console.log(
-        "✅ Admin registration notification email sent via SMTP:",
-        info.messageId,
-      );
+      console.log("✅ Admin notification email sent via SMTP:", info.messageId);
       return { success: true, messageId: info.messageId };
     } catch (error) {
       console.error("❌ Error sending email via SMTP:", error);
@@ -227,13 +270,7 @@ export async function sendAdminRegistrationNotification(
   console.warn(
     "⚠️ [EMAIL NOTIFICATION] Email not sent because SMTP or RESEND credentials are not set in .env.local.\n" +
       "To enable real email delivery, add ADMIN_EMAIL and SMTP_USER + SMTP_PASS (Gmail App Password) or RESEND_API_KEY to your .env.local file.",
-    {
-      to: adminEmail,
-      studentName: data.studentName,
-      selectedClass: data.selectedClass,
-      whatsappNumber: data.whatsappNumber,
-      email: data.email,
-    },
+    { to: adminEmail, ...logContext },
   );
 
   return { success: false, reason: "unconfigured" };

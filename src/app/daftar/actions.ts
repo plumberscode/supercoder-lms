@@ -3,7 +3,12 @@
 import { createClient } from "@/utils/supabase/server";
 import { sendAdminRegistrationNotification } from "@/lib/email";
 import { sendAdminRegistrationTelegram } from "@/lib/telegram";
-import { PROMO_VOUCHER_CODE } from "@/lib/promo";
+import { createPaymentRequest } from "@/lib/mayar";
+import { getClassPrice } from "@/lib/pricing";
+import { SITE_URL } from "@/lib/site";
+
+// Link pembayaran Mayar berlaku 3 hari.
+const PAYMENT_LINK_TTL_MS = 3 * 24 * 60 * 60 * 1000;
 
 export type RegistrationResult = {
   success?: boolean;
@@ -15,13 +20,15 @@ export type RegistrationResult = {
     whatsappNumber: string;
     email: string;
     selectedClass: string;
-    voucherCode: string | null;
-    voucherApplied: boolean;
+    // Ada untuk Weekend/Premium bila link Mayar berhasil dibuat; client langsung redirect ke sini.
+    paymentUrl: string | null;
+    // true bila kelas berbayar online tapi link gagal dibuat (admin kirim tagihan manual).
+    paymentPending: boolean;
   };
 };
 
 export async function submitRegistration(
-  prevState: any,
+  prevState: unknown,
   formData: FormData,
 ): Promise<RegistrationResult> {
   const studentName = formData.get("student_name")?.toString().trim();
@@ -29,9 +36,6 @@ export async function submitRegistration(
   const whatsappNumber = formData.get("whatsapp_number")?.toString().trim();
   const email = formData.get("email")?.toString().trim();
   const selectedClass = formData.get("selected_class")?.toString().trim();
-  const voucherCodeRaw = formData.get("voucher_code")?.toString().trim();
-  const voucherCode = voucherCodeRaw ? voucherCodeRaw.toUpperCase() : null;
-  const voucherApplied = voucherCode === PROMO_VOUCHER_CODE;
 
   if (!studentName) {
     return { error: "Nama calon siswa wajib diisi." };
@@ -60,16 +64,44 @@ export async function submitRegistration(
   }
 
   try {
+    const registrationId = crypto.randomUUID();
+    const paymentAmount = getClassPrice(selectedClass);
+
+    // Weekend/Premium: buat link bayar Mayar dulu. Jika gagal, pendaftaran tetap disimpan
+    // dan admin mengirim tagihan manual.
+    let payment: { id: string; link: string } | null = null;
+    if (paymentAmount) {
+      const res = await createPaymentRequest({
+        name: studentName,
+        email,
+        mobile: whatsappNumber,
+        amount: paymentAmount,
+        description: `Supercoder – ${selectedClass} (bulan pertama)`,
+        redirectUrl: `${SITE_URL}/daftar/status?id=${registrationId}`,
+        expiredAt: new Date(Date.now() + PAYMENT_LINK_TTL_MS).toISOString(),
+        extraData: { registrationId },
+      });
+      if (res.success) {
+        payment = { id: res.data.id, link: res.data.link };
+      } else {
+        console.error("Mayar payment link creation failed:", res.error);
+      }
+    }
+
     const supabase = await createClient();
 
     const { error: insertError } = await supabase.from("registrations").insert({
+      id: registrationId,
       student_name: studentName,
       address: address,
       whatsapp_number: whatsappNumber,
       email: email,
       selected_class: selectedClass,
-      voucher_code: voucherCode,
       status: "pending",
+      payment_status: paymentAmount ? "unpaid" : null,
+      payment_amount: paymentAmount,
+      mayar_payment_id: payment?.id ?? null,
+      mayar_payment_link: payment?.link ?? null,
     });
 
     if (insertError) {
@@ -85,8 +117,8 @@ export async function submitRegistration(
       whatsappNumber,
       email,
       selectedClass,
-      voucherCode,
-      voucherApplied,
+      paymentAmount,
+      paymentLinkCreated: Boolean(payment),
       createdAt: new Date().toISOString(),
     };
     const channels = ["Telegram", "email"];
@@ -105,17 +137,17 @@ export async function submitRegistration(
     return {
       success: true,
       data: {
-        id: "",
+        id: registrationId,
         studentName,
         address,
         whatsappNumber,
         email,
         selectedClass,
-        voucherCode,
-        voucherApplied,
+        paymentUrl: payment?.link ?? null,
+        paymentPending: Boolean(paymentAmount) && !payment,
       },
     };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Unexpected server error on registration:", err);
     return {
       error: "Terjadi kendala sistem. Silakan coba beberapa saat lagi.",

@@ -4,12 +4,14 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { submitRegistration, type RegistrationResult } from "./actions";
+import { formatRupiah, getClassPrice } from "@/lib/pricing";
 import {
   CheckCircle2,
   ArrowLeft,
   MessageCircle,
   Sparkles,
   Send,
+  CreditCard,
   MapPin,
   Phone,
   Mail,
@@ -68,6 +70,8 @@ export default function RegistrationForm({
     RegistrationResult["data"] | null
   >(null);
   const [isPending, startTransition] = useTransition();
+  const [redirecting, setRedirecting] = useState(false);
+  const price = getClassPrice(selectedClass);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -84,6 +88,10 @@ export default function RegistrationForm({
       const res = await submitRegistration(null, formData);
       if (res.error) {
         setErrorMsg(res.error);
+      } else if (res.success && res.data?.paymentUrl) {
+        // Weekend/Premium: lanjut ke halaman bayar Mayar.
+        setRedirecting(true);
+        window.location.assign(res.data.paymentUrl);
       } else if (res.success && res.data) {
         setSubmittedData(res.data);
       }
@@ -162,7 +170,9 @@ export default function RegistrationForm({
                     <strong className="text-emerald-950 underline font-bold">
                       {submittedData.whatsappNumber}
                     </strong>{" "}
-                    untuk konfirmasi detail jadwal dan informasi kelas.
+                    {submittedData.paymentPending
+                      ? "untuk mengirim link pembayaran bulan pertama serta konfirmasi jadwal kelas."
+                      : "untuk konfirmasi detail jadwal dan informasi kelas."}
                   </p>
                 </div>
               </div>
@@ -381,13 +391,22 @@ export default function RegistrationForm({
               <div className="pt-6 sm:pt-8 border-t border-slate-100">
                 <button
                   type="submit"
-                  disabled={isPending}
+                  disabled={isPending || redirecting}
                   className="w-full py-4 sm:py-4.5 px-8 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-poppins font-bold text-base sm:text-lg shadow-xl shadow-red-500/25 transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                 >
-                  {isPending ? (
+                  {isPending || redirecting ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Memproses Pendaftaran...</span>
+                      <span>
+                        {redirecting
+                          ? "Mengarahkan ke Pembayaran..."
+                          : "Memproses Pendaftaran..."}
+                      </span>
+                    </>
+                  ) : price ? (
+                    <>
+                      <CreditCard className="w-5 h-5" />
+                      <span>Daftar &amp; Bayar {formatRupiah(price)}</span>
                     </>
                   ) : (
                     <>
@@ -398,8 +417,9 @@ export default function RegistrationForm({
                 </button>
 
                 <p className="text-center text-xs sm:text-sm text-slate-500 mt-5 leading-relaxed">
-                  Setelah mengirim pendaftaran, data Anda tersimpan aman dan
-                  kami akan segera menghubungi Anda via WhatsApp.
+                  {price
+                    ? "Biaya bulan pertama. Anda akan diarahkan ke halaman pembayaran aman Mayar (QRIS, transfer bank/VA, e-wallet)."
+                    : "Setelah mengirim pendaftaran, data Anda tersimpan aman dan kami akan segera menghubungi Anda via WhatsApp."}
                 </p>
               </div>
             </form>
