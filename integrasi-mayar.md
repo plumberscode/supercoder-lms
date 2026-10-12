@@ -6,12 +6,13 @@ Pendaftar **Weekend Coding Class (Rp399.000)** dan **Premium Online Class (Rp449
 
 | Bagian | Status |
 |---|---|
-| Kode integrasi | ✅ Selesai, di branch `feat/mayar-payment` |
+| Kode integrasi | ✅ **LIVE di production** sejak 12 Oktober 2026 (commit `3e9d662` di `main`) |
+| Env di Vercel (Production) | ✅ `MAYAR_API_KEY`, `MAYAR_API_BASE_URL=https://api.mayar.id/hl/v2`, `MAYAR_WEBHOOK_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`, lalu redeploy |
 | Migration database (`migration_mayar_payments.sql`) | ✅ Sudah dijalankan di Supabase |
 | Typecheck, lint, unit test, `next build` | ✅ Lolos |
 | Akun Mayar | ✅ Terverifikasi, API key **production** sudah dibuat |
 | Uji end-to-end | ✅ Lolos di **production** dengan transaksi nyata (lihat di bawah) |
-| Webhook Mayar | ⏳ Belum didaftarkan dan belum diuji |
+| Webhook Mayar | ✅ Didaftarkan (`https://www.supercoder.id/api/webhooks/mayar?token=…`), route hidup (token salah → 401). ⏳ Belum ada webhook pembayaran asli yang diterima |
 | Notifikasi Telegram | ⏳ Belum teruji (env Telegram tidak ada di `.env.local`), email ✅ |
 
 ### Hasil uji production (12 Oktober 2026)
@@ -101,46 +102,39 @@ Isi di `.env.local` (lokal) **dan** di hosting (produksi). Jangan pernah memberi
 | `MAYAR_WEBHOOK_TOKEN` | String acak panjang buatan sendiri | bebas | **beda** dari sandbox |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API | sama | sama |
 
-## ⚠️ Jangan deploy sebelum uji sandbox lolos
+## ⚠️ Jangan hapus env Mayar di Vercel
 
-Kalau kode ini di-deploy sebelum `MAYAR_API_KEY` terisi:
-- Tombol form tetap bertuliskan "Daftar & Bayar Rp…", tapi link pembayaran tidak bisa dibuat. User justru melihat layar terima kasih ("link pembayaran akan dikirim via WhatsApp"), dan admin harus menagih manual. Pendaftaran **tidak hilang**, tapi pengalaman user membingungkan.
-- Halaman `/daftar/status` akan error tanpa `SUPABASE_SERVICE_ROLE_KEY`.
+Pembayaran online sudah live. Kalau env di Vercel dihapus atau salah:
+- Tanpa `MAYAR_API_KEY`, atau dengan `MAYAR_API_BASE_URL` yang mengarah ke sandbox (`api.mayar.io`): tombol tetap bertuliskan "Daftar & Bayar Rp…", tapi link pembayaran gagal dibuat. User melihat layar terima kasih ("link pembayaran akan dikirim via WhatsApp"), dan admin harus menagih manual. Pendaftaran **tidak hilang**.
+- Tanpa `SUPABASE_SERVICE_ROLE_KEY`: halaman `/daftar/status` dan webhook error.
+- `MAYAR_WEBHOOK_TOKEN` di Vercel harus **sama** dengan token di URL webhook dashboard Mayar. Kalau berbeda, webhook ditolak 401 dan pendaftaran hanya ditandai lunas saat siswa membuka `/daftar/status`.
 
-Karena itu, kode ini sebaiknya **belum di-commit atau di-deploy ke produksi** sampai uji sandbox lolos. Kalau ada perubahan lain yang perlu di-deploy sebelum itu, tambahkan dulu feature flag `MAYAR_ENABLED` (lihat bagian Opsional).
+Setiap kali env diubah di Vercel, lakukan **Redeploy** agar nilainya terbaca.
 
-## Belum pasti (dipastikan saat uji sandbox)
+## Belum pasti (dipastikan dari transaksi production pertama)
 
 - **Field ID di payload webhook.** Dokumentasi Mayar tidak menyebut field mana di data webhook yang berisi ID payment request. Untuk sementara, `candidateIds()` di `route.ts` mencocokkan `paymentLinkId`, `productId`, `paymentRequestId`, `id`, dan `transactionId` ke kolom `mayar_payment_id`. Kalau tidak ada yang cocok, payload lengkap dicatat ke log (`No registration matched`). Setelah field yang benar diketahui, sederhanakan menjadi satu field saja.
 - **Retry webhook.** Dokumentasi tidak menjelaskan apakah Mayar mengirim ulang webhook yang gagal. Route membalas 500 hanya saat error database, supaya bisa di-retry. Halaman `/daftar/status` juga mengecek status langsung ke Mayar sebagai cadangan.
 
 ## Rencana ke depan
 
-### 1. Setelah akun Mayar terverifikasi (sandbox)
-- [ ] Buat API key **Read & Write** di web.mayar.io/api-keys.
-- [ ] Pastikan metode bayar (QRIS, VA, e-wallet) aktif.
-- [ ] Isi `.env.local`: `MAYAR_API_KEY`, `MAYAR_API_BASE_URL` (sandbox), `MAYAR_WEBHOOK_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`.
-- [ ] Jalankan `npm run dev` dan tunnel (ngrok/cloudflared) ke localhost:3000.
-- [ ] Daftarkan webhook di Mayar (Integrasi → Webhook): `https://<url-tunnel>/api/webhooks/mayar?token=<MAYAR_WEBHOOK_TOKEN>`.
-- [ ] Uji end-to-end:
-  - [ ] Daftar **Weekend**: diarahkan ke link `*.myr.id`, dan di DB tercatat `payment_status='unpaid'`, `payment_amount=399000`.
-  - [ ] Bayar (checkout sandbox atau `POST /hl/v2/payments/simulate`): webhook masuk, status jadi `paid`, notifikasi "Pembayaran Diterima" muncul **sekali**.
-  - [ ] Redirect ke `/daftar/status?id=…` menampilkan "Pembayaran Berhasil".
-  - [ ] Kirim ulang webhook (`POST /hl/v2/webhooks/retry`): **tidak** ada notifikasi ganda.
-  - [ ] Webhook dengan token salah: 401.
-  - [ ] Daftar **Premium**: nominal 449000.
-  - [ ] Daftar **Custom Project**: layar terima kasih, tanpa redirect, `payment_status` NULL.
-  - [ ] Kosongkan `MAYAR_API_KEY`: pendaftaran tetap tersimpan, pesan fallback tampil.
-  - [ ] Cek `/daftar/status` dan halaman admin di layar HP.
-- [ ] Pastikan field ID webhook dari log, lalu sederhanakan `candidateIds()`.
-- [ ] Commit.
+### 1. Uji end-to-end (✅ selesai 12 Oktober 2026)
+Dilakukan di production dari localhost, bukan sandbox (lihat "Hasil uji production" di atas).
+- [x] Weekend: redirect ke `*.myr.id`, bayar nyata, `/daftar/status` "Pembayaran Berhasil", admin **Lunas**.
+- [x] Notifikasi "Pembayaran Diterima" hanya **sekali** walau halaman status di-refresh.
+- [x] Premium: nominal 449000. Custom Project: tanpa redirect.
+- [x] Webhook dengan token salah: 401 (dicek di production).
+- [ ] Kosongkan `MAYAR_API_KEY`: pendaftaran tetap tersimpan, pesan fallback tampil.
+- [ ] Cek `/daftar/status` dan halaman admin di layar HP.
 
-### 2. Go-live produksi
-- [ ] Buat API key produksi di web.mayar.id/api-keys.
-- [ ] Set env di hosting: `MAYAR_API_KEY` (produksi), `MAYAR_API_BASE_URL=https://api.mayar.id/hl/v2`, `MAYAR_WEBHOOK_TOKEN` (baru), `SUPABASE_SERVICE_ROLE_KEY`.
-- [ ] Daftarkan webhook produksi: `https://www.supercoder.id/api/webhooks/mayar?token=<token produksi>`.
-- [ ] Deploy.
-- [ ] Uji satu transaksi nyata, lalu cek status di admin dan notifikasi Telegram.
+### 2. Go-live produksi (✅ live 12 Oktober 2026)
+- [x] API key produksi dari web.mayar.id/api-keys.
+- [x] Env di Vercel (Production): `MAYAR_API_KEY`, `MAYAR_API_BASE_URL=https://api.mayar.id/hl/v2`, `MAYAR_WEBHOOK_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`, lalu redeploy.
+- [x] Webhook produksi didaftarkan: `https://www.supercoder.id/api/webhooks/mayar?token=<token produksi>`.
+- [x] Deploy (`main` → Vercel, commit `3e9d662`). `/daftar` menampilkan "Daftar & Bayar Rp399.000".
+- [ ] Transaksi production pertama: cek log Vercel `[MAYAR WEBHOOK]`. Kalau muncul "No registration matched", catat field ID dari payload lalu perbaiki `candidateIds()`. Kalau cocok, sederhanakan `candidateIds()` menjadi satu field.
+- [ ] Pastikan `TELEGRAM_BOT_TOKEN` dan `TELEGRAM_CHAT_ID` ada di Vercel, lalu cek notifikasi "💰 Pembayaran Diterima" di Telegram.
+- [ ] Hapus baris uji (TEST …) di `/admin/registrations` dan link Premium uji yang belum dibayar di dashboard Mayar.
 
 ### 3. Opsional / berikutnya
 - **Feature flag `MAYAR_ENABLED`** untuk menyalakan/mematikan pembayaran online tanpa deploy ulang kode.
