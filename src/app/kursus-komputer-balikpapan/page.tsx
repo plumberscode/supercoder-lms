@@ -137,7 +137,7 @@ export default function KursusKomputerBalikpapanPage() {
     <>
       <JsonLdScript data={buildJsonLd()} />
       <Navbar />
-      <main className="bg-white" style={{ paddingTop: "calc(var(--promo-bar-height, 0px) + 88px)" }}>
+      <main className="bg-white" style={{ paddingTop: "88px" }}>
         {/* Hero */}
         <section className="px-5 pt-6 pb-14 bg-gradient-to-b from-white via-slate-50/50 to-slate-50">
           <div className="max-w-6xl mx-auto">

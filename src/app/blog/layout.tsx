@@ -12,7 +12,7 @@ export default function BlogLayout({
       <Navbar />
       <main
         className="bg-white min-h-screen"
-        style={{ paddingTop: "calc(var(--promo-bar-height, 0px) + 88px)" }}
+        style={{ paddingTop: "88px" }}
       >
         {children}
       </main>

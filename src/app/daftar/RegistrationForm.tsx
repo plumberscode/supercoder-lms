@@ -15,8 +15,6 @@ import {
   Mail,
   User,
   BookOpen,
-  Ticket,
-  PartyPopper,
 } from "lucide-react";
 
 const CLASS_OPTIONS = [
@@ -44,15 +42,13 @@ const CLASS_OPTIONS = [
 ];
 
 /**
- * Parameter URL (?class=, ?program=, ?voucher=) dibaca di server (page.tsx) dan dioper
+ * Parameter URL (?class=, ?program=) dibaca di server (page.tsx) dan dioper
  * sebagai props, supaya form + H1 ikut dirender di HTML awal (terbaca crawler).
  */
 export default function RegistrationForm({
   initialClassParam,
-  initialVoucher,
 }: {
   initialClassParam: string;
-  initialVoucher: string;
 }) {
   // Match initial class if provided in query params
   const matchedClass =
@@ -67,7 +63,6 @@ export default function RegistrationForm({
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [email, setEmail] = useState("");
   const [selectedClass, setSelectedClass] = useState(matchedClass);
-  const [voucherCode, setVoucherCode] = useState(initialVoucher);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [submittedData, setSubmittedData] = useState<
     RegistrationResult["data"] | null
@@ -84,7 +79,6 @@ export default function RegistrationForm({
     formData.append("whatsapp_number", whatsappNumber);
     formData.append("email", email);
     formData.append("selected_class", selectedClass);
-    formData.append("voucher_code", voucherCode);
 
     startTransition(async () => {
       const res = await submitRegistration(null, formData);
@@ -380,42 +374,6 @@ export default function RegistrationForm({
                       </label>
                     );
                   })}
-                </div>
-              </div>
-
-              {/* SECTION 4: KODE VOUCHER */}
-              <div className="space-y-6">
-                <div className="border-b border-slate-100 pb-2">
-                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    4. Kode Voucher Promo (Opsional)
-                  </h3>
-                </div>
-
-                <div className="space-y-2.5">
-                  <label
-                    htmlFor="voucher_code"
-                    className="block text-sm font-bold text-slate-800 flex items-center gap-2"
-                  >
-                    <Ticket className="w-4 h-4 text-pink-500" />
-                    <span>Punya Kode Voucher?</span>
-                  </label>
-                  <input
-                    id="voucher_code"
-                    name="voucher_code"
-                    type="text"
-                    placeholder="Contoh: SUPERCODER99"
-                    value={voucherCode}
-                    onChange={(e) =>
-                      setVoucherCode(e.target.value.toUpperCase())
-                    }
-                    className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-slate-900 text-base font-mono font-bold tracking-wider placeholder:text-slate-400 placeholder:font-sans placeholder:font-normal placeholder:tracking-normal transition-all bg-slate-50/50 focus:bg-white uppercase"
-                  />
-                  {voucherCode.trim().toUpperCase() === "SUPERCODER99" && (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-700 bg-pink-50 border border-pink-200 rounded-full px-3 py-1.5">
-                      <PartyPopper className="w-3.5 h-3.5" />
-                      Promo 9.9 aktif — diskon Rp50.000/bulan selamanya!
-                    </span>
-                  )}
                 </div>
               </div>
 

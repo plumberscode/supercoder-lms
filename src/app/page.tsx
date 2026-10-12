@@ -31,7 +31,7 @@ export default function Home() {
       <JsonLd />
       <ScrollReveal />
       <Navbar />
-      <main style={{ paddingTop: "var(--promo-bar-height, 0px)" }}>
+      <main>
         <HeroSection />
         <ManifestoSection />
         <TestimoniSection />
