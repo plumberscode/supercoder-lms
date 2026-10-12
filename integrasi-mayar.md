@@ -12,7 +12,7 @@ Pendaftar **Weekend Coding Class (Rp399.000)** dan **Premium Online Class (Rp449
 | Typecheck, lint, unit test, `next build` | ✅ Lolos |
 | Akun Mayar | ✅ Terverifikasi, API key **production** sudah dibuat |
 | Uji end-to-end | ✅ Lolos di **production** dengan transaksi nyata (lihat di bawah) |
-| Webhook Mayar | ✅ Didaftarkan (`https://www.supercoder.id/api/webhooks/mayar?token=…`), route hidup (token salah → 401). ⏳ Belum ada webhook pembayaran asli yang diterima |
+| Webhook Mayar | ✅ Didaftarkan (`https://www.supercoder.id/api/webhooks/mayar?token=…`), route hidup (token salah → 401). ✅ Teruji tanpa transaksi baru (lihat "Uji webhook" di bawah) |
 | Notifikasi Telegram | ⏳ Belum teruji (env Telegram tidak ada di `.env.local`), email ✅ |
 
 ### Hasil uji production (12 Oktober 2026)
@@ -23,7 +23,13 @@ Sandbox web.mayar.io tidak bisa dipakai (login gagal: `InternalOAuthError` di se
 - ✅ Email admin: satu "pendaftaran baru" + satu "Pembayaran Diterima". Refresh halaman status tidak mengirim notifikasi ganda.
 - ✅ **Premium**: nominal Rp449.000 di halaman Mayar, tidak dibayar → **Belum bayar**.
 - ✅ **Custom Project**: layar terima kasih tanpa redirect.
-- Penandaan lunas terjadi lewat pengecekan dari `/daftar/status`, bukan webhook. Field ID di payload webhook (`candidateIds()`) **masih belum dipastikan**. Cek log `[MAYAR WEBHOOK]` setelah transaksi production pertama.
+- Penandaan lunas saat uji ini terjadi lewat pengecekan dari `/daftar/status`, karena webhook belum didaftarkan waktu itu.
+
+### Uji webhook (12 Oktober 2026, setelah go-live)
+
+- **Riwayat webhook Mayar** (`GET /hl/v2/webhooks/new-history`): Mayar sudah mengirim `payment.reminder` untuk link Premium uji ke URL production, dengan status **SUCCESS**. Artinya URL dan token di Mayar cocok dengan Vercel.
+- **Field ID sudah dipastikan:** di payload webhook, `data.productId` (sama dengan `paymentLinkId` di riwayat) berisi **ID payment request** yang disimpan di `mayar_payment_id`. `data.id` dan `data.transactionId` berisi ID transaksi, bukan ID payment request.
+- **Webhook tiruan** `payment.received` dengan `productId` transaksi uji Rp10.000 (sudah lunas) dikirim ke production. Respons `{"ok":true,"result":"already_paid"}`: token diterima, pendaftaran ditemukan, status dicek ulang ke Mayar, tanpa notifikasi ganda.
 
 ## Alur pembayaran
 
@@ -113,7 +119,7 @@ Setiap kali env diubah di Vercel, lakukan **Redeploy** agar nilainya terbaca.
 
 ## Belum pasti (dipastikan dari transaksi production pertama)
 
-- **Field ID di payload webhook.** Dokumentasi Mayar tidak menyebut field mana di data webhook yang berisi ID payment request. Untuk sementara, `candidateIds()` di `route.ts` mencocokkan `paymentLinkId`, `productId`, `paymentRequestId`, `id`, dan `transactionId` ke kolom `mayar_payment_id`. Kalau tidak ada yang cocok, payload lengkap dicatat ke log (`No registration matched`). Setelah field yang benar diketahui, sederhanakan menjadi satu field saja.
+- **Field ID di payload webhook.** ✅ Sudah dipastikan: `data.productId`. `candidateIds()` di `route.ts` masih mencocokkan beberapa kandidat (`paymentLinkId`, `productId`, `paymentRequestId`, `id`, `transactionId`). Ini tidak salah, dan bisa disederhanakan menjadi `productId` saja kapan-kapan.
 - **Retry webhook.** Dokumentasi tidak menjelaskan apakah Mayar mengirim ulang webhook yang gagal. Route membalas 500 hanya saat error database, supaya bisa di-retry. Halaman `/daftar/status` juga mengecek status langsung ke Mayar sebagai cadangan.
 
 ## Rencana ke depan
@@ -132,7 +138,8 @@ Dilakukan di production dari localhost, bukan sandbox (lihat "Hasil uji producti
 - [x] Env di Vercel (Production): `MAYAR_API_KEY`, `MAYAR_API_BASE_URL=https://api.mayar.id/hl/v2`, `MAYAR_WEBHOOK_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`, lalu redeploy.
 - [x] Webhook produksi didaftarkan: `https://www.supercoder.id/api/webhooks/mayar?token=<token produksi>`.
 - [x] Deploy (`main` → Vercel, commit `3e9d662`). `/daftar` menampilkan "Daftar & Bayar Rp399.000".
-- [ ] Transaksi production pertama: cek log Vercel `[MAYAR WEBHOOK]`. Kalau muncul "No registration matched", catat field ID dari payload lalu perbaiki `candidateIds()`. Kalau cocok, sederhanakan `candidateIds()` menjadi satu field.
+- [x] Webhook `payment.received` teruji di production dengan webhook tiruan untuk transaksi uji yang sudah lunas (`already_paid`). Field ID = `data.productId`.
+- [ ] (Opsional) Sederhanakan `candidateIds()` menjadi `productId` saja.
 - [ ] Pastikan `TELEGRAM_BOT_TOKEN` dan `TELEGRAM_CHAT_ID` ada di Vercel, lalu cek notifikasi "💰 Pembayaran Diterima" di Telegram.
 - [ ] Hapus baris uji (TEST …) di `/admin/registrations` dan link Premium uji yang belum dibayar di dashboard Mayar.
 
