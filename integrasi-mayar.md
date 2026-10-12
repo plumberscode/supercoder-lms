@@ -6,12 +6,23 @@ Pendaftar **Weekend Coding Class (Rp399.000)** dan **Premium Online Class (Rp449
 
 | Bagian | Status |
 |---|---|
-| Kode integrasi | ✅ Selesai, **belum di-commit** |
+| Kode integrasi | ✅ Selesai, di branch `feat/mayar-payment` |
 | Migration database (`migration_mayar_payments.sql`) | ✅ Sudah dijalankan di Supabase |
 | Typecheck, lint, unit test, `next build` | ✅ Lolos |
-| Akun Mayar | ⏳ Menunggu verifikasi (beberapa hari) |
-| API key & webhook Mayar | ⏳ Belum dibuat (menunggu verifikasi akun) |
-| Uji end-to-end dengan Mayar sandbox | ⏳ Belum dilakukan |
+| Akun Mayar | ✅ Terverifikasi, API key **production** sudah dibuat |
+| Uji end-to-end | ✅ Lolos di **production** dengan transaksi nyata (lihat di bawah) |
+| Webhook Mayar | ⏳ Belum didaftarkan dan belum diuji |
+| Notifikasi Telegram | ⏳ Belum teruji (env Telegram tidak ada di `.env.local`), email ✅ |
+
+### Hasil uji production (12 Oktober 2026)
+
+Sandbox web.mayar.io tidak bisa dipakai (login gagal: `InternalOAuthError` di server Mayar), jadi uji dilakukan di production dari `localhost:3000`, dengan harga Weekend diturunkan **sementara** ke Rp10.000 (tidak di-commit).
+
+- ✅ **Weekend**: redirect ke Mayar, bayar Rp10.000, `/daftar/status` menampilkan "Pembayaran Berhasil", admin menandai **Lunas**, dana masuk di Mayar.
+- ✅ Email admin: satu "pendaftaran baru" + satu "Pembayaran Diterima". Refresh halaman status tidak mengirim notifikasi ganda.
+- ✅ **Premium**: nominal Rp449.000 di halaman Mayar, tidak dibayar → **Belum bayar**.
+- ✅ **Custom Project**: layar terima kasih tanpa redirect.
+- Penandaan lunas terjadi lewat pengecekan dari `/daftar/status`, bukan webhook. Field ID di payload webhook (`candidateIds()`) **masih belum dipastikan**. Cek log `[MAYAR WEBHOOK]` setelah transaksi production pertama.
 
 ## Alur pembayaran
 
