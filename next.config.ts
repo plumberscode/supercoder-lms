@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   images: {
     // Gambar artikel blog di-hosting di Cloudinary
     remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
+    // + 512: foto hero mobile tampil ~500px (288px × DPR 1,75); tanpa ini terpilih 640w
+    imageSizes: [32, 48, 64, 96, 128, 256, 384, 512],
   },
   // URL .html dari versi situs lama yang masih ada di indeks Google (data GSC).
   // Redirect permanen agar pengunjung tidak mendarat di 404 dan Google memindahkan sinyalnya.
