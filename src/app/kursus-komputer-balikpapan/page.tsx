@@ -275,7 +275,7 @@ export default function KursusKomputerBalikpapanPage() {
             <h2 className={h2Class}>Pilihan Kelas dan Biaya Kursus</h2>
             <p className={pClass}>
               Ada tiga format kelas, semuanya 90 menit per sesi. Biaya kursus komputer (coding) di
-              Supercoder mulai Rp 449.000 per bulan.
+              Supercoder mulai Rp 399.000 per bulan.
             </p>
 
             {/* Tabel di desktop */}

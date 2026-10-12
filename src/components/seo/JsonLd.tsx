@@ -16,7 +16,7 @@ export default function JsonLd() {
     description:
       "Tempat generasi muda memahami teknologi, menguasai coding fundamentals, dan menggunakan AI untuk mengubah ide menjadi produk digital nyata di Balikpapan.",
     telephone: BUSINESS.phone,
-    priceRange: "Rp 449.000 - Rp 650.000",
+    priceRange: "Rp 399.000 - Rp 449.000",
     address: {
       "@type": "PostalAddress",
       streetAddress: BUSINESS.streetAddress,

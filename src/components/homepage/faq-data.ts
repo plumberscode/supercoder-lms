@@ -28,6 +28,6 @@ export const faqs = [
   },
   {
     q: "Berapa biaya kursus coding di Supercoder?",
-    a: "Weekend Coding Class (tatap muka di Balikpapan) Rp 449.000 per bulan dan Premium Online Class 1-on-1 Rp 499.000 per bulan, masing-masing 1x seminggu 90 menit. Biaya Custom Project Class menyesuaikan project yang ingin dibangun.",
+    a: "Weekend Coding Class (tatap muka di Balikpapan) Rp 399.000 per bulan dan Premium Online Class 1-on-1 Rp 449.000 per bulan, masing-masing 1x seminggu 90 menit. Biaya Custom Project Class menyesuaikan project yang ingin dibangun.",
   },
 ];

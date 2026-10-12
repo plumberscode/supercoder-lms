@@ -7,7 +7,7 @@ const classes = [
   {
     name: "Weekend Coding Class",
     mode: "Tatap muka",
-    price: "Rp 449.000 / bulan",
+    price: "Rp 399.000 / bulan",
     schedule: "1x seminggu, hari Minggu pukul 09.00 - 10.30 WITA (90 menit per sesi)",
     place: `${BUSINESS.streetAddress}, ${BUSINESS.city}`,
     desc: "Kelas kelompok kecil (maksimal 6 siswa) bersama mentor. Cocok untuk pelajar SMP, SMA, maupun umum yang ingin belajar coding dari nol: logika pemrograman, HTML, CSS, JavaScript, lalu memakai AI sebagai partner untuk mengerjakan project nyata. Suasana belajar langsung membuat siswa lebih mudah bertanya dan saling berbagi ide.",
@@ -15,7 +15,7 @@ const classes = [
   {
     name: "Premium Online Class",
     mode: "Online privat 1-on-1",
-    price: "Rp 499.000 / bulan",
+    price: "Rp 449.000 / bulan",
     schedule: "1x seminggu, jadwal fleksibel (90 menit per sesi) lewat Google Meet",
     place: "Online, dapat diikuti dari mana saja",
     desc: "Pembelajaran privat satu siswa dengan satu mentor dengan kurikulum adaptif yang menyesuaikan kecepatan belajar. Ideal bagi siswa dengan jadwal padat atau yang tinggal di luar Balikpapan. Fokus pada fondasi coding yang kuat sekaligus cara menggunakan AI secara efektif untuk mempercepat pembuatan project digital.",

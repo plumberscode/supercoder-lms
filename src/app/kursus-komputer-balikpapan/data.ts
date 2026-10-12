@@ -3,7 +3,7 @@ export const PAGE_PATH = "/kursus-komputer-balikpapan";
 export const PAGE_TITLE = "Kursus Komputer Balikpapan | Coding & AI – Supercoder";
 
 export const PAGE_DESCRIPTION =
-  "Cari kursus komputer di Balikpapan? Supercoder mengajarkan coding & AI untuk SMP, SMA, dan umum. Tatap muka Rp449rb/bln, online privat Rp499rb/bln.";
+  "Cari kursus komputer di Balikpapan? Supercoder mengajarkan coding & AI untuk SMP, SMA, dan umum. Tatap muka Rp399rb/bln, online privat Rp449rb/bln.";
 
 export const levels = [
   {
@@ -34,8 +34,8 @@ export const programs = [
     title: "Weekend Coding Class",
     format: "Tatap muka, maks. 6 siswa per sesi",
     schedule: "1x seminggu, Minggu 09.00–10.30 WITA",
-    priceLabel: "Rp 449.000 / bulan",
-    price: "449000" as string | null,
+    priceLabel: "Rp 399.000 / bulan",
+    price: "399000" as string | null,
     cta: "Amankan seat",
     image: "/images/weekend-coding-class-offline.webp",
     alt: "Weekend Coding Class tatap muka di Balikpapan, kelas kursus komputer Supercoder",
@@ -46,8 +46,8 @@ export const programs = [
     title: "Premium Online Class",
     format: "Online privat 1-on-1 via Google Meet",
     schedule: "1x seminggu, jadwal fleksibel",
-    priceLabel: "Rp 499.000 / bulan",
-    price: "499000" as string | null,
+    priceLabel: "Rp 449.000 / bulan",
+    price: "449000" as string | null,
     cta: "Amankan seat",
     image: "/images/premium-online-class-1on1.webp",
     alt: "Premium Online Class privat 1-on-1, kursus komputer online dari Balikpapan",
@@ -79,7 +79,7 @@ export const partnerLogos = [
 export const faqs = [
   {
     q: "Berapa biaya kursus komputer di Balikpapan di Supercoder?",
-    a: "Weekend Coding Class tatap muka Rp 449.000 per bulan dan Premium Online Class 1-on-1 Rp 499.000 per bulan, masing-masing 1x seminggu 90 menit. Biaya Custom Project Class menyesuaikan project yang ingin dibangun.",
+    a: "Weekend Coding Class tatap muka Rp 399.000 per bulan dan Premium Online Class 1-on-1 Rp 449.000 per bulan, masing-masing 1x seminggu 90 menit. Biaya Custom Project Class menyesuaikan project yang ingin dibangun.",
   },
   {
     q: "Apakah Supercoder mengajarkan Microsoft Office atau mengetik?",

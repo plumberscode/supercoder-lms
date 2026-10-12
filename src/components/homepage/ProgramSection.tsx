@@ -36,7 +36,7 @@ const programs = [
         value: "1x seminggu (Minggu: 09.00 - 10.30)",
       },
       { icon: MapPin, label: "Lokasi", value: BUSINESS.shortAddress },
-      { icon: Sparkles, label: "Investasi", value: "Rp 449.000 / bulan" },
+      { icon: Sparkles, label: "Investasi", value: "Rp 399.000 / bulan" },
     ],
   },
   {
@@ -54,7 +54,7 @@ const programs = [
         value: "1x seminggu (Jadwal fleksibel)",
       },
       { icon: Video, label: "Platform", value: "Google Meet" },
-      { icon: Sparkles, label: "Investasi", value: "Rp 499.000 / bulan" },
+      { icon: Sparkles, label: "Investasi", value: "Rp 449.000 / bulan" },
     ],
   },
   {
