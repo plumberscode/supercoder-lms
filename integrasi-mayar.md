@@ -13,7 +13,7 @@ Pendaftar **Weekend Coding Class (Rp399.000)** dan **Premium Online Class (Rp449
 | Akun Mayar | ✅ Terverifikasi, API key **production** sudah dibuat |
 | Uji end-to-end | ✅ Lolos di **production** dengan transaksi nyata (lihat di bawah) |
 | Webhook Mayar | ✅ Didaftarkan (`https://www.supercoder.id/api/webhooks/mayar?token=…`), route hidup (token salah → 401). ✅ Teruji tanpa transaksi baru (lihat "Uji webhook" di bawah) |
-| Notifikasi Telegram | ⏳ Belum teruji (env Telegram tidak ada di `.env.local`), email ✅ |
+| Notifikasi Telegram | ⏸️ Ditunda atas keputusan pemilik (aplikasi Telegram bermasalah). Notifikasi admin lewat email ✅ |
 
 ### Hasil uji production (12 Oktober 2026)
 
@@ -140,7 +140,7 @@ Dilakukan di production dari localhost, bukan sandbox (lihat "Hasil uji producti
 - [x] Deploy (`main` → Vercel, commit `3e9d662`). `/daftar` menampilkan "Daftar & Bayar Rp399.000".
 - [x] Webhook `payment.received` teruji di production dengan webhook tiruan untuk transaksi uji yang sudah lunas (`already_paid`). Field ID = `data.productId`.
 - [ ] (Opsional) Sederhanakan `candidateIds()` menjadi `productId` saja.
-- [ ] Pastikan `TELEGRAM_BOT_TOKEN` dan `TELEGRAM_CHAT_ID` ada di Vercel, lalu cek notifikasi "💰 Pembayaran Diterima" di Telegram.
+- [ ] ~~Notifikasi Telegram~~: ditunda. Kalau nanti diaktifkan, isi `TELEGRAM_BOT_TOKEN` dan `TELEGRAM_CHAT_ID` di Vercel, redeploy, lalu cek notifikasi "💰 Pembayaran Diterima".
 - [ ] Hapus baris uji (TEST …) di `/admin/registrations` dan link Premium uji yang belum dibayar di dashboard Mayar.
 
 ### 3. Opsional / berikutnya
