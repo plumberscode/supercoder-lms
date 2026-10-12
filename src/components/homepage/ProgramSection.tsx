@@ -76,7 +76,7 @@ const programs = [
 export default function ProgramSection() {
   return (
     <section
-      className="py-24 px-5 bg-slate-50 relative"
+      className="cv-auto py-24 px-5 bg-slate-50 relative"
       id="program"
     >
       <div className="max-w-6xl mx-auto">

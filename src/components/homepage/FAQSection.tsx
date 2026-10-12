@@ -11,7 +11,7 @@ import { faqs } from "./faq-data";
 export default function FAQSection() {
   return (
     <section
-      className="py-24 px-5 bg-slate-50 relative overflow-hidden"
+      className="cv-auto py-24 px-5 bg-slate-50 relative overflow-hidden"
       id="faq"
     >
       {/* Background ambient glow */}

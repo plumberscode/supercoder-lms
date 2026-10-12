@@ -6,7 +6,7 @@ import { Sparkles } from "lucide-react";
 export default function CTASection() {
   return (
     <section
-      className="py-20 sm:py-24 px-5 bg-white relative overflow-hidden"
+      className="cv-auto py-20 sm:py-24 px-5 bg-white relative overflow-hidden"
     >
       <div className="max-w-6xl mx-auto">
         <div className="cta-card relative rounded-3xl sm:rounded-[36px] bg-gradient-to-r from-orange-500 via-red-500 to-rose-600 p-8 sm:p-14 lg:p-16 text-center text-white shadow-2xl shadow-red-500/25 overflow-hidden">

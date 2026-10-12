@@ -5,7 +5,7 @@ import { Bot, BrainCircuit, Rocket } from "lucide-react";
 export default function ManifestoSection() {
   return (
     <section
-      className="bg-slate-50/80 py-24 sm:py-32 lg:py-36 px-5 relative overflow-hidden"
+      className="cv-auto bg-slate-50/80 py-24 sm:py-32 lg:py-36 px-5 relative overflow-hidden"
     >
       {/* Ambient background blur */}
       <div

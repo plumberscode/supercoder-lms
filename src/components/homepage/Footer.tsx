@@ -8,7 +8,7 @@ import { BUSINESS, BUSINESS_MAPS_EMBED_URL } from "@/lib/site";
 export default function Footer({ showLocalLinks = false }: { showLocalLinks?: boolean }) {
   return (
     <footer
-      className="bg-slate-50 border-t border-slate-200/80 pt-16 pb-16 px-5 relative overflow-hidden"
+      className="cv-auto bg-slate-50 border-t border-slate-200/80 pt-16 pb-16 px-5 relative overflow-hidden"
     >
       {/* Giant Background Watermark Text */}
       <div

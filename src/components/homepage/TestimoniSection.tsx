@@ -371,7 +371,7 @@ export default function TestimoniSection() {
 
   return (
     <section
-      className="py-28 sm:py-36 lg:py-44 px-5 bg-slate-50 relative overflow-hidden"
+      className="cv-auto py-28 sm:py-36 lg:py-44 px-5 bg-slate-50 relative overflow-hidden"
       id="testimoni"
     >
       <div className="max-w-6xl mx-auto">

@@ -86,7 +86,7 @@ export default function BahasaSection() {
   return (
     <TooltipProvider delayDuration={150}>
       <section
-        className="py-24 px-5 bg-slate-50 relative overflow-hidden"
+        className="cv-auto py-24 px-5 bg-slate-50 relative overflow-hidden"
         id="bahasa"
       >
         <div className="max-w-6xl mx-auto">

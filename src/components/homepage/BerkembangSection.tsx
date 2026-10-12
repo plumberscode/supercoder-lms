@@ -31,7 +31,7 @@ const boxes = [
 export default function BerkembangSection() {
   return (
     <section
-      className="py-28 sm:py-36 lg:py-44 px-5 bg-gradient-to-b from-white via-orange-50/25 to-slate-50 relative overflow-hidden"
+      className="cv-auto py-28 sm:py-36 lg:py-44 px-5 bg-gradient-to-b from-white via-orange-50/25 to-slate-50 relative overflow-hidden"
     >
       {/* Soft ambient background glows */}
       <div

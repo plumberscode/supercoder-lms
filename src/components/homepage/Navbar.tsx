@@ -56,7 +56,7 @@ export default function Navbar() {
             width={140}
             height={40}
             className="h-8 sm:h-9 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
-            priority
+            loading="eager"
           />
         </Link>
 
