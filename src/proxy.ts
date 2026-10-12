@@ -6,14 +6,25 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
+  /*
+   * Hanya route yang memakai sesi Supabase. Halaman publik (/, /blog,
+   * /kursus-komputer-balikpapan, sitemap, robots) sengaja tidak masuk agar
+   * dilayani langsung dari cache tanpa menunggu refresh sesi (TTFB lebih cepat).
+   * Tambahkan di sini jika ada route baru yang membaca sesi login.
+   */
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/dashboard/:path*",
+    "/admin/:path*",
+    "/lessons/:path*",
+    "/subjects/:path*",
+    "/leaderboard/:path*",
+    "/rapor/:path*",
+    "/login/:path*",
+    "/signup/:path*",
+    "/auth/:path*",
+    "/pending-approval/:path*",
+    "/akun-nonaktif/:path*",
+    "/daftar/:path*",
+    "/api/:path*",
   ],
 };

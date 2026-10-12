@@ -65,7 +65,7 @@ const levels = [
 export default function JourneySection() {
   return (
     <section
-      className="py-24 px-5 bg-white relative overflow-hidden"
+      className="cv-auto py-24 px-5 bg-white relative overflow-hidden"
       id="journey"
     >
       {/* Ambient background decoration */}

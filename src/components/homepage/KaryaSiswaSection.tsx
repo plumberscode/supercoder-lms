@@ -111,7 +111,7 @@ export default function KaryaSiswaSection() {
 
   return (
     <section
-      className="py-24 sm:py-28 lg:py-32 px-5 bg-white relative overflow-hidden"
+      className="cv-auto py-24 sm:py-28 lg:py-32 px-5 bg-white relative overflow-hidden"
       id="karya-siswa"
     >
       <div className="max-w-6xl mx-auto">

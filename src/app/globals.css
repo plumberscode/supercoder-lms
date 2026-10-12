@@ -81,7 +81,7 @@ body {
 }
 
 .hero-elem {
-  animation: hero-in 0.55s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+  animation: hero-in 0.35s cubic-bezier(0.215, 0.61, 0.355, 1) both;
 }
 
 .hero-video-box {
@@ -91,17 +91,15 @@ body {
 /* Navbar turun halus saat halaman dibuka (pengganti GSAP) */
 @keyframes nav-in {
   from {
-    opacity: 0.01;
     transform: translateY(-20px);
   }
   to {
-    opacity: 1;
     transform: none;
   }
 }
 
 .nav-in {
-  animation: nav-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: nav-in 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -110,6 +108,14 @@ body {
   .nav-in {
     animation: none;
   }
+}
+
+/* Section homepage di bawah layar pertama: browser melewati layout & paint sampai
+   section mendekati layar (memangkas render delay LCP di HP). `auto` mengingat tinggi
+   aslinya setelah sekali dirender agar scrollbar/anchor tidak meloncat. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1000px;
 }
 
 /* Muncul saat di-scroll — dikendalikan src/components/homepage/ScrollReveal.tsx */

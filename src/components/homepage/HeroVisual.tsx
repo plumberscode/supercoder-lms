@@ -14,8 +14,9 @@ export default function HeroVisual() {
           src="/images/hero/rig-hero.webp"
           alt="Rig Marjanul, siswa Supercoder kelas 8, memegang sertifikat Bronze Medal International Coding Olympiad 2026"
           fill
-          // Elemen LCP hero (Next 16: `preload` menggantikan `priority`)
-          preload
+          // Elemen LCP di mobile: unduh segera dengan prioritas tinggi
+          loading="eager"
+          fetchPriority="high"
           sizes="(min-width: 1024px) 400px, (min-width: 640px) 320px, 70vw"
           className="object-contain object-bottom"
         />

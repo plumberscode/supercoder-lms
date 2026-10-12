@@ -52,7 +52,7 @@ const rows = [
 export default function ManfaatSection() {
   return (
     <section
-      className="py-24 px-5 bg-white relative overflow-hidden"
+      className="cv-auto py-24 px-5 bg-white relative overflow-hidden"
       id="manfaat"
     >
       {/* Background Subtle Gradient Accents */}

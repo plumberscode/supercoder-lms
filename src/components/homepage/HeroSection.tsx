@@ -147,8 +147,6 @@ export default function HeroSection() {
                 width={logo.width}
                 height={logo.height}
                 sizes="(min-width: 640px) 160px, 120px"
-                // Logo ini sering menjadi elemen LCP di mobile: jangan lazy-load
-                loading="eager"
                 className="h-[46px] w-auto"
               />
             </div>

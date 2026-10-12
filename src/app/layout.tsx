@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Poppins, Geist } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ToastProvider";
-import { cn } from "@/lib/utils";
 import { SITE_URL, HOME_TITLE, HOME_DESCRIPTION } from "@/lib/site";
-
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const inter = Inter({
   subsets: ["latin"],
@@ -91,7 +88,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={cn("font-sans", geist.variable)}>
+    <html lang="id" className="font-sans">
       <body className={`${inter.variable} ${poppins.variable}`}>
         <ToastProvider>{children}</ToastProvider>
       </body>
