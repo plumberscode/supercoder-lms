@@ -7,7 +7,7 @@ import { buildReportSnapshot, formatPeriod, type ReportSnapshot } from "@/lib/re
 import { buildWaLink } from "@/lib/whatsapp";
 import { SITE_URL } from "@/lib/site";
 import { publishReport, saveNotes, unpublishReport } from "../actions";
-import SendWaButton from "../SendWaButton";
+import ShareReportMessage from "../ShareReportMessage";
 import StatusBadge from "../StatusBadge";
 
 const textareaStyle = {
@@ -67,14 +67,14 @@ export default async function AdminReportDetailPage({
       : await buildReportSnapshot(supabase, report.student_id, report.period);
 
   const publicUrl = report.public_token ? `${SITE_URL}/rapor/${report.public_token}` : null;
+  const waMessage = publicUrl
+    ? `Halo Bapak/Ibu${student?.parent_name ? ` ${student.parent_name}` : ""}, berikut rapor belajar ${
+        snapshot.student.name
+      } di Supercoder untuk bulan ${formatPeriod(report.period)}:\n\n${publicUrl}\n\nTerima kasih atas dukungannya 🙏`
+    : null;
   const waLink =
-    publicUrl && student?.parent_whatsapp
-      ? buildWaLink(
-          student.parent_whatsapp,
-          `Halo Bapak/Ibu${student.parent_name ? ` ${student.parent_name}` : ""}, berikut rapor belajar ${
-            snapshot.student.name
-          } di Supercoder untuk bulan ${formatPeriod(report.period)}:\n\n${publicUrl}\n\nTerima kasih atas dukungannya 🙏`,
-        )
+    waMessage && student?.parent_whatsapp
+      ? buildWaLink(student.parent_whatsapp, waMessage)
       : null;
 
   return (
@@ -157,10 +157,13 @@ export default async function AdminReportDetailPage({
                     {publicUrl}
                   </a>
                 </div>
+                <ShareReportMessage
+                  reportId={id}
+                  message={waMessage!}
+                  waLink={waLink}
+                  alreadySent={!!report.sent_at}
+                />
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  {waLink && (
-                    <SendWaButton reportId={id} waLink={waLink} alreadySent={!!report.sent_at} />
-                  )}
                   <form action={unpublishReport.bind(null, id)}>
                     <button type="submit" className="btn" style={{ color: "#B91C1C" }}>
                       Tarik ke Draf
