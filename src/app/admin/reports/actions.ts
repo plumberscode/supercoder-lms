@@ -9,6 +9,7 @@ import { buildReportSnapshot, normalizePeriod } from "@/lib/reports";
 function notesFrom(formData: FormData) {
   const read = (key: string) => ((formData.get(key) as string) || "").trim() || null;
   return {
+    month_note: read("month_note"),
     strengths: read("strengths"),
     improvements: read("improvements"),
     parent_advice: read("parent_advice"),

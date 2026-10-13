@@ -24,6 +24,12 @@ const textareaStyle = {
 
 const noteFields = [
   {
+    name: "month_note",
+    label: "📌 Kegiatan Bulan Ini",
+    placeholder:
+      "Contoh: Bulan ini ananda fokus belajar AI untuk persiapan lomba, sehingga belum mengerjakan soal di LMS.",
+  },
+  {
     name: "strengths",
     label: "💪 Hal yang Sudah Dikuasai",
     placeholder: "Contoh: Cepat memahami konsep perulangan dan rajin bertanya.",

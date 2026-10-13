@@ -102,6 +102,15 @@
   break-inside: avoid;
 }
 
+.highlight {
+  margin: 20px 24px 0;
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  padding: 14px 16px;
+  break-inside: avoid;
+}
+
 .noteTitle {
   font-weight: 700;
   font-size: 0.9rem;
@@ -253,6 +262,10 @@
 }
 
 @media (max-width: 600px) {
+  .highlight {
+    margin: 16px 16px 0;
+  }
+
   .stats {
     grid-template-columns: repeat(2, 1fr);
     padding: 16px;

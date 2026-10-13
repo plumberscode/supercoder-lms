@@ -41,6 +41,7 @@ export interface ReportSnapshot {
 export interface PublicReport {
   period: string;
   snapshot: ReportSnapshot;
+  month_note: string | null;
   strengths: string | null;
   improvements: string | null;
   parent_advice: string | null;

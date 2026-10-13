@@ -29,6 +29,7 @@ export default function ReportView({
 }: {
   snapshot: ReportSnapshot;
   notes: {
+    month_note?: string | null;
     strengths: string | null;
     improvements: string | null;
     parent_advice: string | null;
@@ -38,6 +39,7 @@ export default function ReportView({
   const overallPct =
     totals.total > 0 ? Math.round((totals.completed / totals.total) * 100) : 0;
 
+  const monthNote = notes.month_note?.trim();
   const noteSections = [
     { title: "💪 Hal yang Sudah Dikuasai", body: notes.strengths },
     { title: "🎯 Fokus Pengembangan Berikutnya", body: notes.improvements },
@@ -54,6 +56,13 @@ export default function ReportView({
         <h1 className={styles.studentName}>{student.name}</h1>
         <div className={styles.period}>{formatPeriod(snapshot.period)}</div>
       </header>
+
+      {monthNote && (
+        <section className={styles.highlight}>
+          <div className={styles.noteTitle}>📌 Kegiatan Bulan Ini</div>
+          <p className={styles.noteBody}>{monthNote}</p>
+        </section>
+      )}
 
       <section className={styles.stats}>
         <div className={styles.stat}>
@@ -114,7 +123,11 @@ export default function ReportView({
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Aktivitas Bulan Ini</h2>
         {activities.length === 0 ? (
-          <p className={styles.empty}>Tidak ada aktivitas tercatat pada bulan ini.</p>
+          <p className={styles.empty}>
+            {monthNote
+              ? "Tidak ada tugas LMS bulan ini — lihat Kegiatan Bulan Ini di atas."
+              : "Tidak ada aktivitas tercatat pada bulan ini."}
+          </p>
         ) : (
           <ul className={styles.activityList}>
             {activities.map((a, i) => (
