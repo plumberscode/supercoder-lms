@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { submitRegistration, type RegistrationResult } from "./actions";
-import { formatRupiah, getClassPrice } from "@/lib/pricing";
+import { getClassPrice } from "@/lib/pricing";
 import {
   CheckCircle2,
   ArrowLeft,
@@ -406,7 +406,7 @@ export default function RegistrationForm({
                   ) : price ? (
                     <>
                       <CreditCard className="w-5 h-5" />
-                      <span>Daftar &amp; Bayar {formatRupiah(price)}</span>
+                      <span>Daftar</span>
                     </>
                   ) : (
                     <>
