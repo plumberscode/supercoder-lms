@@ -1,10 +1,12 @@
 // Host kanonis produksi adalah www (apex di-redirect 308 oleh hosting). Env lama masih berisi apex,
 // jadi dinormalisasi di sini agar canonical, sitemap, dan JSON-LD tidak mengarah ke URL yang di-redirect.
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.supercoder.id"
-)
-  .replace(/\/+$/, "")
-  .replace(/^(https?:\/\/)supercoder\.id$/, "$1www.supercoder.id");
+export function normalizeSiteUrl(url: string) {
+  return url.replace(/\/+$/, "").replace(/^(https?:\/\/)supercoder\.id$/, "$1www.supercoder.id");
+}
+
+export const SITE_URL = normalizeSiteUrl(
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.supercoder.id",
+);
 
 export const SITE_NAME = "Supercoder";
 

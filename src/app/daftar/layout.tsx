@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
 import { DEFAULT_OG_IMAGE, SITE_NAME } from "@/lib/site";
+import { DAFTAR_DESCRIPTION, DAFTAR_PATH, DAFTAR_TITLE } from "./data";
 
-// page.tsx adalah Client Component, jadi metadata /daftar didefinisikan di layout ini.
+// Metadata /daftar (juga berlaku untuk /daftar/status yang menimpanya sendiri).
 export const metadata: Metadata = {
-  title: "Daftar Kelas Coding Balikpapan",
-  description:
-    "Daftar kelas coding & AI Supercoder di Balikpapan: Weekend Coding Class tatap muka, Premium Online Class 1-on-1, atau Custom Project Class. Isi formulir, tim kami segera menghubungi via WhatsApp.",
+  title: DAFTAR_TITLE,
+  description: DAFTAR_DESCRIPTION,
   alternates: {
-    canonical: "/daftar",
+    canonical: DAFTAR_PATH,
   },
   // openGraph milik child menimpa seluruh objek parent, jadi field penting diulang di sini
   openGraph: {
     type: "website",
     locale: "id_ID",
     siteName: SITE_NAME,
-    title: "Daftar Kelas Coding Balikpapan | Supercoder",
-    url: "/daftar",
+    title: `${DAFTAR_TITLE} | Supercoder`,
+    description: DAFTAR_DESCRIPTION,
+    url: DAFTAR_PATH,
     images: [DEFAULT_OG_IMAGE],
   },
 };

@@ -17,6 +17,7 @@ import {
   SITE_URL,
 } from "@/lib/site";
 import {
+  buildCourseJsonLd,
   faqs,
   levels,
   partnerLogos,
@@ -103,25 +104,7 @@ function buildJsonLd() {
     ],
   };
 
-  const courses = programs.map((p) => ({
-    "@context": "https://schema.org",
-    "@type": "Course",
-    name: p.title,
-    description: p.schemaDescription,
-    provider: { "@type": "EducationalOrganization", "@id": ORG_ID, name: BUSINESS.name, url: SITE_URL },
-    ...(p.price
-      ? {
-          offers: {
-            "@type": "Offer",
-            price: p.price,
-            priceCurrency: "IDR",
-            url: `${SITE_URL}/daftar?class=${encodeURIComponent(p.title)}`,
-          },
-        }
-      : {}),
-  }));
-
-  return [organization, faqPage, breadcrumb, ...courses];
+  return [organization, faqPage, breadcrumb, ...buildCourseJsonLd()];
 }
 
 const waButtonClass =

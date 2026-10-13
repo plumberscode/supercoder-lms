@@ -1,3 +1,5 @@
+import { BUSINESS, ORG_ID, SITE_URL } from "@/lib/site";
+
 export const PAGE_PATH = "/kursus-komputer-balikpapan";
 
 export const PAGE_TITLE = "Kursus Komputer Balikpapan | Coding & AI – Supercoder";
@@ -106,3 +108,24 @@ export const faqs = [
     a: "Di Kompleks Masjid An-Nasa'i, Jl. Syarifuddin Yoes, Balikpapan. Kelas berlangsung setiap Minggu pukul 09.00–10.30 WITA.",
   },
 ];
+
+/** Schema Course per program (dipakai di halaman ini dan /daftar). */
+export function buildCourseJsonLd() {
+  return programs.map((p) => ({
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: p.title,
+    description: p.schemaDescription,
+    provider: { "@type": "EducationalOrganization", "@id": ORG_ID, name: BUSINESS.name, url: SITE_URL },
+    ...(p.price
+      ? {
+          offers: {
+            "@type": "Offer",
+            price: p.price,
+            priceCurrency: "IDR",
+            url: `${SITE_URL}/daftar?class=${encodeURIComponent(p.title)}`,
+          },
+        }
+      : {}),
+  }));
+}

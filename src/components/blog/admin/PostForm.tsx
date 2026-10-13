@@ -36,6 +36,10 @@ const label = "block text-sm font-semibold text-slate-800 mb-1.5";
 const hint = "text-xs text-slate-500 mt-1";
 const card = "bg-white rounded-2xl border border-slate-200 p-5 space-y-4";
 
+// Template root "%s | Supercoder" menambah 13 karakter; total <title> idealnya ≤ 60 agar tidak terpotong.
+const TITLE_SUFFIX = " | Supercoder";
+const TITLE_MAX = 60 - TITLE_SUFFIX.length;
+
 function Counter({ value, min, max }: { value: string; min: number; max: number }) {
   const n = value.trim().length;
   const color = n === 0 ? "text-slate-400" : n < min || n > max ? "text-amber-600" : "text-emerald-600";
@@ -83,8 +87,8 @@ export default function PostForm({ post, categories, defaultAuthorName }: Props)
     setHeadline((prev) => prev.trim() || h1);
     setTitle((prev) => {
       if (prev.trim()) return prev;
-      if (h1.length <= 60) return h1;
-      const cut = h1.slice(0, 60);
+      if (h1.length <= TITLE_MAX) return h1;
+      const cut = h1.slice(0, TITLE_MAX);
       const space = cut.lastIndexOf(" ");
       return (space > 30 ? cut.slice(0, space) : cut).replace(/[\s,.;:–-]+$/, "");
     });
@@ -148,12 +152,14 @@ export default function PostForm({ post, categories, defaultAuthorName }: Props)
               className={input}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Contoh: Cara Belajar Coding untuk Anak SD: Panduan Orang Tua"
+              placeholder="Contoh: Cara Belajar Coding Anak SD: Panduan Orang Tua"
               required
             />
             <div className="flex justify-between">
-              <p className={hint}>Tampil di tab browser & hasil Google. Letakkan keyword utama di depan.</p>
-              <Counter value={title} min={30} max={60} />
+              <p className={hint}>
+                Tampil di tab browser & hasil Google, otomatis diberi akhiran &quot;{TITLE_SUFFIX.trim()}&quot;. Letakkan keyword utama di depan.
+              </p>
+              <Counter value={title} min={25} max={TITLE_MAX} />
             </div>
           </div>
           <div>
@@ -348,7 +354,7 @@ export default function PostForm({ post, categories, defaultAuthorName }: Props)
           <div className="rounded-xl border border-slate-200 p-3 bg-slate-50">
             <p className="text-[11px] font-semibold text-slate-500 mb-2 uppercase tracking-wide">Pratinjau Google</p>
             <p className="text-xs text-slate-600 truncate">{serpUrl}</p>
-            <p className="text-[#1a0dab] text-lg leading-snug truncate">{title ? `${title} | Supercoder` : "Judul SEO | Supercoder"}</p>
+            <p className="text-[#1a0dab] text-lg leading-snug truncate">{`${title || "Judul SEO"}${TITLE_SUFFIX}`}</p>
             <p className="text-sm text-slate-600 line-clamp-2">{serpDescription || "Meta description akan tampil di sini."}</p>
           </div>
         </div>

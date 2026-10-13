@@ -7,7 +7,7 @@
 -- 1. Pengaturan (satu baris, id = 1)
 CREATE TABLE IF NOT EXISTS public.seo_settings (
   id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-  site_url TEXT NOT NULL DEFAULT 'https://supercoder.id',
+  site_url TEXT NOT NULL DEFAULT 'https://www.supercoder.id',
   location TEXT NOT NULL DEFAULT 'Balikpapan, East Kalimantan, Indonesia',
   language TEXT NOT NULL DEFAULT 'id',
   competitors TEXT[] NOT NULL DEFAULT '{}',

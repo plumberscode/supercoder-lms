@@ -2,7 +2,7 @@ import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 
 export const SEO_USER_AGENT =
-  "Mozilla/5.0 (compatible; SupercoderSEOBot/1.0; +https://supercoder.id)";
+  "Mozilla/5.0 (compatible; SupercoderSEOBot/1.0; +https://www.supercoder.id)";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_MAX_BYTES = 2 * 1024 * 1024;

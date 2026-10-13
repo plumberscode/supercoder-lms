@@ -14,6 +14,7 @@ import {
   type GscSite,
 } from "@/lib/seo/providers/gsc";
 import { getSeoSettings } from "@/lib/seo/settings";
+import { normalizeSiteUrl, SITE_URL } from "@/lib/site";
 
 const lines = (value: FormDataEntryValue | null) =>
   String(value ?? "")
@@ -31,7 +32,7 @@ export async function saveSeoSettings(formData: FormData) {
 
   const { error } = await supabase.from("seo_settings").upsert({
     id: 1,
-    site_url: siteUrl || "https://supercoder.id",
+    site_url: normalizeSiteUrl(siteUrl || SITE_URL),
     location: location || "Balikpapan, East Kalimantan, Indonesia",
     language: String(formData.get("language") ?? "id").trim() || "id",
     competitors: [...new Set(lines(formData.get("competitors")).map(bareDomain))].slice(0, 10),
