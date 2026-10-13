@@ -8,7 +8,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   /*
    * Hanya route yang memakai sesi Supabase. Halaman publik (/, /blog,
-   * /kursus-komputer-balikpapan, sitemap, robots) sengaja tidak masuk agar
+   * /kursus-coding-balikpapan, /kursus-komputer-balikpapan, sitemap, robots) sengaja tidak masuk agar
    * dilayani langsung dari cache tanpa menunggu refresh sesi (TTFB lebih cepat).
    * Tambahkan di sini jika ada route baru yang membaca sesi login.
    */

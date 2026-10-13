@@ -1,4 +1,4 @@
-import { BUSINESS, ORG_ID, SITE_URL } from "@/lib/site";
+import { BUSINESS, ORG_ID, SITE_LOGO, SITE_URL } from "@/lib/site";
 
 export const PAGE_PATH = "/kursus-komputer-balikpapan";
 
@@ -108,6 +108,32 @@ export const faqs = [
     a: "Di Kompleks Masjid An-Nasa'i, Jl. Syarifuddin Yoes, Balikpapan. Kelas berlangsung setiap Minggu pukul 09.00–10.30 WITA.",
   },
 ];
+
+/** Schema organisasi + bisnis lokal. NAP identik dengan schema homepage (satu @id, jangan bertentangan). */
+export function buildLocalBusinessJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": ["EducationalOrganization", "LocalBusiness"],
+    "@id": ORG_ID,
+    name: BUSINESS.name,
+    url: SITE_URL,
+    logo: SITE_LOGO,
+    telephone: BUSINESS.phone,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: BUSINESS.streetAddress,
+      addressLocality: BUSINESS.city,
+      addressRegion: BUSINESS.region,
+      addressCountry: BUSINESS.country,
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: BUSINESS.geo.lat,
+      longitude: BUSINESS.geo.lng,
+    },
+    sameAs: [BUSINESS.instagramUrl],
+  };
+}
 
 /** Schema Course per program (dipakai di halaman ini dan /daftar). */
 export function buildCourseJsonLd() {

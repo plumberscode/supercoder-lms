@@ -12,12 +12,11 @@ import {
   BUSINESS,
   BUSINESS_MAPS_EMBED_URL,
   DEFAULT_OG_IMAGE,
-  ORG_ID,
-  SITE_LOGO,
   SITE_URL,
 } from "@/lib/site";
 import {
   buildCourseJsonLd,
+  buildLocalBusinessJsonLd,
   faqs,
   levels,
   partnerLogos,
@@ -60,30 +59,6 @@ export const metadata: Metadata = {
 const PAGE_URL = `${SITE_URL}${PAGE_PATH}`;
 
 function buildJsonLd() {
-  const organization = {
-    "@context": "https://schema.org",
-    "@type": ["EducationalOrganization", "LocalBusiness"],
-    "@id": ORG_ID,
-    name: BUSINESS.name,
-    url: SITE_URL,
-    logo: SITE_LOGO,
-    telephone: BUSINESS.phone,
-    // NAP identik dengan schema homepage (satu @id, jangan bertentangan)
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: BUSINESS.streetAddress,
-      addressLocality: BUSINESS.city,
-      addressRegion: BUSINESS.region,
-      addressCountry: BUSINESS.country,
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: BUSINESS.geo.lat,
-      longitude: BUSINESS.geo.lng,
-    },
-    sameAs: [BUSINESS.instagramUrl],
-  };
-
   const faqPage = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -104,7 +79,7 @@ function buildJsonLd() {
     ],
   };
 
-  return [organization, faqPage, breadcrumb, ...buildCourseJsonLd()];
+  return [buildLocalBusinessJsonLd(), faqPage, breadcrumb, ...buildCourseJsonLd()];
 }
 
 const waButtonClass =
@@ -215,7 +190,9 @@ export default function KursusKomputerBalikpapanPage() {
             <p className={pClass}>
               Kurikulum Supercoder dibagi tiga level berurutan, dari memahami web sampai membangun
               aplikasi nyata dengan AI (
-              <Link href="/#journey" className={linkClass}>lihat Coding Journey</Link>).
+              <Link href="/#journey" className={linkClass}>lihat Coding Journey</Link>). Fokus
+              materi coding-nya, dari HTML sampai proyek portofolio, dibahas lebih rinci di halaman{" "}
+              <Link href="/kursus-coding-balikpapan" className={linkClass}>Kursus Coding Balikpapan</Link>.
             </p>
             <ol className="grid grid-cols-1 md:grid-cols-3 gap-5 my-8">
               {levels.map((lv, i) => (

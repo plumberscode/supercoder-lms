@@ -3,7 +3,7 @@ import Link from "next/link";
 import { MapPin, Clock, Phone } from "lucide-react";
 import { BUSINESS, BUSINESS_MAPS_EMBED_URL } from "@/lib/site";
 
-// showLocalLinks: tautan ke halaman lokal /kursus-komputer-balikpapan. Sengaja tidak aktif di
+// showLocalLinks: tautan ke halaman lokal (/kursus-coding-balikpapan, /kursus-komputer-balikpapan). Sengaja tidak aktif di
 // homepage (default) supaya halaman itu tidak ditautkan dari "/".
 export default function Footer({ showLocalLinks = false }: { showLocalLinks?: boolean }) {
   return (
@@ -261,6 +261,16 @@ export default function Footer({ showLocalLinks = false }: { showLocalLinks?: bo
                     Portal LMS
                   </Link>
                 </li>
+                {showLocalLinks && (
+                  <li>
+                    <Link
+                      href="/kursus-coding-balikpapan"
+                      className="hover:text-red-600 transition-colors"
+                    >
+                      Kursus Coding Balikpapan
+                    </Link>
+                  </li>
+                )}
                 {showLocalLinks && (
                   <li>
                     <Link
