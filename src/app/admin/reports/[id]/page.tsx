@@ -25,17 +25,17 @@ const textareaStyle = {
 const noteFields = [
   {
     name: "strengths",
-    label: "💪 Kekuatan",
+    label: "💪 Hal yang Sudah Dikuasai",
     placeholder: "Contoh: Cepat memahami konsep perulangan dan rajin bertanya.",
   },
   {
     name: "improvements",
-    label: "🎯 Yang Perlu Ditingkatkan",
+    label: "🎯 Fokus Pengembangan Berikutnya",
     placeholder: "Contoh: Perlu lebih teliti membaca soal sebelum mengerjakan.",
   },
   {
     name: "parent_advice",
-    label: "🏠 Saran untuk Orang Tua",
+    label: "🏠 Dukungan Belajar di Rumah",
     placeholder: "Contoh: Ajak ananda menceritakan proyek yang sedang dibuat setiap minggu.",
   },
 ] as const;

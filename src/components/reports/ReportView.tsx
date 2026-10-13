@@ -39,9 +39,9 @@ export default function ReportView({
     totals.total > 0 ? Math.round((totals.completed / totals.total) * 100) : 0;
 
   const noteSections = [
-    { title: "💪 Kekuatan", body: notes.strengths },
-    { title: "🎯 Yang Perlu Ditingkatkan", body: notes.improvements },
-    { title: "🏠 Saran untuk Orang Tua", body: notes.parent_advice },
+    { title: "💪 Hal yang Sudah Dikuasai", body: notes.strengths },
+    { title: "🎯 Fokus Pengembangan Berikutnya", body: notes.improvements },
+    { title: "🏠 Dukungan Belajar di Rumah", body: notes.parent_advice },
   ].filter((n) => n.body?.trim());
 
   return (
