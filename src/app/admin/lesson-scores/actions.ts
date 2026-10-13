@@ -2,6 +2,32 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { PASS_SCORE } from "@/lib/reports";
+
+export async function saveLessonXpReward(formData: FormData) {
+  const supabase = await createClient();
+
+  const lessonId = formData.get("lessonId") as string;
+  const xpReward = parseInt(formData.get("xpReward") as string);
+
+  if (!lessonId || isNaN(xpReward) || xpReward < 0) {
+    throw new Error("Bobot XP tidak valid");
+  }
+
+  const { error } = await supabase
+    .from("lessons")
+    .update({ xp_reward: xpReward })
+    .eq("id", lessonId);
+
+  if (error) {
+    console.error("Error updating xp_reward:", error);
+    throw new Error(
+      `Gagal menyimpan bobot XP: ${error.message}. Pastikan migration_lesson_xp_reward.sql sudah dijalankan.`,
+    );
+  }
+
+  revalidatePath("/admin/lesson-scores");
+}
 
 export async function submitLessonScore(formData: FormData) {
   const supabase = await createClient();
@@ -18,11 +44,27 @@ export async function submitLessonScore(formData: FormData) {
   // Cek apakah sudah ada nilai sebelumnya untuk lesson ini oleh student ini
   const { data: existing } = await supabase
     .from("submissions")
-    .select("id, score")
+    .select("id, score, data")
     .eq("student_id", studentId)
     .eq("content_id", lessonId)
     .eq("type", "lesson")
     .maybeSingle();
+
+  const { data: lesson } = await supabase
+    .from("lessons")
+    .select("xp_reward")
+    .eq("id", lessonId)
+    .maybeSingle();
+  const xpReward: number = lesson?.xp_reward ?? 0;
+
+  // XP diberikan sekali per siswa per materi. Penanda di data mencegah XP ganda
+  // saat nilai diturunkan lalu dinaikkan lagi.
+  const alreadyAwarded = !!existing?.data?.xp_awarded;
+  const awardXp = score >= PASS_SCORE && xpReward > 0 && !alreadyAwarded;
+  const data = {
+    ...(existing?.data || {}),
+    ...(awardXp && { xp_awarded: xpReward }),
+  };
 
   if (existing) {
     // Update
@@ -31,6 +73,7 @@ export async function submitLessonScore(formData: FormData) {
       .update({
         score,
         feedback,
+        data,
         status: "graded",
         graded_at: new Date().toISOString(),
       })
@@ -46,7 +89,7 @@ export async function submitLessonScore(formData: FormData) {
       student_id: studentId,
       content_id: lessonId,
       type: "lesson",
-      data: {}, // No specific submission data
+      data,
       score,
       feedback,
       status: "graded",
@@ -60,6 +103,10 @@ export async function submitLessonScore(formData: FormData) {
         `Gagal menyimpan nilai baru: ${error.message} (${error.details || ""})`,
       );
     }
+  }
+
+  if (awardXp) {
+    await supabase.rpc("increment_xp", { user_id: studentId, amount: xpReward });
   }
 
   revalidatePath("/admin/lesson-scores");

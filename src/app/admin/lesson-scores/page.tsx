@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import styles from "../admin.module.css";
 import Link from "next/link";
-import { submitLessonScore } from "./actions";
+import { saveLessonXpReward, submitLessonScore } from "./actions";
 
 export default async function LessonScoresPage({
   searchParams,
@@ -25,6 +25,7 @@ export default async function LessonScoresPage({
   let lessons: any[] = [];
   let students: any[] = [];
   const scoresMap: Record<string, any> = {};
+  let xpReward = 0;
 
   if (params.subject_id) {
     const { data } = await supabase
@@ -45,6 +46,14 @@ export default async function LessonScoresPage({
   }
 
   if (params.lesson_id) {
+    // Kolom xp_reward baru ada setelah migration_lesson_xp_reward.sql; tanpa itu tetap 0.
+    const { data: lessonRow } = await supabase
+      .from("lessons")
+      .select("xp_reward")
+      .eq("id", params.lesson_id)
+      .maybeSingle();
+    xpReward = lessonRow?.xp_reward ?? 0;
+
     // Fetch all students
     const { data: allStudents } = await supabase
       .from("profiles")
@@ -186,6 +195,49 @@ export default async function LessonScoresPage({
 
       {params.lesson_id && (
         <div className="card">
+          <form
+            action={saveLessonXpReward}
+            style={{
+              display: "flex",
+              gap: "12px",
+              alignItems: "center",
+              flexWrap: "wrap",
+              padding: "16px",
+              marginBottom: "24px",
+              borderRadius: "12px",
+              backgroundColor: "#F8FAFC",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <input type="hidden" name="lessonId" value={params.lesson_id} />
+            <label style={{ fontWeight: 600, fontSize: "0.9rem" }}>
+              ⚡ Bobot XP materi ini
+            </label>
+            <div className={styles.inputGroup} style={{ width: "100px" }}>
+              <input
+                type="number"
+                name="xpReward"
+                min="0"
+                defaultValue={xpReward}
+                required
+              />
+            </div>
+            <button type="submit" className="btn">
+              Simpan Bobot
+            </button>
+            <p
+              style={{
+                flexBasis: "100%",
+                margin: 0,
+                fontSize: "0.8rem",
+                color: "var(--text-muted)",
+              }}
+            >
+              Nilai siswa diisi dengan skala 0–100. Siswa mendapat XP ini sekali,
+              saat nilainya pertama kali mencapai 70 atau lebih.
+            </p>
+          </form>
+
           <h2 style={{ marginBottom: "24px" }}>Daftar Siswa</h2>
 
           <div
@@ -232,6 +284,9 @@ export default async function LessonScoresPage({
                       >
                         Dinilai pada{" "}
                         {new Date(existingScore.graded_at).toLocaleDateString()}
+                        {existingScore.data?.xp_awarded
+                          ? ` · +${existingScore.data.xp_awarded} XP`
+                          : ""}
                       </span>
                     )}
                   </div>
@@ -259,7 +314,8 @@ export default async function LessonScoresPage({
                       <input
                         type="number"
                         name="score"
-                        placeholder="0-100"
+                        placeholder="Nilai 0–100"
+                        aria-label="Nilai (0–100)"
                         min="0"
                         max="100"
                         defaultValue={existingScore?.score || ""}
