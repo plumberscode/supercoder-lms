@@ -24,7 +24,7 @@ export default async function AdminReportsPage({
   const { data: reports, error } = await supabase
     .from("monthly_reports")
     .select(
-      "id, status, sent_at, published_at, profiles!monthly_reports_student_id_fkey(full_name, email, parent_whatsapp)",
+      "id, status, sent_at, published_at, profiles!monthly_reports_student_id_fkey(full_name, email, parent_whatsapp, status)",
     )
     .eq("period", period);
 
@@ -42,6 +42,8 @@ export default async function AdminReportsPage({
       ...r,
       student: Array.isArray(r.profiles) ? r.profiles[0] : r.profiles,
     }))
+    // Siswa nonaktif tidak perlu muncul di daftar rapor.
+    .filter((r) => r.student?.status !== "inactive")
     .sort((a, b) =>
       (a.student?.full_name || "").localeCompare(b.student?.full_name || ""),
     );
