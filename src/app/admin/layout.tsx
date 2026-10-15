@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./admin.module.css";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
@@ -30,7 +31,14 @@ export default async function AdminLayout({
     <div className={styles.adminLayout}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarLogo}>
-          Super<span>coder</span>
+          <Image
+            src="/images/Logo transparent orange.webp"
+            alt="Supercoder"
+            width={120}
+            height={40}
+            className={styles.sidebarLogoImage}
+            priority
+          />
         </div>
 
         <nav className={styles.nav}>
