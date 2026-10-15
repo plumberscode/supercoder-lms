@@ -8,6 +8,7 @@ import { runCode } from "@/lib/code-runner";
 import { runTestCases, type GradingResult } from "@/lib/test-runner";
 import HtmlJsChallenge from "./HtmlJsChallenge";
 import ChallengeDescription from "./ChallengeDescription";
+import Celebration, { PASSING_SCORE } from "./Celebration";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 
 interface CodingChallenge {
@@ -78,6 +79,11 @@ function StandardCodeChallenge({
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [testResults, setTestResults] = useState<GradingResult | null>(null);
+  const [celebration, setCelebration] = useState<{
+    score: number;
+    xpEarned: number;
+    key: number;
+  } | null>(null);
   const [hint, setHint] = useState("");
   const [isLoadingHint, setIsLoadingHint] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
@@ -126,13 +132,18 @@ function StandardCodeChallenge({
       setTestResults(result);
       setAttemptCount((prev) => prev + 1);
 
-      if (result.score >= 70) {
+      if (result.score >= PASSING_SCORE) {
         setFinalScore(result.score);
-        await submitCodeSolution({
+        const saved = await submitCodeSolution({
           challengeId: challenge.id,
           lessonId: challenge.lesson_id,
           code,
           score: result.score,
+        });
+        setCelebration({
+          score: result.score,
+          xpEarned: saved.xpEarned,
+          key: Date.now(),
         });
       }
     } catch (err: any) {
@@ -185,6 +196,14 @@ function StandardCodeChallenge({
 
   return (
     <div className={styles.container}>
+      {celebration && (
+        <Celebration
+          key={celebration.key}
+          score={celebration.score}
+          xpEarned={celebration.xpEarned}
+          onDone={() => setCelebration(null)}
+        />
+      )}
       {existingSubmission && (
         <div className={styles.existingScore}>
           🏆 Skor terbaik sebelumnya: {existingSubmission.score}/100
@@ -406,8 +425,8 @@ function StandardCodeChallenge({
                         className={styles.hintButton}
                       >
                         {isLoadingHint
-                          ? "⏳ Meminta bantuan AI..."
-                          : "💡 Minta Petunjuk (AI Hint)"}
+                          ? "⏳ Sebentar ya..."
+                          : "💡 Kasih Petunjuk Dong"}
                       </button>
                     )}
                   </>
@@ -420,7 +439,7 @@ function StandardCodeChallenge({
                 {!hint ? (
                   <div>
                     <p style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: "10px" }}>
-                      Butuh bantuan? AI Tutor dapat menganalisis kodemu dan memberikan petunjuk tanpa memberi jawaban langsung.
+                      Butuh bantuan? Kakak bisa lihat kodemu dan kasih petunjuk, tanpa langsung kasih jawabannya.
                     </p>
                     <button
                       onClick={handleGetHint}
@@ -428,15 +447,15 @@ function StandardCodeChallenge({
                       className={styles.hintButton}
                     >
                       {isLoadingHint
-                        ? "⏳ Meminta bantuan AI..."
+                        ? "⏳ Sebentar ya..."
                         : !testResults
                           ? "Submit kode terlebih dahulu untuk mendapat hint"
-                          : "💡 Minta Petunjuk (AI Hint)"}
+                          : "💡 Kasih Petunjuk Dong"}
                     </button>
                   </div>
                 ) : (
                   <div className={styles.hintPanel}>
-                    <div className={styles.hintTitle}>💡 Petunjuk dari AI Tutor</div>
+                    <div className={styles.hintTitle}>💡 Petunjuk dari Kakak</div>
                     <div className={styles.hintText}>{hint}</div>
                     <button
                       onClick={handleGetHint}
@@ -453,7 +472,7 @@ function StandardCodeChallenge({
                         cursor: "pointer",
                       }}
                     >
-                      {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Baru"}
+                      {isLoadingHint ? "⏳ Sebentar ya..." : "🔄 Petunjuk Lain, Kak"}
                     </button>
                   </div>
                 )}

@@ -1,3 +1,4 @@
+import { DEEPSEEK_DEFAULTS } from "@/lib/deepseek";
 import OpenAI from "openai";
 import { requireBlogAdmin } from "@/lib/blog/auth";
 import { runSeoAgent, type AgentEvent } from "@/lib/seo/agent";
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
       try {
         created = await runSeoAgent({
           stream: (params) =>
-            client.chat.completions.create({ model: "deepseek-chat", stream: true, temperature: 0.3, ...params }),
+            client.chat.completions.create({ ...DEEPSEEK_DEFAULTS, stream: true, temperature: 0.3, ...params }),
           system,
           history: [...history, userMessage],
           ctx: { supabase, userId: user.id, conversationId: convId, settings, collected: [] },

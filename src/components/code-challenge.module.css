@@ -347,6 +347,7 @@
 }
 
 .hintText {
+  white-space: pre-line;
   color: #fcd34d;
   line-height: 1.6;
   font-size: 0.8rem;

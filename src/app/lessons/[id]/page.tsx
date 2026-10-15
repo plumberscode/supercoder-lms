@@ -326,6 +326,7 @@ export default async function LessonPage({
                         marginTop: "8px",
                         fontStyle: "italic",
                         color: "#166534",
+                        whiteSpace: "pre-line",
                       }}
                     >
                       &quot;{lessonScore.feedback}&quot;

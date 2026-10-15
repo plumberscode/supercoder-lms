@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import CodeEditor from "./CodeEditor";
 import ChallengeDescription from "./ChallengeDescription";
+import Celebration, { PASSING_SCORE } from "./Celebration";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 import styles from "./code-challenge.module.css";
 import {
@@ -64,6 +65,11 @@ export default function HtmlJsChallenge({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // AI Grading states
+  const [celebration, setCelebration] = useState<{
+    score: number;
+    xpEarned: number;
+    key: number;
+  } | null>(null);
   const [gradeResult, setGradeResult] = useState<{
     score: number;
     feedback: string;
@@ -150,6 +156,13 @@ export default function HtmlJsChallenge({
       }
 
       setGradeResult({ score: result.score!, feedback: result.feedback! });
+      if (result.score! >= PASSING_SCORE) {
+        setCelebration({
+          score: result.score!,
+          xpEarned: result.xpEarned ?? 0,
+          key: Date.now(),
+        });
+      }
       setBestScore(result.bestScore!);
       setAttemptsUsed(
         typeof result.attemptsUsed === "number" && !isNaN(result.attemptsUsed)
@@ -159,7 +172,7 @@ export default function HtmlJsChallenge({
       setLastSubmittedHtml(htmlCode);
       setLastSubmittedJs(jsCode);
     } catch (err: any) {
-      setOutputError(err.message || "Terjadi kesalahan saat submit ke AI");
+      setOutputError(err.message || "Terjadi kesalahan saat menilai kodemu");
     } finally {
       setIsSubmitting(false);
     }
@@ -206,6 +219,14 @@ export default function HtmlJsChallenge({
 
   return (
     <div className={styles.container}>
+      {celebration && (
+        <Celebration
+          key={celebration.key}
+          score={celebration.score}
+          xpEarned={celebration.xpEarned}
+          onDone={() => setCelebration(null)}
+        />
+      )}
       {existingSubmission && existingSubmission.score > 0 && (
         <div className={styles.existingScore}>
           🏆 Skor terbaik sebelumnya: {existingSubmission.score}/100
@@ -257,10 +278,10 @@ export default function HtmlJsChallenge({
                 className={styles.submitButton}
               >
                 {isSubmitting
-                  ? "⏳ Memeriksa..."
+                  ? "⏳ Lagi dinilai, tunggu ya..."
                   : isMaxedOut
-                    ? "📤 Batas tercapai"
-                    : `📤 Submit ke AI (sisa: ${remainingAttempts})`}
+                    ? "🔒 Kesempatan habis"
+                    : `🎯 Nilai Kodeku (sisa ${remainingAttempts}x)`}
               </button>
               <button onClick={handleReset} className={styles.resetButton}>
                 ↺ Reset
@@ -412,13 +433,13 @@ export default function HtmlJsChallenge({
               style={{ marginTop: "16px" }}
             >
               {isLoadingHint
-                ? "⏳ Meminta bantuan AI..."
-                : "💡 Minta Petunjuk (AI Hint)"}
+                ? "⏳ Sebentar ya..."
+                : "💡 Kasih Petunjuk Dong"}
             </button>
           )}
           {hint && (
             <div className={styles.hintPanel} style={{ marginTop: "16px" }}>
-              <div className={styles.hintTitle}>💡 Petunjuk dari AI Tutor</div>
+              <div className={styles.hintTitle}>💡 Petunjuk dari Kakak</div>
               <div className={styles.hintText}>{hint}</div>
               <button
                 onClick={handleGetHint}
@@ -435,7 +456,7 @@ export default function HtmlJsChallenge({
                   cursor: "pointer",
                 }}
               >
-                {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Lagi"}
+                {isLoadingHint ? "⏳ Sebentar ya..." : "🔄 Petunjuk Lain, Kak"}
               </button>
             </div>
           )}

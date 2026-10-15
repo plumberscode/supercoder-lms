@@ -1,5 +1,7 @@
 "use server";
 
+import { DEEPSEEK_DEFAULTS } from "@/lib/deepseek";
+import { KAKAK_STYLE, KAKAK_STYLE_JSON } from "@/lib/ai-persona";
 import { descriptionToPlainText } from "@/lib/challenge-description";
 
 import {
@@ -82,14 +84,17 @@ ${params.js}
    - 0-49: Salah, error parah, atau sangat tidak lengkap.
 
 Balas HANYA dengan JSON valid:
-{"score": <number>, "feedback": "<feedback mendidik dalam Bahasa Indonesia>"}`;
+{"score": <number>, "feedback": "<feedback mendidik dalam Bahasa Indonesia>"}
+
+Aturan untuk isi "feedback":
+${KAKAK_STYLE_JSON}`;
 
   let score = 0;
   let feedback = "Tidak dapat menilai jawaban saat ini.";
 
   try {
     const result = await openai.chat.completions.create({
-      model: "deepseek-chat",
+      ...DEEPSEEK_DEFAULTS,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
     });
@@ -150,8 +155,9 @@ Balas HANYA dengan JSON valid:
   }
 
   // Award XP ONCE: only when transitioning from below-70 to 70+
+  let xpEarned = 0;
   if (score >= 70 && (!existing || (existing.score || 0) < 70)) {
-    await awardXp(user.id, challenge.max_score ?? 100);
+    xpEarned = await awardXp(user.id, challenge.max_score ?? 100);
   }
 
   revalidatePath(`/lessons/${params.lessonId}`);
@@ -159,7 +165,13 @@ Balas HANYA dengan JSON valid:
   revalidatePath("/dashboard");
   revalidatePath("/admin/gradebook");
 
-  return { score, feedback, bestScore, attemptsUsed: newAttempts.length };
+  return {
+    score,
+    feedback,
+    bestScore,
+    attemptsUsed: newAttempts.length,
+    xpEarned,
+  };
 }
 
 export async function getHtmlJsHint(params: {
@@ -207,10 +219,12 @@ ${params.studentJs}
 Ini adalah percobaan ke-${params.attemptNumber} siswa.
 ${hintLevel}
 
-Berikan hint SINGKAT (maksimal 2-3 kalimat) dalam Bahasa Indonesia. JANGAN berikan jawaban langsung.`;
+Berikan hint SINGKAT (maksimal 4 kalimat pendek) dalam Bahasa Indonesia. JANGAN berikan jawaban langsung.
+
+${KAKAK_STYLE}`;
 
     const result = await openai.chat.completions.create({
-      model: "deepseek-chat",
+      ...DEEPSEEK_DEFAULTS,
       messages: [{ role: "user", content: prompt }],
     });
     return (
