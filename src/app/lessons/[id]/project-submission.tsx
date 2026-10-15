@@ -1,33 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { submitProject } from "../quiz-actions";
 
 export default function ProjectSubmission({ lessonId }: { lessonId: string }) {
   const [link, setLink] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const supabase = createClient();
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      const { error } = await supabase.from("submissions").insert({
-        student_id: user.id,
-        content_id: lessonId,
-        type: "project",
-        data: { link },
-        status: "submitted",
-      });
-
-      if (!error) setSubmitted(true);
-    }
+    const result = await submitProject(lessonId, link);
+    if ("error" in result) setError(result.error);
+    else setSubmitted(true);
     setLoading(false);
   };
 
@@ -66,6 +55,11 @@ export default function ProjectSubmission({ lessonId }: { lessonId: string }) {
               {loading ? "Mengirim..." : "Kirim Proyek"}
             </button>
           </div>
+          {error && (
+            <p style={{ color: "#DC2626", fontSize: "0.875rem", marginTop: "12px" }}>
+              {error}
+            </p>
+          )}
         </form>
       ) : (
         <div

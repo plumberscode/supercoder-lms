@@ -1,51 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@/utils/supabase/client";
+import {
+  getQuizForStudent,
+  submitQuiz,
+  type StudentQuizQuestion,
+} from "../quiz-actions";
 
+// Soal diambil tanpa kunci jawaban, dan dinilai di server (quiz-actions.ts).
 export default function QuizView({ lessonId }: { lessonId: string }) {
-  const [quiz, setQuiz] = useState<any>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [quiz, setQuiz] = useState<{ id: string; title: string; passScore: number } | null>(null);
+  const [questions, setQuestions] = useState<StudentQuizQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [score, setScore] = useState(0);
+  const [xpAwarded, setXpAwarded] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const supabase = createClient();
-
   useEffect(() => {
-    async function loadQuiz() {
-      const { data: quizData } = await supabase
-        .from("quizzes")
-        .select("*")
-        .eq("lesson_id", lessonId)
-        .single();
-
-      if (quizData) {
-        setQuiz(quizData);
-        let questionData;
-        if (quizData.is_dynamic) {
-          const { data } = await supabase
-            .from("question_bank")
-            .select("*")
-            .eq("category", quizData.target_category);
-
-          // Randomize and limit in JS to ensure fresh experience
-          questionData = (data || [])
-            .sort(() => Math.random() - 0.5)
-            .slice(0, quizData.question_count || 10);
-        } else {
-          const { data } = await supabase
-            .from("quiz_questions")
-            .select("*")
-            .eq("quiz_id", quizData.id);
-          questionData = data || [];
-        }
-        setQuestions(questionData);
+    getQuizForStudent(lessonId).then((result) => {
+      if ("error" in result) setError(result.error);
+      else {
+        setQuiz(result.quiz);
+        setQuestions(result.questions);
       }
       setLoading(false);
-    }
-    loadQuiz();
+    });
   }, [lessonId]);
 
   const handleSelect = (questionId: string, index: number) => {
@@ -54,38 +36,21 @@ export default function QuizView({ lessonId }: { lessonId: string }) {
   };
 
   const handleSubmit = async () => {
-    let correctCount = 0;
-    questions.forEach((q) => {
-      if (answers[q.id] === q.correct_option_index) {
-        correctCount++;
-      }
-    });
-
-    const finalScore = Math.round((correctCount / questions.length) * 100);
-    setScore(finalScore);
-    setSubmitted(true);
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from("submissions").insert({
-        student_id: user.id,
-        content_id: quiz.id,
-        type: "quiz",
-        data: answers,
-        score: finalScore,
-        status: "graded",
-      });
-
-      if (finalScore >= (quiz.pass_score || 70)) {
-        await supabase.rpc("increment_xp", { user_id: user.id, amount: 50 });
-      }
+    setSubmitting(true);
+    setError(null);
+    const result = await submitQuiz(lessonId, answers);
+    setSubmitting(false);
+    if ("error" in result) {
+      setError(result.error);
+      return;
     }
+    setScore(result.score);
+    setXpAwarded(result.xpAwarded);
+    setSubmitted(true);
   };
 
   if (loading) return <div>Memuat kuis...</div>;
-  if (!quiz) return <div>Kuis tidak ditemukan untuk materi ini.</div>;
+  if (!quiz) return <div>{error ?? "Kuis tidak ditemukan untuk materi ini."}</div>;
 
   return (
     <div style={{ padding: "20px" }}>
@@ -129,23 +94,29 @@ export default function QuizView({ lessonId }: { lessonId: string }) {
           <button
             className="btn btn-primary"
             onClick={handleSubmit}
-            disabled={Object.keys(answers).length < questions.length}
+            disabled={submitting || Object.keys(answers).length < questions.length}
             style={{ marginTop: "20px" }}
           >
-            Kirim Kuis
+            {submitting ? "Memeriksa..." : "Kirim Kuis"}
           </button>
+          {error && <p style={{ color: "#DC2626", margin: 0 }}>{error}</p>}
         </div>
       ) : (
         <div style={{ textAlign: "center", padding: "40px" }}>
           <div style={{ fontSize: "4rem", marginBottom: "16px" }}>
-            {score >= (quiz.pass_score || 70) ? "🎉" : "📚"}
+            {score >= quiz.passScore ? "🎉" : "📚"}
           </div>
           <h2>Skor Anda: {score}%</h2>
           <p style={{ color: "#64748B", marginTop: "8px" }}>
-            {score >= (quiz.pass_score || 70)
+            {score >= quiz.passScore
               ? "Bagus sekali! Anda lulus."
               : "Tetap semangat dan coba lagi ya!"}
           </p>
+          {xpAwarded > 0 && (
+            <p style={{ color: "#F97316", fontWeight: 700, marginTop: "8px" }}>
+              +{xpAwarded} XP
+            </p>
+          )}
           <button
             className="btn btn-secondary"
             style={{ marginTop: "24px" }}

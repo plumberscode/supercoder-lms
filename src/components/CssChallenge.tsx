@@ -15,7 +15,6 @@ interface CssChallenge {
   description: string;
   starter_html: string;
   starter_css: string;
-  reference_css: string;
   max_score: number;
   max_attempts: number;
 }
@@ -88,10 +87,6 @@ export default function CssChallengeComponent({
         challengeId: challenge.id,
         lessonId: challenge.lesson_id,
         css: cssCode,
-        starterHtml: htmlCode,
-        referenceCss: challenge.reference_css,
-        description: challenge.description,
-        maxScore: challenge.max_score,
       });
 
       if ("error" in result && result.error) {
@@ -124,7 +119,6 @@ export default function CssChallengeComponent({
         lessonId: challenge.lesson_id,
         description: challenge.description,
         studentCss: cssCode,
-        referenceCss: challenge.reference_css,
         starterHtml: htmlCode,
         attemptNumber: attemptsUsed,
       });

@@ -1,9 +1,8 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
-import { isStaff } from "@/lib/student-access";
+import { currentUserIsStaff } from "@/lib/staff";
 import {
   generatePassword,
   minasEmail,
@@ -26,26 +25,11 @@ export type CreateMinasState = {
 
 const MAX_PER_IMPORT = 60;
 
-// Action ini memakai service role (melewati RLS), jadi pemanggilnya wajib admin/guru.
-async function requireStaff() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return false;
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  return isStaff(profile?.role);
-}
-
 export async function createMinasStudents(
   _prev: CreateMinasState,
   formData: FormData,
 ): Promise<CreateMinasState> {
-  if (!(await requireStaff())) {
+  if (!(await currentUserIsStaff())) {
     return { created: [], failed: [], error: "Hanya admin atau guru." };
   }
 
@@ -127,7 +111,7 @@ export type ResetPasswordResult =
 export async function resetMinasPassword(
   userId: string,
 ): Promise<ResetPasswordResult> {
-  if (!(await requireStaff())) {
+  if (!(await currentUserIsStaff())) {
     return { ok: false, message: "Hanya admin atau guru." };
   }
 

@@ -8,6 +8,8 @@ import {
   LESSON_ACCESS_DENIED,
 } from "@/lib/lesson-access";
 import { revalidatePath } from "next/cache";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { awardXp } from "@/lib/xp";
 import OpenAI from "openai";
 
 export async function submitHtmlJsSolution(params: {
@@ -15,12 +17,21 @@ export async function submitHtmlJsSolution(params: {
   lessonId: string;
   html: string;
   js: string;
-  description: string;
-  maxScore: number;
 }) {
   const access = await getLessonAccess(params.lessonId);
   if (!access) return { error: LESSON_ACCESS_DENIED };
   const { supabase, user } = access;
+
+  // Soal & bobot XP dibaca dari database, bukan dari browser.
+  const admin = createAdminClient();
+  const { data: challenge } = await admin
+    .from("coding_challenges")
+    .select("id, lesson_id, description, max_score")
+    .eq("id", params.challengeId)
+    .single();
+  if (!challenge || challenge.lesson_id !== params.lessonId) {
+    return { error: "Soal tidak ditemukan." };
+  }
 
   // Fetch existing submission
   const { data: existing } = await supabase
@@ -49,7 +60,7 @@ export async function submitHtmlJsSolution(params: {
   const prompt = `Kamu adalah penilai kode HTML dan Javascript untuk siswa.
 
 ## Soal / Deskripsi
-${descriptionToPlainText(params.description)}
+${descriptionToPlainText(challenge.description)}
 
 ## Jawaban HTML Siswa
 \`\`\`html
@@ -109,7 +120,7 @@ Balas HANYA dengan JSON valid:
   const bestScore = Math.max(score, existing?.score || 0);
 
   if (existing) {
-    const { error } = await supabase
+    const { error } = await admin
       .from("submissions")
       .update({
         data: { code: params.js, html: params.html, attempts: newAttempts },
@@ -122,7 +133,7 @@ Balas HANYA dengan JSON valid:
       return { error: "Gagal memperbarui: " + error.message };
     }
   } else {
-    const { error } = await supabase.from("submissions").insert({
+    const { error } = await admin.from("submissions").insert({
       student_id: user.id,
       content_id: params.lessonId,
       type: "code",
@@ -140,10 +151,7 @@ Balas HANYA dengan JSON valid:
 
   // Award XP ONCE: only when transitioning from below-70 to 70+
   if (score >= 70 && (!existing || (existing.score || 0) < 70)) {
-    await supabase.rpc("increment_xp", {
-      user_id: user.id,
-      amount: params.maxScore,
-    });
+    await awardXp(user.id, challenge.max_score ?? 100);
   }
 
   revalidatePath(`/lessons/${params.lessonId}`);

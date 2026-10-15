@@ -142,8 +142,6 @@ export default function HtmlJsChallenge({
         lessonId: challenge.lesson_id,
         html: htmlCode,
         js: jsCode,
-        description: challenge.description,
-        maxScore: challenge.max_score,
       });
 
       if ("error" in result && result.error) {

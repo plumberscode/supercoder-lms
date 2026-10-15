@@ -22,9 +22,6 @@ interface WebChallengeData {
   starter_html: string;
   starter_css: string;
   starter_js: string;
-  reference_html: string;
-  reference_css: string;
-  reference_js: string;
   max_score: number;
   max_attempts: number;
 }
@@ -117,15 +114,9 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
       const result = await submitWebChallengeSolution({
         challengeId: challenge.id,
         lessonId: challenge.lesson_id,
-        mode: challenge.mode,
         html: htmlCode,
         css: includeCss ? cssCode : "",
         js: includeJs ? jsCode : "",
-        referenceHtml: challenge.reference_html,
-        referenceCss: challenge.reference_css,
-        referenceJs: challenge.reference_js,
-        description: challenge.description,
-        maxScore: challenge.max_score,
       });
 
       if ("error" in result && result.error) {

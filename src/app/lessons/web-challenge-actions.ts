@@ -8,6 +8,8 @@ import {
   LESSON_ACCESS_DENIED,
 } from "@/lib/lesson-access";
 import { revalidatePath } from "next/cache";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { awardXp } from "@/lib/xp";
 import OpenAI from "openai";
 
 type WebMode = "html" | "html-css" | "html-css-js";
@@ -15,19 +17,25 @@ type WebMode = "html" | "html-css" | "html-css-js";
 export async function submitWebChallengeSolution(params: {
   challengeId: string;
   lessonId: string;
-  mode: WebMode;
   html: string;
   css: string;
   js: string;
-  referenceHtml: string;
-  referenceCss: string;
-  referenceJs: string;
-  description: string;
-  maxScore: number;
 }) {
   const access = await getLessonAccess(params.lessonId);
   if (!access) return { error: LESSON_ACCESS_DENIED };
   const { supabase, user } = access;
+
+  // Soal, mode, kunci jawaban & bobot XP dibaca dari database, bukan dari browser.
+  const admin = createAdminClient();
+  const { data: challenge } = await admin
+    .from("web_challenges")
+    .select("id, description, mode, reference_html, reference_css, reference_js, max_score")
+    .eq("lesson_id", params.lessonId)
+    .single();
+  if (!challenge || challenge.id !== params.challengeId) {
+    return { error: "Soal tidak ditemukan." };
+  }
+  const mode = challenge.mode as WebMode;
 
   // Fetch existing submission
   const { data: existing } = await supabase
@@ -52,20 +60,20 @@ export async function submitWebChallengeSolution(params: {
     apiKey: apiKey,
   });
 
-  const includeCss = params.mode === "html-css" || params.mode === "html-css-js";
-  const includeJs = params.mode === "html-css-js";
+  const includeCss = mode === "html-css" || mode === "html-css-js";
+  const includeJs = mode === "html-css-js";
 
   const modeLabel =
-    params.mode === "html"
+    mode === "html"
       ? "HTML saja"
-      : params.mode === "html-css"
+      : mode === "html-css"
         ? "HTML + CSS"
         : "HTML + CSS + JavaScript";
 
   const prompt = `Kamu adalah penilai proyek Web (HTML${includeCss ? "[+ CSS]" : ""}${includeJs ? "[+ JavaScript]" : ""}) untuk siswa pemula.
 
 ## Soal / Deskripsi
-${descriptionToPlainText(params.description)}
+${descriptionToPlainText(challenge.description)}
 
 ## Mode Soal
 ${modeLabel}
@@ -95,14 +103,14 @@ ${params.js}
 }
 ## Referensi Jawaban HTML (dari guru)
 \`\`\`html
-${params.referenceHtml}
+${challenge.reference_html}
 \`\`\`
 ${
   includeCss
     ? `
 ## Referensi Jawaban CSS (dari guru)
 \`\`\`css
-${params.referenceCss}
+${challenge.reference_css}
 \`\`\`
 `
     : ""
@@ -111,13 +119,13 @@ ${params.referenceCss}
     ? `
 ## Referensi Jawaban JavaScript (dari guru)
 \`\`\`javascript
-${params.referenceJs}
+${challenge.reference_js}
 \`\`\`
 `
     : ""
 }
 ## Instruksi Penilaian
-1. HANYA nilai bagian yang sesuai mode soal (${params.mode}). Jangan kurangi nilai karena CSS/JS tidak ada jika mode tidak memintanya.
+1. HANYA nilai bagian yang sesuai mode soal (${mode}). Jangan kurangi nilai karena CSS/JS tidak ada jika mode tidak memintanya.
 2. Bandingkan jawaban siswa dengan referensi guru dari sisi hasil visual dan/atau fungsional, bukan kesamaan kode literal.
 3. Untuk HTML: struktur elemen dan semantik yang relevan dengan soal.
 ${includeCss ? "4. Untuk CSS: fokus pada apakah CSS MENGHASILKAN VISUAL YANG SAMA, bukan kode identik.\n" : ""}${includeJs ? "5. Untuk JavaScript: periksa apakah logika benar dan interaksi berjalan sesuai soal.\n" : ""}6. Berikan skor 0-100:
@@ -171,7 +179,7 @@ Balas HANYA dengan JSON valid:
   };
 
   if (existing) {
-    const { error } = await supabase
+    const { error } = await admin
       .from("submissions")
       .update({
         data,
@@ -184,7 +192,7 @@ Balas HANYA dengan JSON valid:
       return { error: "Gagal memperbarui: " + error.message };
     }
   } else {
-    const { error } = await supabase.from("submissions").insert({
+    const { error } = await admin.from("submissions").insert({
       student_id: user.id,
       content_id: params.lessonId,
       type: "web",
@@ -202,10 +210,7 @@ Balas HANYA dengan JSON valid:
 
   // Award XP if score >= 70 and first time passing
   if (score >= 70 && (!existing || (existing.score || 0) < 70)) {
-    await supabase.rpc("increment_xp", {
-      user_id: user.id,
-      amount: params.maxScore,
-    });
+    await awardXp(user.id, challenge.max_score ?? 100);
   }
 
   revalidatePath(`/lessons/${params.lessonId}`);

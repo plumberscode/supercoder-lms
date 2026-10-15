@@ -3,6 +3,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { PASS_SCORE } from "@/lib/reports";
+import { currentUserIsStaff } from "@/lib/staff";
+import { awardXp } from "@/lib/xp";
 
 export async function saveLessonXpReward(formData: FormData) {
   const supabase = await createClient();
@@ -30,6 +32,8 @@ export async function saveLessonXpReward(formData: FormData) {
 }
 
 export async function submitLessonScore(formData: FormData) {
+  // XP diberikan lewat service role, jadi pemanggilnya wajib admin/guru.
+  if (!(await currentUserIsStaff())) throw new Error("Hanya admin atau guru.");
   const supabase = await createClient();
 
   const lessonId = formData.get("lessonId") as string;
@@ -60,10 +64,10 @@ export async function submitLessonScore(formData: FormData) {
   // XP diberikan sekali per siswa per materi. Penanda di data mencegah XP ganda
   // saat nilai diturunkan lalu dinaikkan lagi.
   const alreadyAwarded = !!existing?.data?.xp_awarded;
-  const awardXp = score >= PASS_SCORE && xpReward > 0 && !alreadyAwarded;
+  const shouldAwardXp = score >= PASS_SCORE && xpReward > 0 && !alreadyAwarded;
   const data = {
     ...(existing?.data || {}),
-    ...(awardXp && { xp_awarded: xpReward }),
+    ...(shouldAwardXp && { xp_awarded: xpReward }),
   };
 
   if (existing) {
@@ -105,8 +109,8 @@ export async function submitLessonScore(formData: FormData) {
     }
   }
 
-  if (awardXp) {
-    await supabase.rpc("increment_xp", { user_id: studentId, amount: xpReward });
+  if (shouldAwardXp) {
+    await awardXp(studentId, xpReward);
   }
 
   revalidatePath("/admin/lesson-scores");

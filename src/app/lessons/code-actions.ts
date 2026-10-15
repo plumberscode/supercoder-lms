@@ -6,6 +6,8 @@ import {
   LESSON_ACCESS_DENIED,
 } from "@/lib/lesson-access";
 import { revalidatePath } from "next/cache";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { awardXp } from "@/lib/xp";
 import { getAIHint } from "@/lib/ai-hints";
 
 export async function submitCodeSolution(params: {
@@ -19,6 +21,11 @@ export async function submitCodeSolution(params: {
   if (!access) throw new Error(LESSON_ACCESS_DENIED);
   const { supabase, user } = access;
 
+  // Tes dijalankan di browser, jadi skor masih berasal dari browser; minimal dibatasi
+  // 0-100. Penilaian yang tidak bisa dipalsukan butuh runner kode di server.
+  const score = Math.max(0, Math.min(100, Math.round(Number(params.score) || 0)));
+  const admin = createAdminClient();
+
   const { data: existing } = await supabase
     .from("submissions")
     .select("id, score")
@@ -28,15 +35,15 @@ export async function submitCodeSolution(params: {
     .maybeSingle();
 
   if (existing) {
-    if (params.score > (existing.score || 0)) {
-      const { error } = await supabase
+    if (score > (existing.score || 0)) {
+      const { error } = await admin
         .from("submissions")
         .update({
           data: {
             code: params.code,
             ...(params.html !== undefined && { html: params.html }),
           },
-          score: params.score,
+          score: score,
           status: "graded",
           graded_at: new Date().toISOString(),
         })
@@ -45,20 +52,17 @@ export async function submitCodeSolution(params: {
     }
 
     // Award XP if student passes for the first time on a retry
-    if (params.score >= 70 && (existing.score || 0) < 70) {
+    if (score >= 70 && (existing.score || 0) < 70) {
       const { data: challenge } = await supabase
         .from("coding_challenges")
         .select("max_score")
         .eq("id", params.challengeId)
         .single();
       const xpReward = challenge?.max_score ?? 100;
-      await supabase.rpc("increment_xp", {
-        user_id: user.id,
-        amount: xpReward,
-      });
+      await awardXp(user.id, xpReward);
     }
   } else {
-    const { error } = await supabase.from("submissions").insert({
+    const { error } = await admin.from("submissions").insert({
       student_id: user.id,
       content_id: params.lessonId,
       type: "code",
@@ -66,7 +70,7 @@ export async function submitCodeSolution(params: {
         code: params.code,
         ...(params.html !== undefined && { html: params.html }),
       },
-      score: params.score,
+      score: score,
       status: "graded",
       submitted_at: new Date().toISOString(),
       graded_at: new Date().toISOString(),
@@ -83,11 +87,8 @@ export async function submitCodeSolution(params: {
     const xpReward = challenge?.max_score ?? 100;
 
     // Award XP only if first submission passes
-    if (params.score >= 70) {
-      await supabase.rpc("increment_xp", {
-        user_id: user.id,
-        amount: xpReward,
-      });
+    if (score >= 70) {
+      await awardXp(user.id, xpReward);
     }
   }
 

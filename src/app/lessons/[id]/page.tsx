@@ -14,6 +14,7 @@ import WebChallenge from "@/components/WebChallenge";
 import { prepareChallengeDescription } from "@/lib/challenge-description";
 import ChallengeDescription from "@/components/ChallengeDescription";
 import styles from "./lesson.module.css";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 export default async function LessonPage({
   params,
@@ -123,12 +124,17 @@ export default async function LessonPage({
     }
   }
 
+  // Soal CSS & Web: tabelnya hanya bisa dibaca staf (kunci jawaban ada di sana), jadi
+  // diambil lewat service role setelah akses materi dicek di atas. Kolom reference_*
+  // (kunci jawaban) tidak dikirim ke browser; penilaian AI mengambilnya sendiri di server.
+  const admin = createAdminClient();
+
   // Fetch CSS challenge if lesson type is 'css-challenge'
   let cssChallenge = null;
   if (lesson.type === "css-challenge") {
-    const { data: challenge } = await supabase
+    const { data: challenge } = await admin
       .from("css_challenges")
-      .select("*")
+      .select("id, lesson_id, title, description, starter_html, starter_css, max_score, max_attempts")
       .eq("lesson_id", id)
       .single();
     if (challenge) {
@@ -142,9 +148,11 @@ export default async function LessonPage({
   // Fetch Web challenge if lesson type is 'web-challenge'
   let webChallenge = null;
   if (lesson.type === "web-challenge") {
-    const { data: challenge } = await supabase
+    const { data: challenge } = await admin
       .from("web_challenges")
-      .select("*")
+      .select(
+        "id, lesson_id, title, description, mode, starter_html, starter_css, starter_js, max_score, max_attempts",
+      )
       .eq("lesson_id", id)
       .single();
     if (challenge) {

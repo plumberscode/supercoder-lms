@@ -8,20 +8,29 @@ import {
   LESSON_ACCESS_DENIED,
 } from "@/lib/lesson-access";
 import { revalidatePath } from "next/cache";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { awardXp } from "@/lib/xp";
 import OpenAI from "openai";
 
 export async function submitCssSolution(params: {
   challengeId: string;
   lessonId: string;
   css: string;
-  starterHtml: string;
-  referenceCss: string;
-  description: string;
-  maxScore: number;
 }) {
   const access = await getLessonAccess(params.lessonId);
   if (!access) return { error: LESSON_ACCESS_DENIED };
   const { supabase, user } = access;
+
+  // Soal, kunci jawaban & bobot XP dibaca dari database, bukan dari browser.
+  const admin = createAdminClient();
+  const { data: challenge } = await admin
+    .from("css_challenges")
+    .select("id, description, starter_html, reference_css, max_score")
+    .eq("lesson_id", params.lessonId)
+    .single();
+  if (!challenge || challenge.id !== params.challengeId) {
+    return { error: "Soal tidak ditemukan." };
+  }
 
   // Fetch existing submission
   const { data: existing } = await supabase
@@ -50,11 +59,11 @@ export async function submitCssSolution(params: {
   const prompt = `Kamu adalah penilai CSS untuk siswa pemula.
 
 ## Soal
-${descriptionToPlainText(params.description)}
+${descriptionToPlainText(challenge.description)}
 
 ## Referensi Jawaban CSS (dari guru)
 \`\`\`css
-${params.referenceCss}
+${challenge.reference_css}
 \`\`\`
 
 ## Jawaban CSS Siswa
@@ -64,7 +73,7 @@ ${params.css}
 
 ## HTML Template
 \`\`\`html
-${params.starterHtml}
+${challenge.starter_html}
 \`\`\`
 
 ## Instruksi Penilaian
@@ -116,7 +125,7 @@ Balas HANYA dengan JSON valid:
   const bestScore = Math.max(score, existing?.score || 0);
 
   if (existing) {
-    const { error } = await supabase
+    const { error } = await admin
       .from("submissions")
       .update({
         data: { css: params.css, attempts: newAttempts },
@@ -129,7 +138,7 @@ Balas HANYA dengan JSON valid:
       return { error: "Gagal memperbarui: " + error.message };
     }
   } else {
-    const { error } = await supabase.from("submissions").insert({
+    const { error } = await admin.from("submissions").insert({
       student_id: user.id,
       content_id: params.lessonId,
       type: "css",
@@ -147,10 +156,7 @@ Balas HANYA dengan JSON valid:
 
   // Award XP if score >= 70 and first time passing
   if (score >= 70 && (!existing || (existing.score || 0) < 70)) {
-    await supabase.rpc("increment_xp", {
-      user_id: user.id,
-      amount: params.maxScore,
-    });
+    await awardXp(user.id, challenge.max_score ?? 100);
   }
 
   revalidatePath(`/lessons/${params.lessonId}`);
@@ -165,7 +171,6 @@ export async function getCssHint(params: {
   lessonId: string;
   description: string;
   studentCss: string;
-  referenceCss: string;
   starterHtml: string;
   attemptNumber: number;
 }): Promise<string> {
