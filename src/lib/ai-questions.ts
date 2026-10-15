@@ -1,3 +1,4 @@
+import { DEEPSEEK_DEFAULTS } from "@/lib/deepseek";
 import OpenAI from "openai";
 
 export const MAX_SOURCE_TEXT_LENGTH = 20000;
@@ -62,7 +63,7 @@ ${sourceText}
   let responseText: string;
   try {
     const result = await openai.chat.completions.create({
-      model: "deepseek-chat",
+      ...DEEPSEEK_DEFAULTS,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
       max_tokens: 8000,

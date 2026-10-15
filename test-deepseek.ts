@@ -8,7 +8,7 @@ const openai = new OpenAI({
 async function test() {
   try {
     const result = await openai.chat.completions.create({
-      model: "deepseek-chat",
+      model: "deepseek-flash",
       messages: [
         {
           role: "user",

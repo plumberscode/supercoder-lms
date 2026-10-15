@@ -1,3 +1,4 @@
+import { DEEPSEEK_DEFAULTS } from "@/lib/deepseek";
 import { descriptionToPlainText } from "@/lib/challenge-description";
 import OpenAI from "openai";
 
@@ -63,7 +64,7 @@ ${hintLevel}
 Berikan hint SINGKAT (maksimal 2-3 kalimat) dalam Bahasa Indonesia. JANGAN berikan jawaban langsung. Bantu siswa menemukan solusinya sendiri.`;
 
     const result = await openai.chat.completions.create({
-      model: "deepseek-chat",
+      ...DEEPSEEK_DEFAULTS,
       messages: [{ role: "user", content: prompt }],
     });
     return (

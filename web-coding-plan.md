@@ -177,7 +177,7 @@ Balas HANYA dengan JSON valid:
 {"score": <number>, "feedback": "<feedback mendidik dalam Bahasa Indonesia>"}
 ```
 
-6. `model: "deepseek-chat"`, `response_format: { type: "json_object" }`, parse dengan fallback markdown-fence sama seperti `css-actions.ts:90-104`.
+6. `model: "deepseek-flash"`, `response_format: { type: "json_object" }`, parse dengan fallback markdown-fence sama seperti `css-actions.ts:90-104`.
 7. Upsert `submissions`: `data: { html, css, js, attempts: newAttempts }`, `type: "web"`, `bestScore = Math.max(score, existing?.score || 0)`.
 8. Award XP: `score >= 70 && (!existing || (existing.score||0) < 70)` → RPC `increment_xp(user_id, amount: maxScore)` (signature dikonfirmasi di `supabase_schema.sql:138`).
 9. `revalidatePath` 4 path yang sama seperti `css-actions.ts` (`/lessons/${lessonId}`, `/leaderboard`, `/dashboard`, `/admin/gradebook`).

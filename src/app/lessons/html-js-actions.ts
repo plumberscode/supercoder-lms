@@ -1,5 +1,6 @@
 "use server";
 
+import { DEEPSEEK_DEFAULTS } from "@/lib/deepseek";
 import { descriptionToPlainText } from "@/lib/challenge-description";
 
 import {
@@ -89,7 +90,7 @@ Balas HANYA dengan JSON valid:
 
   try {
     const result = await openai.chat.completions.create({
-      model: "deepseek-chat",
+      ...DEEPSEEK_DEFAULTS,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
     });
@@ -210,7 +211,7 @@ ${hintLevel}
 Berikan hint SINGKAT (maksimal 2-3 kalimat) dalam Bahasa Indonesia. JANGAN berikan jawaban langsung.`;
 
     const result = await openai.chat.completions.create({
-      model: "deepseek-chat",
+      ...DEEPSEEK_DEFAULTS,
       messages: [{ role: "user", content: prompt }],
     });
     return (
