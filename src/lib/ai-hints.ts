@@ -1,4 +1,5 @@
 import { DEEPSEEK_DEFAULTS } from "@/lib/deepseek";
+import { KAKAK_STYLE } from "@/lib/ai-persona";
 import { descriptionToPlainText } from "@/lib/challenge-description";
 import OpenAI from "openai";
 
@@ -61,7 +62,9 @@ Ini adalah percobaan ke-${params.attemptNumber} siswa.
 
 ${hintLevel}
 
-Berikan hint SINGKAT (maksimal 2-3 kalimat) dalam Bahasa Indonesia. JANGAN berikan jawaban langsung. Bantu siswa menemukan solusinya sendiri.`;
+Berikan hint SINGKAT (maksimal 4 kalimat pendek) dalam Bahasa Indonesia. JANGAN berikan jawaban langsung. Bantu siswa menemukan solusinya sendiri.
+
+${KAKAK_STYLE}`;
 
     const result = await openai.chat.completions.create({
       ...DEEPSEEK_DEFAULTS,

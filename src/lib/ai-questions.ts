@@ -45,7 +45,7 @@ Tugasmu:
    - Jika soal tidak punya opsi, buat 1 jawaban benar dan 3 pengecoh yang masuk akal, setara panjang dan gayanya.
 3. Tentukan indeks jawaban benar (0-3). Gunakan kunci dari teks bila ada (mis. "Jawaban: B", "Kunci: c", tanda *, atau tebal). Jika tidak ada, tentukan sendiri jawaban yang benar.
 4. Acak posisi jawaban benar untuk soal yang opsinya kamu buat sendiri, jangan selalu di posisi yang sama.
-5. Pertahankan bahasa soal aslinya. Rapikan ejaan seperlunya tanpa mengubah makna. Kode program dalam soal pertahankan apa adanya (boleh dibungkus backtick).
+5. Pertahankan bahasa soal aslinya. Rapikan ejaan seperlunya tanpa mengubah makna. Kode program dalam soal pertahankan apa adanya. JANGAN pakai backtick (\`) atau format markdown apa pun, baik di soal maupun opsi.
 6. Isi "category" dengan topik singkat soal (mis. "HTML Dasar", "Python Perulangan"). Jika ragu, pakai "${defaultCategory || "Umum"}".
 
 Balas HANYA dengan JSON valid berbentuk:
@@ -99,9 +99,9 @@ ${sourceText}
 }
 
 function normalizeDraft(q: any, defaultCategory: string): DraftQuestion | null {
-  const question_text = String(q?.question_text ?? "").trim();
+  const question_text = stripBackticks(String(q?.question_text ?? ""));
   const options: string[] = Array.isArray(q?.options)
-    ? q.options.map((o: unknown) => String(o ?? "").trim()).filter(Boolean)
+    ? q.options.map((o: unknown) => stripBackticks(String(o ?? ""))).filter(Boolean)
     : [];
   const index = Number(q?.correct_option_index);
 
@@ -125,6 +125,11 @@ function normalizeDraft(q: any, defaultCategory: string): DraftQuestion | null {
     answer_from_ai: Boolean(q?.answer_from_ai),
     options_from_ai,
   };
+}
+
+// AI kadang tetap membungkus kode dengan backtick ala markdown; di kuis tampil apa adanya.
+function stripBackticks(text: string) {
+  return text.replace(/`+/g, "").trim();
 }
 
 function shuffleOptions(options: string[], correctIndex: number) {
