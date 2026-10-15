@@ -1,10 +1,11 @@
 "use client";
 
 import "highlight.js/styles/github-dark.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import LinkExtension from "@tiptap/extension-link";
+import ImageExtension from "@tiptap/extension-image";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { Placeholder } from "@tiptap/extensions";
 import { common, createLowlight } from "lowlight";
@@ -25,8 +26,17 @@ import {
   SquareCode,
   Check,
   X,
+  Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
 import { isRichDescription } from "@/components/ChallengeDescription";
+import { uploadChallengeImage } from "@/app/admin/challenge-image-actions";
+
+const IMAGE_TYPES = "image/jpeg,image/png,image/webp,image/gif,image/avif";
+
+function firstImage(files: FileList | undefined | null): File | undefined {
+  return Array.from(files ?? []).find((f) => f.type.startsWith("image/"));
+}
 
 const lowlight = createLowlight(common);
 
@@ -84,12 +94,18 @@ export default function ChallengeRichEditor({ name, initialValue = "", placehold
       : "";
   const [html, setHtml] = useState(startHtml);
   const [linkUrl, setLinkUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  // Handler paste/drop di editorProps dibuat sebelum `editor` ada, jadi lewat ref.
+  const uploadRef = useRef<(file: File) => void>(() => {});
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] }, link: false, codeBlock: false }),
       LinkExtension.configure({ openOnClick: false, autolink: true, defaultProtocol: "https" }),
       CodeBlockLowlight.configure({ lowlight, defaultLanguage: "plaintext" }),
+      ImageExtension.configure({ allowBase64: false }),
       Placeholder.configure({ placeholder: placeholder ?? "Tulis instruksi soal di sini…" }),
     ],
     content: startHtml,
@@ -99,9 +115,43 @@ export default function ChallengeRichEditor({ name, initialValue = "", placehold
     editorProps: {
       attributes: {
         class:
-          "prose prose-slate prose-sm max-w-none min-h-[180px] p-4 focus:outline-none prose-pre:bg-[#0d1117] prose-code:before:content-none prose-code:after:content-none",
+          "prose prose-slate prose-sm max-w-none min-h-[180px] p-4 focus:outline-none prose-pre:bg-[#0d1117] prose-code:before:content-none prose-code:after:content-none prose-img:rounded-lg prose-img:border prose-img:border-slate-200 [&_img.ProseMirror-selectednode]:outline-2 [&_img.ProseMirror-selectednode]:outline-red-400",
+      },
+      // Tempel (mis. screenshot) atau seret gambar langsung ke editor.
+      handlePaste: (_view, event) => {
+        const file = firstImage(event.clipboardData?.files);
+        if (!file) return false;
+        uploadRef.current(file);
+        return true;
+      },
+      handleDrop: (_view, event) => {
+        const file = firstImage(event.dataTransfer?.files);
+        if (!file) return false;
+        event.preventDefault();
+        uploadRef.current(file);
+        return true;
       },
     },
+  });
+
+  const uploadAndInsert = async (file: File) => {
+    if (!editor || uploading) return;
+    setUploading(true);
+    setUploadError(null);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await uploadChallengeImage(fd);
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+    if (!res.success) {
+      setUploadError(res.error);
+      return;
+    }
+    const alt = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim() || "Gambar soal";
+    editor.chain().focus().setImage({ src: res.url, alt }).run();
+  };
+  useEffect(() => {
+    uploadRef.current = uploadAndInsert;
   });
 
   const applyLink = () => {
@@ -119,6 +169,16 @@ export default function ChallengeRichEditor({ name, initialValue = "", placehold
   return (
     <div className="border border-slate-300 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-red-500/20 focus-within:border-red-400 transition">
       <input type="hidden" name={name} value={html} />
+      <input
+        ref={fileRef}
+        type="file"
+        accept={IMAGE_TYPES}
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) uploadAndInsert(file);
+        }}
+      />
       {editor && (
         <div className="flex flex-wrap items-center gap-0.5 p-1.5 border-b border-slate-200 bg-slate-50">
           <ToolbarButton title="Tebal" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}>
@@ -163,6 +223,9 @@ export default function ChallengeRichEditor({ name, initialValue = "", placehold
               <Unlink className="w-4 h-4 text-red-500" />
             </ToolbarButton>
           )}
+          <ToolbarButton title="Sisipkan gambar (bisa juga tempel/seret gambar ke editor)" onClick={() => fileRef.current?.click()}>
+            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+          </ToolbarButton>
           <Divider />
           <ToolbarButton title="Urungkan" onClick={() => editor.chain().focus().undo().run()}>
             <Undo className="w-4 h-4" />
@@ -192,6 +255,17 @@ export default function ChallengeRichEditor({ name, initialValue = "", placehold
           </button>
           <button type="button" onClick={() => setLinkUrl(null)} aria-label="Batal" className="p-1.5 rounded-md text-slate-500 hover:bg-slate-100 cursor-pointer">
             <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+      {uploading && (
+        <div className="px-3 py-2 text-xs text-slate-500 border-b border-slate-200 bg-white">Mengunggah gambar…</div>
+      )}
+      {uploadError && (
+        <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs text-red-700 border-b border-red-200 bg-red-50">
+          <span>{uploadError}</span>
+          <button type="button" onClick={() => setUploadError(null)} aria-label="Tutup" className="cursor-pointer">
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
