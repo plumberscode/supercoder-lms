@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import CodeEditor from "./CodeEditor";
 import ChallengeDescription from "./ChallengeDescription";
+import Celebration, { PASSING_SCORE } from "./Celebration";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 import styles from "./code-challenge.module.css";
 import {
@@ -64,6 +65,11 @@ export default function HtmlJsChallenge({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // AI Grading states
+  const [celebration, setCelebration] = useState<{
+    score: number;
+    xpEarned: number;
+    key: number;
+  } | null>(null);
   const [gradeResult, setGradeResult] = useState<{
     score: number;
     feedback: string;
@@ -150,6 +156,13 @@ export default function HtmlJsChallenge({
       }
 
       setGradeResult({ score: result.score!, feedback: result.feedback! });
+      if (result.score! >= PASSING_SCORE) {
+        setCelebration({
+          score: result.score!,
+          xpEarned: result.xpEarned ?? 0,
+          key: Date.now(),
+        });
+      }
       setBestScore(result.bestScore!);
       setAttemptsUsed(
         typeof result.attemptsUsed === "number" && !isNaN(result.attemptsUsed)
@@ -206,6 +219,14 @@ export default function HtmlJsChallenge({
 
   return (
     <div className={styles.container}>
+      {celebration && (
+        <Celebration
+          key={celebration.key}
+          score={celebration.score}
+          xpEarned={celebration.xpEarned}
+          onDone={() => setCelebration(null)}
+        />
+      )}
       {existingSubmission && existingSubmission.score > 0 && (
         <div className={styles.existingScore}>
           🏆 Skor terbaik sebelumnya: {existingSubmission.score}/100

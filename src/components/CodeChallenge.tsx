@@ -8,6 +8,7 @@ import { runCode } from "@/lib/code-runner";
 import { runTestCases, type GradingResult } from "@/lib/test-runner";
 import HtmlJsChallenge from "./HtmlJsChallenge";
 import ChallengeDescription from "./ChallengeDescription";
+import Celebration, { PASSING_SCORE } from "./Celebration";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 
 interface CodingChallenge {
@@ -78,6 +79,11 @@ function StandardCodeChallenge({
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [testResults, setTestResults] = useState<GradingResult | null>(null);
+  const [celebration, setCelebration] = useState<{
+    score: number;
+    xpEarned: number;
+    key: number;
+  } | null>(null);
   const [hint, setHint] = useState("");
   const [isLoadingHint, setIsLoadingHint] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
@@ -126,13 +132,18 @@ function StandardCodeChallenge({
       setTestResults(result);
       setAttemptCount((prev) => prev + 1);
 
-      if (result.score >= 70) {
+      if (result.score >= PASSING_SCORE) {
         setFinalScore(result.score);
-        await submitCodeSolution({
+        const saved = await submitCodeSolution({
           challengeId: challenge.id,
           lessonId: challenge.lesson_id,
           code,
           score: result.score,
+        });
+        setCelebration({
+          score: result.score,
+          xpEarned: saved.xpEarned,
+          key: Date.now(),
         });
       }
     } catch (err: any) {
@@ -185,6 +196,14 @@ function StandardCodeChallenge({
 
   return (
     <div className={styles.container}>
+      {celebration && (
+        <Celebration
+          key={celebration.key}
+          score={celebration.score}
+          xpEarned={celebration.xpEarned}
+          onDone={() => setCelebration(null)}
+        />
+      )}
       {existingSubmission && (
         <div className={styles.existingScore}>
           🏆 Skor terbaik sebelumnya: {existingSubmission.score}/100

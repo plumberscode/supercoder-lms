@@ -25,6 +25,7 @@ export async function submitCodeSolution(params: {
   // 0-100. Penilaian yang tidak bisa dipalsukan butuh runner kode di server.
   const score = Math.max(0, Math.min(100, Math.round(Number(params.score) || 0)));
   const admin = createAdminClient();
+  let xpEarned = 0;
 
   const { data: existing } = await supabase
     .from("submissions")
@@ -59,7 +60,7 @@ export async function submitCodeSolution(params: {
         .eq("id", params.challengeId)
         .single();
       const xpReward = challenge?.max_score ?? 100;
-      await awardXp(user.id, xpReward);
+      xpEarned = await awardXp(user.id, xpReward);
     }
   } else {
     const { error } = await admin.from("submissions").insert({
@@ -88,7 +89,7 @@ export async function submitCodeSolution(params: {
 
     // Award XP only if first submission passes
     if (score >= 70) {
-      await awardXp(user.id, xpReward);
+      xpEarned = await awardXp(user.id, xpReward);
     }
   }
 
@@ -96,7 +97,7 @@ export async function submitCodeSolution(params: {
   revalidatePath("/leaderboard");
   revalidatePath("/dashboard");
   revalidatePath("/admin/gradebook");
-  return { success: true };
+  return { success: true, xpEarned };
 }
 
 export async function getCodeHint(params: {

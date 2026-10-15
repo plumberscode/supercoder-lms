@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import CodeEditor from "./CodeEditor";
 import ChallengeDescription from "./ChallengeDescription";
+import Celebration, { PASSING_SCORE } from "./Celebration";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 import styles from "./WebChallenge.module.css";
 import {
@@ -55,6 +56,11 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
   const [activeTab, setActiveTab] = useState<"html" | "css" | "js">("html");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [celebration, setCelebration] = useState<{
+    score: number;
+    xpEarned: number;
+    key: number;
+  } | null>(null);
   const [gradeResult, setGradeResult] = useState<{
     score: number;
     feedback: string;
@@ -125,6 +131,13 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
       }
 
       setGradeResult({ score: result.score!, feedback: result.feedback! });
+      if (result.score! >= PASSING_SCORE) {
+        setCelebration({
+          score: result.score!,
+          xpEarned: result.xpEarned ?? 0,
+          key: Date.now(),
+        });
+      }
       setBestScore(result.bestScore!);
       setAttemptsUsed(
         typeof result.attemptsUsed === "number" && !isNaN(result.attemptsUsed)
@@ -192,6 +205,14 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
 
   return (
     <div className={styles.container}>
+      {celebration && (
+        <Celebration
+          key={celebration.key}
+          score={celebration.score}
+          xpEarned={celebration.xpEarned}
+          onDone={() => setCelebration(null)}
+        />
+      )}
       {/* Existing best score banner */}
       {existingSubmission && existingSubmission.score > 0 && (
         <div className={styles.existingScore}>

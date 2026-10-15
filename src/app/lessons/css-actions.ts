@@ -160,8 +160,9 @@ ${KAKAK_STYLE_JSON}`;
   }
 
   // Award XP if score >= 70 and first time passing
+  let xpEarned = 0;
   if (score >= 70 && (!existing || (existing.score || 0) < 70)) {
-    await awardXp(user.id, challenge.max_score ?? 100);
+    xpEarned = await awardXp(user.id, challenge.max_score ?? 100);
   }
 
   revalidatePath(`/lessons/${params.lessonId}`);
@@ -169,7 +170,13 @@ ${KAKAK_STYLE_JSON}`;
   revalidatePath("/dashboard");
   revalidatePath("/admin/gradebook");
 
-  return { score, feedback, bestScore, attemptsUsed: newAttempts.length };
+  return {
+    score,
+    feedback,
+    bestScore,
+    attemptsUsed: newAttempts.length,
+    xpEarned,
+  };
 }
 
 export async function getCssHint(params: {
