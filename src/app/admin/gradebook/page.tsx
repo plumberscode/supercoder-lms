@@ -1,14 +1,17 @@
 import { createClient } from "@/utils/supabase/server";
 import styles from "../admin.module.css";
 import Link from "next/link";
+import ProgramFilter, { parseProgramFilter, programQuery } from "../ProgramFilter";
 
 export default async function GradebookPage({
   searchParams,
 }: {
-  searchParams: Promise<{ subject_id?: string; student_id?: string }>;
+  searchParams: Promise<{ subject_id?: string; student_id?: string; program?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
+  // Teaser tidak dinilai; filter ini memisahkan siswa Supercoder dan MINAS.
+  const program = parseProgramFilter(params.program, ["supercoder", "minas"]);
 
   // Fetch all active subjects
   const { data: subjects } = await supabase
@@ -28,10 +31,13 @@ export default async function GradebookPage({
     // Fetch modules
     const { data: mods } = await supabase
       .from("modules")
-      .select("id, title, order_index")
+      .select("*")
       .eq("subject_id", params.subject_id)
       .order("order_index");
-    modules = mods || [];
+    // Bila satu program dipilih, hanya modul yang dicentang untuk program itu.
+    modules = (mods || []).filter(
+      (m) => !program || (m.programs ?? ["supercoder"]).includes(program),
+    );
 
     if (modules.length > 0) {
       const moduleIds = modules.map((m) => m.id);
@@ -45,13 +51,14 @@ export default async function GradebookPage({
       lessons = less || [];
 
       // Fetch all students
-      const { data: allStudents } = await supabase
+      let studentQuery = supabase
         .from("profiles")
-        .select("id, full_name, email")
+        .select("id, full_name, email, username")
         .eq("role", "student")
         .neq("status", "inactive")
-        .neq("program", "teaser")
-        .order("full_name");
+        .neq("program", "teaser");
+      if (program) studentQuery = studentQuery.eq("program", program);
+      const { data: allStudents } = await studentQuery.order("full_name");
       students = allStudents || [];
 
       if (lessons.length > 0) {
@@ -111,6 +118,13 @@ export default async function GradebookPage({
     <div>
       <h1 className={styles.pageTitle}>📊 Buku Nilai (Gradebook)</h1>
 
+      <ProgramFilter
+        basePath="/admin/gradebook"
+        params={params}
+        current={program}
+        allowed={["supercoder", "minas"]}
+      />
+
       {/* Subject Filter */}
       <div className="card" style={{ marginBottom: "24px" }}>
         <label
@@ -127,7 +141,7 @@ export default async function GradebookPage({
           {subjects?.map((sub) => (
             <Link
               key={sub.id}
-              href={`/admin/gradebook?subject_id=${sub.id}`}
+              href={`/admin/gradebook?subject_id=${sub.id}${programQuery(program)}`}
               className={`btn ${params.subject_id === sub.id ? "btn-primary" : ""}`}
               style={{
                 backgroundColor:
@@ -194,7 +208,7 @@ export default async function GradebookPage({
               return (
                 <Link
                   key={student.id}
-                  href={`/admin/gradebook?subject_id=${params.subject_id}&student_id=${student.id}`}
+                  href={`/admin/gradebook?subject_id=${params.subject_id}&student_id=${student.id}${programQuery(program)}`}
                   style={{
                     display: "block",
                     padding: "14px 16px",
@@ -225,7 +239,7 @@ export default async function GradebookPage({
                       marginBottom: "8px",
                     }}
                   >
-                    {student.email}
+                    {student.username ?? student.email}
                   </div>
                   {/* Mini Progress Bar */}
                   <div
@@ -319,7 +333,7 @@ export default async function GradebookPage({
                         color: "var(--text-muted)",
                       }}
                     >
-                      {selectedStudent?.email}
+                      {selectedStudent?.username ?? selectedStudent?.email}
                     </div>
                   </div>
                   <div style={{ textAlign: "right" }}>

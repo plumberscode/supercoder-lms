@@ -1,16 +1,23 @@
 import { createClient } from "@/utils/supabase/server";
 import styles from "../admin.module.css";
 import { gradeSubmission } from "./actions";
+import ProgramFilter, { parseProgramFilter } from "../ProgramFilter";
 
-export default async function SubmissionsPage() {
+export default async function SubmissionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ program?: string }>;
+}) {
+  const params = await searchParams;
+  const program = parseProgramFilter(params.program, ["supercoder", "minas", "teaser"]);
   const supabase = await createClient();
 
-  const { data: submissions, error } = await supabase
+  const { data: allSubmissions, error } = await supabase
     .from("submissions")
     .select(
       `
       *,
-      profiles!student_id(full_name, email)
+      profiles!student_id(full_name, email, username, program)
     `,
     )
     .eq("type", "project")
@@ -18,9 +25,20 @@ export default async function SubmissionsPage() {
 
   if (error) return <div>Gagal memuat kiriman: {error.message}</div>;
 
+  const submissions = allSubmissions?.filter(
+    (sub) => !program || (sub as any).profiles?.program === program,
+  );
+
   return (
     <div>
       <h1 className={styles.pageTitle}>Kiriman Proyek Siswa</h1>
+
+      <ProgramFilter
+        basePath="/admin/submissions"
+        params={params}
+        current={program}
+        allowed={["supercoder", "minas", "teaser"]}
+      />
 
       <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
         {submissions?.length === 0 && (
@@ -65,7 +83,9 @@ export default async function SubmissionsPage() {
                 </span>
               </div>
               <h3 style={{ marginBottom: "4px" }}>
-                {(sub as any).profiles.full_name || (sub as any).profiles.email}
+                {(sub as any).profiles.full_name ||
+                  (sub as any).profiles.username ||
+                  (sub as any).profiles.email}
               </h3>
               <p
                 style={{

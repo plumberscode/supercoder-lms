@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import styles from "../admin.module.css";
 import Link from "next/link";
+import ProgramFilter, { parseProgramFilter, programQuery } from "../ProgramFilter";
 import { saveLessonXpReward, submitLessonScore } from "./actions";
 
 export default async function LessonScoresPage({
@@ -10,10 +11,13 @@ export default async function LessonScoresPage({
     subject_id?: string;
     module_id?: string;
     lesson_id?: string;
+    program?: string;
   }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
+  // Teaser tidak dinilai; filter ini memisahkan siswa Supercoder dan MINAS.
+  const program = parseProgramFilter(params.program, ["supercoder", "minas"]);
 
   // Fetch all active subjects
   const { data: subjects } = await supabase
@@ -30,10 +34,13 @@ export default async function LessonScoresPage({
   if (params.subject_id) {
     const { data } = await supabase
       .from("modules")
-      .select("id, title")
+      .select("*")
       .eq("subject_id", params.subject_id)
       .order("order_index");
-    modules = data || [];
+    // Bila satu program dipilih, hanya modul yang dicentang untuk program itu.
+    modules = (data || []).filter(
+      (m) => !program || (m.programs ?? ["supercoder"]).includes(program),
+    );
   }
 
   if (params.module_id) {
@@ -55,13 +62,14 @@ export default async function LessonScoresPage({
     xpReward = lessonRow?.xp_reward ?? 0;
 
     // Fetch all students
-    const { data: allStudents } = await supabase
+    let studentQuery = supabase
       .from("profiles")
-      .select("id, full_name, email")
+      .select("id, full_name, email, username")
       .eq("role", "student")
       .neq("status", "inactive")
-      .neq("program", "teaser")
-      .order("full_name");
+      .neq("program", "teaser");
+    if (program) studentQuery = studentQuery.eq("program", program);
+    const { data: allStudents } = await studentQuery.order("full_name");
     students = allStudents || [];
 
     // Fetch existing scores for this lesson
@@ -81,6 +89,13 @@ export default async function LessonScoresPage({
   return (
     <div>
       <h1 className={styles.pageTitle}>💯 Penilaian Materi (Offline/Manual)</h1>
+
+      <ProgramFilter
+        basePath="/admin/lesson-scores"
+        params={params}
+        current={program}
+        allowed={["supercoder", "minas"]}
+      />
       <p style={{ marginBottom: "24px", color: "var(--text-muted)" }}>
         Pilih mata pelajaran, modul, dan materi untuk memberikan nilai secara
         manual kepada siswa.
@@ -110,7 +125,7 @@ export default async function LessonScoresPage({
             {subjects?.map((sub) => (
               <Link
                 key={sub.id}
-                href={`/admin/lesson-scores?subject_id=${sub.id}`}
+                href={`/admin/lesson-scores?subject_id=${sub.id}${programQuery(program)}`}
                 className={`btn ${params.subject_id === sub.id ? "btn-primary" : ""}`}
                 style={{
                   textAlign: "left",
@@ -143,7 +158,7 @@ export default async function LessonScoresPage({
               {modules?.map((mod) => (
                 <Link
                   key={mod.id}
-                  href={`/admin/lesson-scores?subject_id=${params.subject_id}&module_id=${mod.id}`}
+                  href={`/admin/lesson-scores?subject_id=${params.subject_id}&module_id=${mod.id}${programQuery(program)}`}
                   className={`btn ${params.module_id === mod.id ? "btn-primary" : ""}`}
                   style={{
                     textAlign: "left",
@@ -177,7 +192,7 @@ export default async function LessonScoresPage({
               {lessons?.map((les) => (
                 <Link
                   key={les.id}
-                  href={`/admin/lesson-scores?subject_id=${params.subject_id}&module_id=${params.module_id}&lesson_id=${les.id}`}
+                  href={`/admin/lesson-scores?subject_id=${params.subject_id}&module_id=${params.module_id}&lesson_id=${les.id}${programQuery(program)}`}
                   className={`btn ${params.lesson_id === les.id ? "btn-primary" : ""}`}
                   style={{
                     textAlign: "left",
@@ -271,7 +286,7 @@ export default async function LessonScoresPage({
                         color: "var(--text-muted)",
                       }}
                     >
-                      {student.email}
+                      {student.username ?? student.email}
                     </p>
                     {existingScore && (
                       <span
