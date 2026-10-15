@@ -113,3 +113,13 @@
   color: var(--primary);
   font-weight: 600;
 }
+
+@media (max-width: 480px) {
+  .loginContainer {
+    padding: 16px;
+  }
+
+  .loginCard {
+    padding: 32px 20px;
+  }
+}

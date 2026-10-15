@@ -87,16 +87,7 @@ export default async function SubjectPage({
 
   return (
     <div style={{ backgroundColor: "#F8FAFC", minHeight: "100vh" }}>
-      <header
-        style={{
-          backgroundColor: "white",
-          borderBottom: "1px solid var(--border)",
-          padding: "20px 40px",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
+      <header className={styles.header}>
         <div
           className="container"
           style={{
@@ -124,21 +115,12 @@ export default async function SubjectPage({
         </div>
       </header>
 
-      <main className="container" style={{ padding: "48px 24px" }}>
+      <main className={`container ${styles.main}`}>
         <div style={{ marginBottom: "48px" }}>
           <div className="badge badge-xp" style={{ marginBottom: "16px" }}>
             KURSUS
           </div>
-          <h1
-            style={{
-              fontSize: "3rem",
-              fontWeight: 900,
-              color: "var(--secondary)",
-              lineHeight: 1.1,
-            }}
-          >
-            {subject.title}
-          </h1>
+          <h1 className={styles.title}>{subject.title}</h1>
           <p
             style={{
               fontSize: "1.125rem",
@@ -151,13 +133,7 @@ export default async function SubjectPage({
           </p>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 350px",
-            gap: "40px",
-          }}
-        >
+        <div className={styles.layout}>
           <div
             style={{ display: "flex", flexDirection: "column", gap: "24px" }}
           >

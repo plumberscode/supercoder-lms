@@ -46,9 +46,10 @@
   outline: none;
 }
 
-/* Layout bertumpuk di mobile: pembatas kiri-kanan tidak relevan */
+/* Layout bertumpuk & di-scroll di mobile: pembatas tidak relevan */
 @media (max-width: 768px) {
-  .handleX {
+  .handleX,
+  .handleY {
     display: none;
   }
 }
