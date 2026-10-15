@@ -1,5 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
-import { blockedStudentPath, canAccessModule } from "@/lib/student-access";
+import {
+  blockedStudentPath,
+  canAccessModule,
+  moduleVisibility,
+} from "@/lib/student-access";
+import UpgradeCta from "@/components/UpgradeCta";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,15 +55,49 @@ export default async function DashboardPage() {
     redirect(blockedStudentPath(profile?.status));
   }
 
-  // Subjects yang punya minimal satu modul untuk program siswa ini
+  // Subjects yang punya modul terbuka untuk program siswa ini. Teaser juga melihat kursus
+  // yang hanya berisi modul terkunci (isLocked) sebagai ajakan ke kelas Supercoder.
   const { data: allSubjects } = await supabase
     .from("subjects")
-    .select("*, modules(*)")
+    .select("*, modules(*, lessons(id))")
     .eq("is_active", true)
     .order("order_index", { ascending: true });
-  const subjects = allSubjects?.filter((s) =>
-    s.modules?.some((m: any) => canAccessModule(profile, m.programs)),
-  );
+  const subjects = (allSubjects ?? [])
+    .map((s) => {
+      const visibility = (s.modules ?? []).map((m: any) =>
+        moduleVisibility(profile, m.programs),
+      );
+      return { ...s, visibility, isLocked: !visibility.includes("open") };
+    })
+    .filter((s) => s.visibility.some((v: string) => v !== "hidden"));
+
+  const isTeaser = profile.program === "teaser";
+
+  // Progres materi gratis teaser: materi di modul terbuka yang sudah punya submission.
+  // Submission kuis memakai id kuis, jadi dipetakan kembali ke id materinya.
+  let teaserProgress: { done: number; total: number } | undefined;
+  if (isTeaser) {
+    const openLessonIds = (allSubjects ?? []).flatMap((s) =>
+      (s.modules ?? [])
+        .filter((m: any) => canAccessModule(profile, m.programs))
+        .flatMap((m: any) => (m.lessons ?? []).map((l: any) => l.id as string)),
+    );
+    const done = new Set<string>();
+    if (openLessonIds.length > 0) {
+      const { data: quizzes } = await supabase
+        .from("quizzes")
+        .select("id, lesson_id")
+        .in("lesson_id", openLessonIds);
+      const quizLesson = new Map((quizzes ?? []).map((q) => [q.id, q.lesson_id]));
+      const { data: subs } = await supabase
+        .from("submissions")
+        .select("content_id")
+        .eq("student_id", user.id)
+        .in("content_id", [...openLessonIds, ...quizLesson.keys()]);
+      subs?.forEach((sub) => done.add(quizLesson.get(sub.content_id) ?? sub.content_id));
+    }
+    teaserProgress = { done: done.size, total: openLessonIds.length };
+  }
 
   // Recent activity from submissions (lesson + quiz)
   const { data: recentActivity } = await supabase
@@ -77,10 +116,11 @@ export default async function DashboardPage() {
     .limit(5);
 
   // Find HTML & CSS subject for new students
+  const openSubjects = subjects.filter((s) => !s.isLocked);
   const htmlCssSubject =
-    subjects?.find((s) => s.title.toLowerCase().includes("html")) ||
-    subjects?.find((s) => s.order_index === 1) ||
-    subjects?.[0];
+    openSubjects.find((s) => s.title.toLowerCase().includes("html")) ||
+    openSubjects.find((s) => s.order_index === 1) ||
+    openSubjects[0];
 
   // Determine if student has previous learning activity and find last lesson
   const { data: latestSubmission } = await supabase
@@ -444,15 +484,16 @@ export default async function DashboardPage() {
 
           {/* SUBJECT GRID */}
           <section className={styles.sectionBlock}>
+            {isTeaser && <UpgradeCta progress={teaserProgress} />}
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>Materi Belajar</h2>
               <span className={styles.sectionCount}>
-                {subjects?.length ?? 0} kursus tersedia
+                {openSubjects.length} kursus tersedia
               </span>
             </div>
 
             <div className={styles.subjectGrid}>
-              {subjects?.map((subject, i) => {
+              {subjects.map((subject, i) => {
                 const icons = ["💻", "🎨", "⚡", "🔧", "🌐", "🛠️"];
                 const gradients = [
                   "linear-gradient(135deg,#eef2ff,#e0e7ff)",
@@ -467,28 +508,35 @@ export default async function DashboardPage() {
                     href={`/subjects/${subject.id}`}
                     key={subject.id}
                     className={styles.subjectCard}
+                    style={subject.isLocked ? { opacity: 0.75 } : undefined}
                   >
                     <div
                       className={styles.subjectIconWrap}
-                      style={{ background: gradients[i % gradients.length] }}
+                      style={{
+                        background: subject.isLocked
+                          ? "#F1F5F9"
+                          : gradients[i % gradients.length],
+                      }}
                     >
                       <span className={styles.subjectIconEmoji}>
-                        {icons[i % icons.length]}
+                        {subject.isLocked ? "🔒" : icons[i % icons.length]}
                       </span>
                     </div>
                     <h3 className={styles.subjectName}>{subject.title}</h3>
                     <p className={styles.subjectDesc}>{subject.description}</p>
                     <div className={styles.subjectFooter}>
-                      <span className={styles.subjectTag}>Coding</span>
+                      <span className={styles.subjectTag}>
+                        {subject.isLocked ? "Kelas Supercoder" : "Coding"}
+                      </span>
                       <span className={styles.subjectCTA}>
-                        Mulai →
+                        {subject.isLocked ? "Lihat isi →" : "Mulai →"}
                       </span>
                     </div>
                   </Link>
                 );
               })}
 
-              {(!subjects || subjects.length === 0) && (
+              {subjects.length === 0 && (
                 <div className={styles.emptyState}>
                   <p>Belum ada materi tersedia. Cek lagi nanti! 🕐</p>
                 </div>

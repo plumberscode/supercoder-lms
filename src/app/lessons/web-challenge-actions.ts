@@ -2,7 +2,11 @@
 
 import { descriptionToPlainText } from "@/lib/challenge-description";
 
-import { getLessonAccess, LESSON_ACCESS_DENIED } from "@/lib/lesson-access";
+import {
+  checkHintAllowed,
+  getLessonAccess,
+  LESSON_ACCESS_DENIED,
+} from "@/lib/lesson-access";
 import { revalidatePath } from "next/cache";
 import OpenAI from "openai";
 
@@ -221,7 +225,8 @@ export async function getWebChallengeHint(params: {
   studentJs: string;
   attemptNumber: number;
 }): Promise<string> {
-  if (!(await getLessonAccess(params.lessonId))) return LESSON_ACCESS_DENIED;
+  const hintBlocked = await checkHintAllowed(params.lessonId);
+  if (hintBlocked) return hintBlocked;
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {

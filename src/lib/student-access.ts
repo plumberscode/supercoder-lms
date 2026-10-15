@@ -36,3 +36,22 @@ export function canAccessModule(
   const program = viewer.program ?? DEFAULT_PROGRAM;
   return (modulePrograms ?? [DEFAULT_PROGRAM]).includes(program);
 }
+
+export type ModuleVisibility = "open" | "locked" | "hidden";
+
+// open: bisa dikerjakan. locked: teaser melihat judulnya sebagai ajakan ke kelas Supercoder.
+// Modul khusus MINAS tidak pernah ditampilkan ke teaser.
+export function moduleVisibility(
+  viewer: Viewer,
+  modulePrograms: string[] | null | undefined,
+): ModuleVisibility {
+  if (canAccessModule(viewer, modulePrograms)) return "open";
+  if (
+    viewer.status === "approved" &&
+    viewer.program === "teaser" &&
+    (modulePrograms ?? [DEFAULT_PROGRAM]).includes("supercoder")
+  ) {
+    return "locked";
+  }
+  return "hidden";
+}

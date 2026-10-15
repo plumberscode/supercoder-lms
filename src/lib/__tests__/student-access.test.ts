@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { blockedStudentPath, canAccessModule } from "@/lib/student-access";
+import {
+  blockedStudentPath,
+  canAccessModule,
+  moduleVisibility,
+} from "@/lib/student-access";
 
 const student = (program: string | null | undefined, status = "approved") => ({
   role: "student",
@@ -41,5 +45,28 @@ describe("blockedStudentPath", () => {
     expect(blockedStudentPath("inactive")).toBe("/akun-nonaktif");
     expect(blockedStudentPath("pending")).toBe("/pending-approval");
     expect(blockedStudentPath(undefined)).toBe("/pending-approval");
+  });
+});
+
+describe("moduleVisibility", () => {
+  it("opens modules the viewer can access", () => {
+    expect(moduleVisibility(student("teaser"), ["supercoder", "teaser"])).toBe("open");
+    expect(moduleVisibility(student("supercoder"), ["supercoder"])).toBe("open");
+  });
+
+  it("shows Supercoder modules to teasers as locked", () => {
+    expect(moduleVisibility(student("teaser"), ["supercoder"])).toBe("locked");
+    expect(moduleVisibility(student("teaser"), ["supercoder", "minas"])).toBe("locked");
+  });
+
+  it("hides MINAS-only modules from teasers", () => {
+    expect(moduleVisibility(student("teaser"), ["minas"])).toBe("hidden");
+    expect(moduleVisibility(student("teaser"), [])).toBe("hidden");
+  });
+
+  it("never shows locked modules to MINAS, Supercoder or inactive students", () => {
+    expect(moduleVisibility(student("minas"), ["supercoder"])).toBe("hidden");
+    expect(moduleVisibility(student("supercoder"), ["teaser"])).toBe("hidden");
+    expect(moduleVisibility(student("teaser", "inactive"), ["supercoder"])).toBe("hidden");
   });
 });

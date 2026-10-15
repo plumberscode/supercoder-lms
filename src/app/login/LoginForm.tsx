@@ -7,9 +7,9 @@ import styles from "./login.module.css";
 
 export type LoginMode = "umum" | "minas";
 
-// Dipakai /login (tab Email/Google) dan /minas (tab Siswa MINAS langsung terbuka).
-export default function LoginForm({ initialMode }: { initialMode: LoginMode }) {
-  const [mode, setMode] = useState<LoginMode>(initialMode);
+// /login: Google + email (Supercoder & teaser). /minas: username + password.
+// Sengaja dua halaman terpisah agar pengunjung umum tidak melihat login MINAS.
+export default function LoginForm({ mode }: { mode: LoginMode }) {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -26,12 +26,6 @@ export default function LoginForm({ initialMode }: { initialMode: LoginMode }) {
       if (data.session) window.location.href = "/dashboard";
     });
   }, [supabase]);
-
-  const switchMode = (next: LoginMode) => {
-    setMode(next);
-    setError(null);
-    setPassword("");
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,31 +90,14 @@ export default function LoginForm({ initialMode }: { initialMode: LoginMode }) {
         <div className={styles.logo}>
           Super<span>coder</span>
         </div>
-        <h1 className={styles.title}>Selamat Datang Kembali</h1>
+        <h1 className={styles.title}>
+          {mode === "minas" ? "Masuk Siswa MINAS" : "Selamat Datang Kembali"}
+        </h1>
         <p className={styles.subtitle}>
-          Masuk untuk melanjutkan pembelajaran Anda
+          {mode === "minas"
+            ? "Pakai username dan password dari kartu gurumu"
+            : "Masuk untuk melanjutkan pembelajaran Anda"}
         </p>
-
-        <div className={styles.tabs} role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === "umum"}
-            className={`${styles.tab} ${mode === "umum" ? styles.tabActive : ""}`}
-            onClick={() => switchMode("umum")}
-          >
-            Email / Google
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === "minas"}
-            className={`${styles.tab} ${mode === "minas" ? styles.tabActive : ""}`}
-            onClick={() => switchMode("minas")}
-          >
-            Siswa MINAS
-          </button>
-        </div>
 
         {mode === "umum" ? (
           <>
@@ -194,7 +171,7 @@ export default function LoginForm({ initialMode }: { initialMode: LoginMode }) {
               {loading ? "Memproses..." : "Masuk"}
             </button>
             <p className={styles.footerText}>
-              Username dan password ada di kartu dari gurumu.
+              Bukan siswa MINAS? <a href="/login">Masuk di sini</a>
             </p>
           </form>
         )}

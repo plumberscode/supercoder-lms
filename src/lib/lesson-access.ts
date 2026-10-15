@@ -18,7 +18,28 @@ export async function getLessonAccess(lessonId: string) {
   if (!viewer || !lesson) return null;
   if (!canAccessModule(viewer, (lesson.module_id as any)?.programs)) return null;
 
-  return { supabase, user };
+  return { supabase, user, viewer };
 }
 
 export const LESSON_ACCESS_DENIED = "Materi ini tidak tersedia untuk akunmu";
+
+// Samakan dengan batas di fungsi SQL consume_ai_hint (migration_teaser.sql).
+export const TEASER_DAILY_HINTS = 5;
+
+// Untuk AI Hint: null jika boleh, atau pesan untuk siswa jika tidak. Teaser dibatasi
+// per hari; pemakaiannya dicatat oleh consume_ai_hint.
+export async function checkHintAllowed(lessonId: string): Promise<string | null> {
+  const access = await getLessonAccess(lessonId);
+  if (!access) return LESSON_ACCESS_DENIED;
+
+  const { data: allowed, error } = await access.supabase.rpc("consume_ai_hint");
+  if (error) {
+    console.error("consume_ai_hint error:", error);
+    // Gagal tertutup hanya untuk teaser (akses publik); siswa lain tetap dapat hint.
+    return access.viewer.program === "teaser" ? "Petunjuk sedang tidak tersedia." : null;
+  }
+  if (!allowed) {
+    return `Jatah petunjuk hari ini habis (${TEASER_DAILY_HINTS}/hari). Siswa kelas Supercoder bisa minta petunjuk tanpa batas.`;
+  }
+  return null;
+}

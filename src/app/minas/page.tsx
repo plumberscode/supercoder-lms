@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 
 // Link pendek untuk dibagikan di kelas MINAS: login dengan tab MINAS langsung terbuka.
 export default function MinasLoginPage() {
-  return <LoginForm initialMode="minas" />;
+  return <LoginForm mode="minas" />;
 }

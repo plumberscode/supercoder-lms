@@ -44,9 +44,9 @@ export default function SignupPage() {
         <div className={styles.logo}>
           Super<span>coder</span>
         </div>
-        <h1 className={styles.title}>Buat Akun Baru</h1>
+        <h1 className={styles.title}>Buat Akun Gratis</h1>
         <p className={styles.subtitle}>
-          Bergabunglah dengan komunitas Supercoder hari ini
+          Langsung coba materi coding pilihan dari Supercoder
         </p>
 
         {success ? (

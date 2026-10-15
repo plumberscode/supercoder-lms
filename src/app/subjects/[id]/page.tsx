@@ -2,9 +2,10 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import {
   blockedStudentPath,
-  canAccessModule,
   isStaff,
+  moduleVisibility,
 } from "@/lib/student-access";
+import UpgradeCta from "@/components/UpgradeCta";
 import Link from "next/link";
 import styles from "./subject.module.css";
 
@@ -45,9 +46,12 @@ export default async function SubjectPage({
     .eq("id", id)
     .single();
 
+  // Modul terbuka bisa dikerjakan; modul terkunci (khusus teaser) hanya tampil judulnya.
   const modules = (subject?.modules ?? [])
-    .filter((m: any) => canAccessModule(viewer, m.programs))
+    .map((m: any) => ({ ...m, visibility: moduleVisibility(viewer, m.programs) }))
+    .filter((m: any) => m.visibility !== "hidden")
     .sort((a: any, b: any) => a.order_index - b.order_index);
+  const hasLockedModules = modules.some((m: any) => m.visibility === "locked");
 
   if (!subject || modules.length === 0)
     return (
@@ -58,9 +62,9 @@ export default async function SubjectPage({
 
   const userScores: Record<string, number> = {};
 
-  const lessonIds = modules.flatMap(
-    (m: any) => m.lessons?.map((l: any) => l.id) || [],
-  );
+  const lessonIds = modules
+    .filter((m: any) => m.visibility === "open")
+    .flatMap((m: any) => m.lessons?.map((l: any) => l.id) || []);
 
   if (lessonIds.length > 0) {
     const { data: submissions } = await supabase
@@ -183,6 +187,14 @@ export default async function SubjectPage({
                       {moduleIndex + 1}
                     </span>
                     {module.title}
+                    {module.visibility === "locked" && (
+                      <span
+                        className="badge"
+                        style={{ backgroundColor: "#FFEDD5", color: "#9A3412" }}
+                      >
+                        🔒 Kelas Supercoder
+                      </span>
+                    )}
                   </h3>
                   <div
                     className="card"
@@ -195,12 +207,9 @@ export default async function SubjectPage({
                   >
                     {module.lessons
                       ?.sort((a: any, b: any) => a.order_index - b.order_index)
-                      .map((lesson: any) => (
-                        <Link
-                          href={`/lessons/${lesson.id}`}
-                          key={lesson.id}
-                          className={styles.lessonItem}
-                        >
+                      .map((lesson: any) => {
+                        const content = (
+                          <>
                           <div
                             style={{
                               display: "flex",
@@ -249,12 +258,35 @@ export default async function SubjectPage({
                               </div>
                             </div>
                           </div>
-                          <div className={styles.playIcon}>MULAI ▶</div>
-                        </Link>
-                      ))}
+                          <div className={styles.playIcon}>
+                            {module.visibility === "locked" ? "🔒" : "MULAI ▶"}
+                          </div>
+                          </>
+                        );
+
+                        // Materi di modul terkunci tampil tanpa link.
+                        return module.visibility === "locked" ? (
+                          <div
+                            key={lesson.id}
+                            className={styles.lessonItem}
+                            style={{ opacity: 0.55, cursor: "default" }}
+                          >
+                            {content}
+                          </div>
+                        ) : (
+                          <Link
+                            key={lesson.id}
+                            href={`/lessons/${lesson.id}`}
+                            className={styles.lessonItem}
+                          >
+                            {content}
+                          </Link>
+                        );
+                      })}
                   </div>
                 </div>
               ))}
+            {hasLockedModules && <UpgradeCta />}
           </div>
 
           <aside>

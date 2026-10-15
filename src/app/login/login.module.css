@@ -113,29 +113,3 @@
   color: var(--primary);
   font-weight: 600;
 }
-
-.tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  padding: 4px;
-  margin-bottom: 28px;
-  background: #f1f5f9;
-  border-radius: var(--radius);
-}
-
-.tab {
-  padding: 10px 8px;
-  border-radius: calc(var(--radius) - 2px);
-  background: transparent;
-  color: #64748b;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.tabActive {
-  background: white;
-  color: var(--secondary);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}

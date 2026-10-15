@@ -5,6 +5,7 @@ import RoleSelector from "./RoleSelector";
 import ParentContactForm from "./ParentContactForm";
 import StudentActiveToggle from "./StudentActiveToggle";
 import Link from "next/link";
+import { PROGRAMS } from "@/lib/student-access";
 
 const STATUS_FILTERS = [
   { key: "", label: "Semua" },
@@ -19,12 +20,23 @@ const STATUS_BADGE: Record<string, { label: string; bg: string; color: string }>
   pending: { label: "Menunggu", bg: "#FEE2E2", color: "#991B1B" },
 };
 
+const PROGRAM_FILTERS = [{ key: "", label: "Semua Program" }].concat(
+  PROGRAMS.map((p) => ({ key: p.value, label: p.label })),
+);
+
+const PROGRAM_BADGE: Record<string, { bg: string; color: string }> = {
+  supercoder: { bg: "#E0E7FF", color: "#3730A3" },
+  minas: { bg: "#CCFBF1", color: "#115E59" },
+  teaser: { bg: "#FFEDD5", color: "#9A3412" },
+};
+
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; program?: string }>;
 }) {
-  const { status: statusFilter = "" } = await searchParams;
+  const { status: statusFilter = "", program: programFilter = "" } =
+    await searchParams;
   const supabase = await createClient();
 
   let query = supabase
@@ -34,42 +46,61 @@ export default async function AdminUsersPage({
   if (STATUS_FILTERS.some((f) => f.key && f.key === statusFilter)) {
     query = query.eq("status", statusFilter);
   }
+  if (PROGRAM_FILTERS.some((f) => f.key && f.key === programFilter)) {
+    query = query.eq("program", programFilter);
+  }
   const { data: users, error } = await query;
 
   if (error) return <div>Gagal memuat data pengguna: {error.message}</div>;
 
   // Nomor WA dari formulir pendaftaran dipakai sebagai saran bila WA orang tua belum diisi.
+  // Pendaftaran lunas menandai akun teaser yang siap dinaikkan ke Supercoder.
   const { data: registrations } = await supabase
     .from("registrations")
-    .select("email, whatsapp_number")
+    .select("email, whatsapp_number, payment_status")
     .order("created_at", { ascending: false });
   const waFromRegistration = new Map<string, string>();
+  const paidEmails = new Set<string>();
   registrations?.forEach((r) => {
     const email = r.email?.toLowerCase();
     if (email && r.whatsapp_number && !waFromRegistration.has(email)) {
       waFromRegistration.set(email, r.whatsapp_number);
     }
+    if (email && r.payment_status === "paid") paidEmails.add(email);
   });
+
+  const filterHref = (status: string, program: string) => {
+    const params = new URLSearchParams();
+    if (status) params.set("status", status);
+    if (program) params.set("program", program);
+    const qs = params.toString();
+    return qs ? `/admin/users?${qs}` : "/admin/users";
+  };
 
   return (
     <div>
       <h1 className={styles.pageTitle}>Manajemen Pengguna</h1>
 
-      <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-        {STATUS_FILTERS.map((f) => {
-          const active = f.key === statusFilter;
-          return (
+      {[
+        { filters: STATUS_FILTERS, current: statusFilter, href: (key: string) => filterHref(key, programFilter) },
+        { filters: PROGRAM_FILTERS, current: programFilter, href: (key: string) => filterHref(statusFilter, key) },
+      ].map((group, i) => (
+        <div
+          key={i}
+          style={{ display: "flex", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}
+        >
+          {group.filters.map((f) => (
             <Link
               key={f.key || "all"}
-              href={f.key ? `/admin/users?status=${f.key}` : "/admin/users"}
-              className={active ? "btn btn-primary" : "btn"}
+              href={group.href(f.key)}
+              className={f.key === group.current ? "btn btn-primary" : "btn"}
               style={{ padding: "6px 14px", fontSize: "0.8rem" }}
             >
               {f.label}
             </Link>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      ))}
 
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         <table
@@ -110,9 +141,32 @@ export default async function AdminUsersPage({
                   </div>
                   <div style={{ fontSize: "0.875rem", color: "#64748B" }}>
                     {user.program === "minas" && user.username
-                      ? `MINAS · ${user.username}`
+                      ? user.username
                       : user.email}
                   </div>
+                  {user.role === "student" && (
+                    <div style={{ display: "flex", gap: "6px", marginTop: "6px", flexWrap: "wrap" }}>
+                      <span
+                        className="badge"
+                        style={{
+                          backgroundColor: PROGRAM_BADGE[user.program]?.bg,
+                          color: PROGRAM_BADGE[user.program]?.color,
+                        }}
+                      >
+                        {PROGRAMS.find((p) => p.value === user.program)?.label ?? user.program}
+                      </span>
+                      {user.program === "teaser" &&
+                        paidEmails.has(user.email?.toLowerCase()) && (
+                          <span
+                            className="badge"
+                            style={{ backgroundColor: "#DCFCE7", color: "#166534" }}
+                            title="Email ini cocok dengan pendaftaran yang sudah lunas"
+                          >
+                            💰 Sudah bayar
+                          </span>
+                        )}
+                    </div>
+                  )}
                 </td>
                 <td style={{ padding: "16px 24px" }}>
                   <RoleSelector userId={user.id} currentRole={user.role} />
@@ -146,25 +200,32 @@ export default async function AdminUsersPage({
                   )}
                 </td>
                 <td style={{ padding: "16px 24px" }}>
-                  {user.status === "pending" ? (
-                    <form action={approveUser.bind(null, user.id)}>
-                      <button
-                        className="btn btn-primary"
-                        style={{ padding: "6px 12px", fontSize: "0.75rem" }}
-                      >
-                        Setujui
-                      </button>
-                    </form>
-                  ) : user.role === "student" &&
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    {/* approveUser = jadikan Supercoder (status approved + program supercoder) */}
+                    {(user.status === "pending" ||
+                      (user.role === "student" && user.program === "teaser")) && (
+                        <form action={approveUser.bind(null, user.id)}>
+                          <button
+                            className="btn btn-primary"
+                            style={{ padding: "6px 12px", fontSize: "0.75rem", whiteSpace: "nowrap" }}
+                          >
+                            Jadikan Supercoder
+                          </button>
+                        </form>
+                      )}
+                    {user.role === "student" &&
                     (user.status === "approved" || user.status === "inactive") ? (
-                    <StudentActiveToggle
-                      userId={user.id}
-                      studentName={user.full_name || user.email}
-                      isActive={user.status === "approved"}
-                    />
-                  ) : (
-                    <span style={{ color: "#CBD5E1" }}>—</span>
-                  )}
+                      <StudentActiveToggle
+                        userId={user.id}
+                        studentName={user.full_name || user.email}
+                        isActive={user.status === "approved"}
+                      />
+                    ) : (
+                      user.status !== "pending" && (
+                        <span style={{ color: "#CBD5E1" }}>—</span>
+                      )
+                    )}
+                  </div>
                 </td>
               </tr>
               );

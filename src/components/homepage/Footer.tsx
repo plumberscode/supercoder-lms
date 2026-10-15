@@ -163,6 +163,14 @@ export default function Footer({ showLocalLinks = false }: { showLocalLinks?: bo
                     Elite Level
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    href="/minas"
+                    className="hover:text-red-600 transition-colors"
+                  >
+                    MINAS
+                  </Link>
+                </li>
               </ul>
             </div>
 

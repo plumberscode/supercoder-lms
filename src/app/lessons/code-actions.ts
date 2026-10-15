@@ -1,6 +1,10 @@
 "use server";
 
-import { getLessonAccess, LESSON_ACCESS_DENIED } from "@/lib/lesson-access";
+import {
+  checkHintAllowed,
+  getLessonAccess,
+  LESSON_ACCESS_DENIED,
+} from "@/lib/lesson-access";
 import { revalidatePath } from "next/cache";
 import { getAIHint } from "@/lib/ai-hints";
 
@@ -107,7 +111,8 @@ export async function getCodeHint(params: {
   }[];
   attemptNumber: number;
 }): Promise<string> {
-  if (!(await getLessonAccess(params.lessonId))) return LESSON_ACCESS_DENIED;
+  const hintBlocked = await checkHintAllowed(params.lessonId);
+  if (hintBlocked) return hintBlocked;
 
   return getAIHint(params);
 }
