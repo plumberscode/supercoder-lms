@@ -14,6 +14,10 @@ import WebChallenge from "@/components/WebChallenge";
 import { prepareChallengeDescription } from "@/lib/challenge-description";
 import ChallengeDescription from "@/components/ChallengeDescription";
 import styles from "./lesson.module.css";
+import StudentTopBar from "@/components/student/StudentTopBar";
+import WhatsAppButton from "@/components/student/WhatsAppButton";
+import { lessonTypeTheme } from "@/components/student/themes";
+import ui from "@/components/student/student.module.css";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export default async function LessonPage({
@@ -46,7 +50,24 @@ export default async function LessonPage({
     .eq("id", id)
     .single();
 
-  if (!lesson) return <div>Materi tidak ditemukan</div>;
+  if (!lesson) {
+    return (
+      <div className={ui.shell}>
+        <StudentTopBar profile={viewer} email={user.email} />
+        <main className={`${ui.page} ${ui.pageNarrow}`}>
+          <div className={ui.emptyState}>
+            <span className={ui.emptyEmoji}>🔍</span>
+            <p>Materi tidak ditemukan.</p>
+            <div className={ui.heroActions} style={{ justifyContent: "center" }}>
+              <Link href="/dashboard" className={ui.secondaryBtn}>
+                ← Kembali ke Dashboard
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   // Materi dari modul program lain: kembali ke halaman subject-nya.
   if (!canAccessModule(viewer, (lesson.module_id as any).programs)) {
@@ -170,35 +191,8 @@ export default async function LessonPage({
     lesson.type === "css-challenge" ||
     lesson.type === "web-challenge";
 
-  // ── Shared header content (used in both layouts) ──────────────────────
-  const waHref = `https://wa.me/62816331126?text=${encodeURIComponent(`Halo Instruktur Supercoder, saya ingin bertanya seputar materi: ${lesson.title}`)}`;
-
   const waButton = (
-    <a
-      href={waHref}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Tanya Instruktur via WhatsApp"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "6px",
-        backgroundColor: "#22C55E",
-        color: "#FFFFFF",
-        padding: "6px 14px",
-        borderRadius: "8px",
-        fontSize: "0.825rem",
-        fontWeight: 700,
-        textDecoration: "none",
-        boxShadow: "0 2px 6px rgba(34, 197, 94, 0.2)",
-        transition: "all 0.15s ease",
-      }}
-    >
-      <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: "14px", height: "14px", flexShrink: 0 }}>
-        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-      </svg>
-      <span className={styles.waLabel}>Tanya Instruktur</span>
-    </a>
+    <WhatsAppButton topic={lesson.title} labelClassName={styles.waLabel} />
   );
 
   // ── IDE layout for coding challenges ──────────────────────────────────
@@ -261,202 +255,144 @@ export default async function LessonPage({
   }
 
   // ── Standard layout for non-coding lesson types ───────────────────────
+  const { data: subjectRow } = await supabase
+    .from("subjects")
+    .select("title")
+    .eq("id", subjectId)
+    .maybeSingle();
+  const type = lessonTypeTheme(lesson.type);
+
   return (
-    <div style={{ backgroundColor: "#F8FAFC", minHeight: "100vh" }}>
-      <header className={styles.pageHeader}>
-        <div className={styles.pageHeaderRow}>
-          <Link href={`/subjects/${subjectId}`} className={styles.pageBack}>
-            ← {moduleTitle}
-          </Link>
-          <div className={styles.headerActions}>
-            {waButton}
-            <div className={styles.pageBrand}>Supercoder</div>
+    <div className={ui.shell}>
+      <StudentTopBar profile={viewer} email={user.email} />
+
+      <main className={`${ui.page} ${ui.pageNarrow}`}>
+        <nav className={ui.breadcrumb} aria-label="Navigasi">
+          <div className={ui.crumbs}>
+            <Link href={`/subjects/${subjectId}`} className={ui.crumbLink}>
+              ← {subjectRow?.title ?? "Mata Pelajaran"}
+            </Link>
+            <span>/</span>
+            <span className={ui.crumbCurrent}>{moduleTitle}</span>
           </div>
-        </div>
-      </header>
+          {waButton}
+        </nav>
 
-      <div
-        className="container"
-        style={{ padding: "40px 20px", maxWidth: "900px", margin: "0 auto" }}
-      >
-        <h1
-          style={{
-            fontSize: "clamp(1.5rem, 5vw, 2.25rem)",
-            marginBottom: "32px",
-          }}
-        >
-          {lesson.title}
-        </h1>
-
-        <div className="card" style={{ marginBottom: "40px" }}>
-          {lessonScore && (
+        <div className={ui.mainColumn}>
+          {/* HERO */}
+          <section className={ui.hero}>
+            <div className={ui.heroText}>
+              <p className={ui.heroLabel}>{type.label}</p>
+              <h1 className={ui.heroTitle}>{lesson.title}</h1>
+              <p className={ui.heroSubtitle}>{lesson.description || moduleTitle}</p>
+            </div>
             <div
-              style={{
-                backgroundColor: "#F0FDF4",
-                border: "1px solid #BBF7D0",
-                padding: "20px",
-                borderRadius: "12px",
-                marginBottom: "24px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: "16px",
-              }}
+              className={ui.heroIcon}
+              style={{ background: type.gradient }}
+              aria-hidden="true"
             >
+              {type.icon}
+            </div>
+          </section>
+
+          {lessonScore && (
+            <div className={ui.scoreBox}>
               <div>
-                <h3
-                  style={{
-                    color: "#166534",
-                    margin: "0 0 8px 0",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <span>🏆</span> Nilai Materi
-                </h3>
-                <p style={{ margin: 0, color: "#15803D", fontSize: "0.9rem" }}>
+                <p className={ui.scoreTitle}>🏆 Nilai Materi</p>
+                <p className={ui.scoreMeta}>
                   Dinilai pada{" "}
-                  {new Date(lessonScore.graded_at).toLocaleDateString()}
+                  {new Date(lessonScore.graded_at).toLocaleDateString("id-ID")}
                   {lessonScore.feedback && (
-                    <span
-                      style={{
-                        display: "block",
-                        marginTop: "8px",
-                        fontStyle: "italic",
-                        color: "#166534",
-                        whiteSpace: "pre-line",
-                      }}
-                    >
+                    <span className={ui.scoreFeedback}>
                       &quot;{lessonScore.feedback}&quot;
                     </span>
                   )}
                 </p>
               </div>
-              <div
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 800,
-                  color: "#166534",
-                  backgroundColor: "white",
-                  padding: "12px 24px",
-                  borderRadius: "12px",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-                }}
-              >
-                {lessonScore.score}{" "}
-                <span
-                  style={{
-                    fontSize: "1rem",
-                    color: "#86EFAC",
-                    fontWeight: 600,
-                  }}
-                >
-                  / 100
-                </span>
+              <div className={ui.scoreValue}>
+                {lessonScore.score}
+                <span className={ui.scoreUnit}> / 100</span>
               </div>
             </div>
           )}
 
           {/* Material Viewer */}
           {lesson.type === "video" && (
-            <div
-              style={{
-                position: "relative",
-                paddingBottom: "56.25%",
-                height: 0,
-                overflow: "hidden",
-                borderRadius: "12px",
-                backgroundColor: "black",
-              }}
-            >
-              <iframe
+            <div className={ui.contentCard} style={{ padding: "12px" }}>
+              <div
                 style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
+                  position: "relative",
+                  paddingBottom: "56.25%",
+                  height: 0,
+                  overflow: "hidden",
+                  borderRadius: "14px",
+                  backgroundColor: "black",
                 }}
-                src={lesson.content_url?.replace("watch?v=", "embed/")}
-                title="Lesson Video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+              >
+                <iframe
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                  }}
+                  src={lesson.content_url?.replace("watch?v=", "embed/")}
+                  title="Lesson Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
             </div>
           )}
 
-          {lesson.type === "pdf" && (
-            <div style={{ padding: "40px", textAlign: "center" }}>
-              <span
-                style={{
-                  fontSize: "4rem",
-                  marginBottom: "16px",
-                  display: "block",
-                }}
-              >
-                📄
+          {(lesson.type === "pdf" || lesson.type === "link") && (
+            <div className={ui.contentCard} style={{ textAlign: "center", padding: "40px 24px" }}>
+              <span className={ui.emptyEmoji} aria-hidden="true">
+                {type.icon}
               </span>
-              <h3>Materi Pembelajaran (PDF)</h3>
-              <p style={{ color: "#64748B", marginBottom: "24px" }}>
-                Silakan tinjau dokumen di bawah ini untuk melanjutkan.
+              <h2 className={ui.cardTitle}>
+                {lesson.type === "pdf" ? "Materi Pembelajaran (PDF)" : "Sumber Eksternal"}
+              </h2>
+              <p className={ui.panelText}>
+                {lesson.type === "pdf"
+                  ? "Buka dokumen di bawah ini untuk mempelajari materinya."
+                  : "Ikuti link di bawah ini untuk mengakses materi pembelajaran."}
               </p>
               <a
                 href={lesson.content_url}
                 target="_blank"
-                className="btn btn-primary"
+                rel="noopener noreferrer"
+                className={ui.primaryBtn}
               >
-                Buka PDF
-              </a>
-            </div>
-          )}
-
-          {lesson.type === "link" && (
-            <div style={{ padding: "40px", textAlign: "center" }}>
-              <span
-                style={{
-                  fontSize: "4rem",
-                  marginBottom: "16px",
-                  display: "block",
-                }}
-              >
-                🔗
-              </span>
-              <h3>Sumber Eksternal</h3>
-              <p style={{ color: "#64748B", marginBottom: "24px" }}>
-                Ikuti link di bawah ini untuk mengakses materi pembelajaran.
-              </p>
-              <a
-                href={lesson.content_url}
-                target="_blank"
-                className="btn btn-primary"
-              >
-                Buka Link
+                {lesson.type === "pdf" ? "📄 Buka PDF" : "🔗 Buka Link"}
               </a>
             </div>
           )}
 
           {lesson.type === "text" && (
-            <div style={{ padding: "20px", lineHeight: 1.8 }}>
+            <div className={ui.contentCard} style={{ lineHeight: 1.8 }}>
               {lesson.content_url ? (
                 <ChallengeDescription
                   description={prepareChallengeDescription(lesson.content_url)}
                   className="whitespace-pre-wrap"
                 />
               ) : (
-                <p>Konten teks akan muncul di sini.</p>
+                <p className={ui.panelText}>Konten teks akan muncul di sini.</p>
               )}
             </div>
           )}
 
+          {lesson.type === "quiz" && (
+            <div className={ui.contentCard}>
+              <QuizView lessonId={lesson.id} />
+            </div>
+          )}
 
-          {lesson.type === "quiz" && <QuizView lessonId={lesson.id} />}
+          {lesson.is_project_required && <ProjectSubmission lessonId={lesson.id} />}
         </div>
-
-        {lesson.is_project_required && <ProjectSubmission lessonId={lesson.id} />}
-      </div>
+      </main>
     </div>
   );
 }

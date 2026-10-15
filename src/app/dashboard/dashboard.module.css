@@ -1,126 +1,4 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   Dashboard Shell — rich gradient background untuk glassmorphism
-   ────────────────────────────────────────────────────────────────────────── */
-
-.dashboardShell {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-
-  /* Mesh gradient background — basis efek glass */
-  background-color: #f0f4ff;
-  background-image:
-    radial-gradient(at 0% 0%,   rgba(249, 115, 22, 0.18)  0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.15)  0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.12)  0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(239, 68, 68, 0.12) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(248, 250, 252, 0.6)  0px, transparent 70%);
-  background-attachment: fixed;
-}
-
-/* ──────────────────────────────────────────────────────────────────────────
-   Top Bar
-   ────────────────────────────────────────────────────────────────────────── */
-
-.topBar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  height: 64px;
-  width: 100%;
-
-  /* Glass effect */
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.8) inset,
-    0 4px 16px rgba(0, 0, 0, 0.06);
-}
-
-.topBarContainer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1200px;
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-.topBarBrand {
-  display: flex;
-  align-items: center;
-}
-
-.brandLogo {
-  height: 32px;
-  width: auto;
-  object-fit: contain;
-}
-
-.topBarRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.adminPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: #fef2f2;
-  color: #ef4444;
-  border: 1px solid #fee2e2;
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-family: var(--font-inter), Inter, sans-serif;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.adminPill:hover {
-  background: #fee2e2;
-}
-
-.levelPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #f97316, #ef4444);
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 700;
-  font-family: var(--font-poppins), Poppins, sans-serif;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-}
-
-.levelIcon {
-  font-size: 0.9rem;
-}
-
-.userAvatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0f172a, #1e1b4b);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-poppins), Poppins, sans-serif;
-  font-weight: 800;
-  font-size: 1rem;
-  border: 2px solid #e2e8f0;
-}
-
-/* ──────────────────────────────────────────────────────────────────────────
    Main Layout (2-col: main + sidebar)
    ────────────────────────────────────────────────────────────────────────── */
 
@@ -617,33 +495,6 @@
   margin-bottom: 16px;
 }
 
-.signOutForm {
-  display: inline-flex;
-}
-
-.signOutBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  white-space: nowrap;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
-  font-family: var(--font-inter), Inter, sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-
-.signOutBtn:hover {
-  background: #fee2e2;
-  color: #ef4444;
-  border-color: #fecaca;
-}
-
 /* ── Activity List ────────────────────────────────────────────────────── */
 
 .activityList {
@@ -888,10 +739,6 @@
 }
 
 @media (max-width: 768px) {
-  .topBarContainer {
-    padding: 0 16px;
-  }
-
   .mainLayout {
     padding: 16px 16px 36px;
     gap: 16px;
@@ -940,16 +787,6 @@
 }
 
 @media (max-width: 480px) {
-  .topBarRight {
-    gap: 8px;
-  }
-
-  .levelPill,
-  .adminPill,
-  .signOutBtn {
-    padding: 6px 10px;
-  }
-
   .statRow {
     grid-template-columns: 1fr 1fr;
   }
