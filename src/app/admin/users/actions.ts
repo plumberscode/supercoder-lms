@@ -54,6 +54,7 @@ export async function setStudentActive(
   }
 
   revalidatePath("/admin/users");
+  revalidatePath("/admin/minas");
   revalidatePath("/admin/gradebook");
   revalidatePath("/admin/lesson-scores");
   revalidatePath("/admin/reports");

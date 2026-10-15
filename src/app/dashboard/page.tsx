@@ -123,12 +123,19 @@ export default async function DashboardPage() {
     }
   }
 
+  // Leaderboard & testimoni terpisah per program: siswa MINAS hanya bersaing sesama MINAS,
+  // dan testimoni (dipakai di situs publik) hanya dari siswa Supercoder.
+  const program = profile.program ?? "supercoder";
+  const isMinas = program === "minas";
+  const canWriteTestimonial = program === "supercoder";
+
   // Top leaderboard
   const { data: leaderboard } = await supabase
     .from("profiles")
     .select("id, full_name, xp, level")
     .eq("status", "approved")
     .eq("role", "student")
+    .eq("program", program)
     .order("xp", { ascending: false })
     .limit(5);
 
@@ -222,7 +229,9 @@ export default async function DashboardPage() {
           <div className={styles.heroBanner}>
             {/* text side */}
             <div className={styles.heroText}>
-              <p className={styles.heroLabel}>Dashboard Siswa</p>
+              <p className={styles.heroLabel}>
+                {isMinas ? "Dashboard Siswa MINAS" : "Dashboard Siswa"}
+              </p>
               <h1 className={styles.heroTitle}>
                 Halo, {firstName}! 👋
               </h1>
@@ -239,12 +248,14 @@ export default async function DashboardPage() {
                 >
                   {isReturningStudent ? "🚀 Lanjutkan Belajar" : "🚀 Mulai Belajar"}
                 </Link>
-                <Link
-                  href="/dashboard/testimonials"
-                  className={styles.heroSecondary}
-                >
-                  ⭐ Beri Testimoni
-                </Link>
+                {canWriteTestimonial && (
+                  <Link
+                    href="/dashboard/testimonials"
+                    className={styles.heroSecondary}
+                  >
+                    ⭐ Beri Testimoni
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -672,18 +683,20 @@ export default async function DashboardPage() {
           </div>
 
           {/* TESTIMONI BANNER */}
-          <div className={styles.testimoniBanner}>
-            <span className={styles.testimoniEmoji}>💬</span>
-            <div>
-              <p className={styles.testimoniTitle}>Bagikan Pengalamanmu</p>
-              <p className={styles.testimoniDesc}>
-                Bantu kami jadi lebih baik!
-              </p>
+          {canWriteTestimonial && (
+            <div className={styles.testimoniBanner}>
+              <span className={styles.testimoniEmoji}>💬</span>
+              <div>
+                <p className={styles.testimoniTitle}>Bagikan Pengalamanmu</p>
+                <p className={styles.testimoniDesc}>
+                  Bantu kami jadi lebih baik!
+                </p>
+              </div>
+              <Link href="/dashboard/testimonials" className={styles.testimoniCTA}>
+                Tulis →
+              </Link>
             </div>
-            <Link href="/dashboard/testimonials" className={styles.testimoniCTA}>
-              Tulis →
-            </Link>
-          </div>
+          )}
         </aside>
       </main>
     </div>

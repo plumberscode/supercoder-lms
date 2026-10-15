@@ -1,0 +1,77 @@
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.loginCard {
+  border: 1.5px dashed #94a3b8;
+  border-radius: 12px;
+  padding: 16px;
+  background: white;
+  break-inside: avoid;
+}
+
+.cardBrand {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cardName {
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin: 4px 0 10px;
+}
+
+.cardRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.9rem;
+  padding: 4px 0;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cardRow span:first-child {
+  color: #64748b;
+}
+
+.cardRow strong {
+  font-family: ui-monospace, monospace;
+  font-size: 1rem;
+}
+
+.cardUrl {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* Saat dicetak, hanya kartu yang tampil (sidebar admin dan form disembunyikan). */
+@media print {
+  :global(body) * {
+    visibility: hidden;
+  }
+
+  .printArea,
+  .printArea * {
+    visibility: visible;
+  }
+
+  .printArea {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+
+  .noPrint {
+    display: none !important;
+  }
+
+  .cardGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

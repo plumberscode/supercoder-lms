@@ -1,15 +1,30 @@
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function LeaderboardPage() {
   const supabase = await createClient();
 
+  // Peringkat per program: siswa MINAS hanya dibandingkan dengan sesama MINAS.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const { data: viewer } = await supabase
+    .from("profiles")
+    .select("program")
+    .eq("id", user.id)
+    .single();
+  const program = viewer?.program ?? "supercoder";
+
   const { data: topStudents } = await supabase
     .from("profiles")
     .select("full_name, email, xp, level")
     .eq("status", "approved")
+    .eq("role", "student")
+    .eq("program", program)
     .order("xp", { ascending: false })
     .limit(10);
 

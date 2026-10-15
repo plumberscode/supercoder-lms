@@ -40,6 +40,9 @@ export default async function AdminLayout({
           <Link href="/admin/users" className={`${styles.navLink}`}>
             <span>👥</span> Pengguna
           </Link>
+          <Link href="/admin/minas" className={styles.navLink}>
+            <span>🏫</span> Siswa MINAS
+          </Link>
           <Link href="/admin/subjects" className={styles.navLink}>
             <span>📚</span> Mata Pelajaran
           </Link>

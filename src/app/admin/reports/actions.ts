@@ -34,7 +34,9 @@ export async function createDrafts(formData: FormData) {
     .from("profiles")
     .select("id")
     .eq("role", "student")
-    .eq("status", "approved");
+    .eq("status", "approved")
+    // Rapor bulanan hanya untuk siswa kursus Supercoder, bukan MINAS/teaser.
+    .eq("program", "supercoder");
   if (error) throw new Error(error.message);
 
   if (students && students.length > 0) {

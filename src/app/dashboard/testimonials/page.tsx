@@ -21,13 +21,16 @@ export default async function StudentTestimonialsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, full_name, email, status")
+    .select("id, full_name, email, status, program")
     .eq("id", user.id)
     .single();
 
   if (!profile || profile.status !== "approved") {
     redirect(blockedStudentPath(profile?.status));
   }
+
+  // Testimoni tampil di situs publik Supercoder, jadi hanya untuk siswa Supercoder.
+  if (profile.program !== "supercoder") redirect("/dashboard");
 
   // Check if student has already submitted testimonials
   const { data: existingTestimonials } = await supabase

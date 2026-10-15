@@ -109,7 +109,9 @@ export default async function AdminUsersPage({
                     {user.full_name || "Tanpa Nama"}
                   </div>
                   <div style={{ fontSize: "0.875rem", color: "#64748B" }}>
-                    {user.email}
+                    {user.program === "minas" && user.username
+                      ? `MINAS · ${user.username}`
+                      : user.email}
                   </div>
                 </td>
                 <td style={{ padding: "16px 24px" }}>

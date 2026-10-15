@@ -20,6 +20,7 @@ export const config = {
     "/leaderboard/:path*",
     "/rapor/:path*",
     "/login/:path*",
+    "/minas/:path*",
     "/signup/:path*",
     "/auth/:path*",
     "/pending-approval/:path*",
