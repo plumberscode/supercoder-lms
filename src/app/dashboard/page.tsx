@@ -9,7 +9,9 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./dashboard.module.css";
-import { signOut } from "@/app/auth/actions";
+import StudentTopBar, { firstNameOf } from "@/components/student/StudentTopBar";
+import { LOCKED_GRADIENT, subjectTheme } from "@/components/student/themes";
+import ui from "@/components/student/student.module.css";
 import { getStudentBadges } from "@/lib/badges";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -216,8 +218,7 @@ export default async function DashboardPage() {
   const myRank =
     leaderboard?.findIndex((p) => p.id === profile.id) ?? -1;
 
-  const firstName = (profile.full_name || user.email?.split("@")[0] || "Coder")
-    .split(" ")[0];
+  const firstName = firstNameOf(profile.full_name, user.email);
 
   // Badges status based on student's XP
   const badgeData = getStudentBadges(profile.xp);
@@ -225,41 +226,8 @@ export default async function DashboardPage() {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className={styles.dashboardShell}>
-      {/* ── TOP BAR ─────────────────────────────────────────── */}
-      <header className={styles.topBar}>
-        <div className={styles.topBarContainer}>
-          <div className={styles.topBarBrand}>
-            <Image
-              src="/images/Logo transparent orange.webp"
-              alt="Supercoder"
-              width={140}
-              height={40}
-              className={styles.brandLogo}
-            />
-          </div>
-
-          <div className={styles.topBarRight}>
-            {(profile.role === "admin" || profile.role === "teacher") && (
-              <Link href="/admin/users" className={styles.adminPill}>
-                ⚙️ Admin
-              </Link>
-            )}
-            <div className={styles.levelPill}>
-              <span className={styles.levelIcon}>⚡</span>
-              <span>Level {profile.level}</span>
-            </div>
-            <form action={signOut} className={styles.signOutForm}>
-              <button type="submit" className={styles.signOutBtn}>
-                Keluar 🚪
-              </button>
-            </form>
-            <div className={styles.userAvatar}>
-              {firstName.charAt(0).toUpperCase()}
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className={ui.shell}>
+      <StudentTopBar profile={profile} email={user.email} />
 
       {/* ── MAIN LAYOUT ─────────────────────────────────────── */}
       <main className={styles.mainLayout}>
@@ -494,15 +462,7 @@ export default async function DashboardPage() {
 
             <div className={styles.subjectGrid}>
               {subjects.map((subject, i) => {
-                const icons = ["💻", "🎨", "⚡", "🔧", "🌐", "🛠️"];
-                const gradients = [
-                  "linear-gradient(135deg,#eef2ff,#e0e7ff)",
-                  "linear-gradient(135deg,#fef3c7,#fde68a)",
-                  "linear-gradient(135deg,#d1fae5,#a7f3d0)",
-                  "linear-gradient(135deg,#ffe4e6,#fecdd3)",
-                  "linear-gradient(135deg,#ede9fe,#ddd6fe)",
-                  "linear-gradient(135deg,#e0f2fe,#bae6fd)",
-                ];
+                const theme = subjectTheme(i);
                 return (
                   <Link
                     href={`/subjects/${subject.id}`}
@@ -514,12 +474,12 @@ export default async function DashboardPage() {
                       className={styles.subjectIconWrap}
                       style={{
                         background: subject.isLocked
-                          ? "#F1F5F9"
-                          : gradients[i % gradients.length],
+                          ? LOCKED_GRADIENT
+                          : theme.gradient,
                       }}
                     >
                       <span className={styles.subjectIconEmoji}>
-                        {subject.isLocked ? "🔒" : icons[i % icons.length]}
+                        {subject.isLocked ? "🔒" : theme.icon}
                       </span>
                     </div>
                     <h3 className={styles.subjectName}>{subject.title}</h3>

@@ -40,39 +40,10 @@
   min-height: 0;
 }
 
-/* ── Materi biasa (teks, video, kuis, proyek) ───────────────────────── */
-.pageHeader {
-  background-color: white;
-  border-bottom: 1px solid var(--border);
-  padding: 16px 40px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.pageHeaderRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.pageBack {
-  font-weight: 600;
-  color: var(--secondary);
-}
-
-.pageBrand {
-  display: block;
-  height: 32px;
-  width: auto;
-}
-
 /* ── Bersama ────────────────────────────────────────────────────────── */
 
 /* Judul modul satu baris dengan elipsis agar tombol di kanan tidak terdesak. */
-.ideBack,
-.pageBack {
+.ideBack {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -105,13 +76,8 @@
     overflow: visible;
   }
 
-  .pageHeader {
-    padding: 12px 16px;
-  }
-
   /* Logo disembunyikan; tombol tanya instruktur lebih penting. */
-  .ideBrand,
-  .pageBrand {
+  .ideBrand {
     display: none;
   }
 }

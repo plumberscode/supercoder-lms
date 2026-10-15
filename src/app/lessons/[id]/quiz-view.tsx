@@ -6,6 +6,7 @@ import {
   submitQuiz,
   type StudentQuizQuestion,
 } from "../quiz-actions";
+import ui from "@/components/student/student.module.css";
 
 // Soal diambil tanpa kunci jawaban, dan dinilai di server (quiz-actions.ts).
 export default function QuizView({ lessonId }: { lessonId: string }) {
@@ -49,81 +50,82 @@ export default function QuizView({ lessonId }: { lessonId: string }) {
     setSubmitted(true);
   };
 
-  if (loading) return <div>Memuat kuis...</div>;
-  if (!quiz) return <div>{error ?? "Kuis tidak ditemukan untuk materi ini."}</div>;
+  if (loading) return <p className={ui.panelText}>Memuat kuis...</p>;
+  if (!quiz)
+    return (
+      <p className={ui.panelText}>{error ?? "Kuis tidak ditemukan untuk materi ini."}</p>
+    );
+
+  const passed = score >= quiz.passScore;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2 style={{ marginBottom: "24px" }}>{quiz.title}</h2>
+    <div>
+      <h2 className={ui.cardTitle}>{quiz.title}</h2>
+      {!submitted && (
+        <p className={ui.panelText} style={{ margin: 0 }}>
+          {questions.length} soal · nilai lulus {quiz.passScore}
+        </p>
+      )}
 
       {!submitted ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+        <div className={ui.quizList}>
           {questions.map((q, idx) => (
             <div key={q.id}>
-              <p style={{ fontWeight: 600, marginBottom: "16px" }}>
-                {idx + 1}. {q.question_text}
+              <p className={ui.quizQuestion}>
+                <span className={ui.quizNumber}>{idx + 1}</span>
+                {q.question_text}
               </p>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr",
-                  gap: "12px",
-                }}
-              >
+              <div className={ui.quizOptions}>
                 {q.options.map((opt: string, i: number) => (
                   <button
                     key={i}
+                    type="button"
                     onClick={() => handleSelect(q.id, i)}
-                    style={{
-                      textAlign: "left",
-                      padding: "16px",
-                      borderRadius: "12px",
-                      border: "1px solid var(--border)",
-                      backgroundColor:
-                        answers[q.id] === i ? "var(--secondary)" : "white",
-                      color: answers[q.id] === i ? "white" : "var(--secondary)",
-                      transition: "all 0.2s ease",
-                    }}
+                    aria-pressed={answers[q.id] === i}
+                    className={`${ui.quizOption} ${
+                      answers[q.id] === i ? ui.quizOptionSelected : ""
+                    }`}
                   >
-                    {opt}
+                    <span className={ui.quizLetter}>{String.fromCharCode(65 + i)}</span>
+                    <span>{opt}</span>
                   </button>
                 ))}
               </div>
             </div>
           ))}
-          <button
-            className="btn btn-primary"
-            onClick={handleSubmit}
-            disabled={submitting || Object.keys(answers).length < questions.length}
-            style={{ marginTop: "20px" }}
-          >
-            {submitting ? "Memeriksa..." : "Kirim Kuis"}
-          </button>
-          {error && <p style={{ color: "#DC2626", margin: 0 }}>{error}</p>}
+          <div>
+            <button
+              type="button"
+              className={ui.primaryBtn}
+              onClick={handleSubmit}
+              disabled={submitting || Object.keys(answers).length < questions.length}
+            >
+              {submitting ? "⏳ Memeriksa..." : "🚀 Kirim Kuis"}
+            </button>
+            {error && <p className={ui.errorText}>{error}</p>}
+          </div>
         </div>
       ) : (
-        <div style={{ textAlign: "center", padding: "40px" }}>
-          <div style={{ fontSize: "4rem", marginBottom: "16px" }}>
-            {score >= quiz.passScore ? "🎉" : "📚"}
-          </div>
-          <h2>Skor Anda: {score}%</h2>
-          <p style={{ color: "#64748B", marginTop: "8px" }}>
-            {score >= quiz.passScore
-              ? "Bagus sekali! Anda lulus."
-              : "Tetap semangat dan coba lagi ya!"}
+        <div className={ui.quizResult}>
+          <div className={ui.quizResultEmoji}>{passed ? "🎉" : "📚"}</div>
+          <h2 className={ui.heroTitle} style={{ fontSize: "1.6rem" }}>
+            Skor kamu: {score}
+          </h2>
+          <p className={ui.panelText} style={{ margin: 0 }}>
+            {passed
+              ? "Keren, kamu lulus kuis ini!"
+              : `Belum mencapai ${quiz.passScore}. Tetap semangat, coba lagi ya!`}
           </p>
-          {xpAwarded > 0 && (
-            <p style={{ color: "#F97316", fontWeight: 700, marginTop: "8px" }}>
-              +{xpAwarded} XP
-            </p>
-          )}
-          <button
-            className="btn btn-secondary"
-            style={{ marginTop: "24px" }}
-            onClick={() => window.location.reload()}
-          >
-            Coba Lagi
-          </button>
+          {xpAwarded > 0 && <span className={ui.quizXp}>+{xpAwarded} XP</span>}
+          <div className={ui.heroActions} style={{ justifyContent: "center" }}>
+            <button
+              type="button"
+              className={ui.secondaryBtn}
+              onClick={() => window.location.reload()}
+            >
+              🔁 Coba Lagi
+            </button>
+          </div>
         </div>
       )}
     </div>

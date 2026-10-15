@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { submitProject } from "../quiz-actions";
+import ui from "@/components/student/student.module.css";
 
 export default function ProjectSubmission({ lessonId }: { lessonId: string }) {
   const [link, setLink] = useState("");
@@ -21,58 +22,34 @@ export default function ProjectSubmission({ lessonId }: { lessonId: string }) {
   };
 
   return (
-    <div
-      className="card"
-      style={{ border: "2px dashed var(--border)", backgroundColor: "#F8FAFC" }}
-    >
-      <h3 style={{ marginBottom: "16px" }}>Pengumpulan Proyek</h3>
+    <div className={ui.contentCard}>
+      <h3 className={ui.cardTitle}>📦 Pengumpulan Proyek</h3>
 
       {!submitted ? (
         <form onSubmit={handleSubmit}>
-          <p
-            style={{
-              color: "#64748B",
-              fontSize: "0.875rem",
-              marginBottom: "20px",
-            }}
-          >
-            Silakan kirim link proyek Anda (Google Drive, GitHub, atau Loom).
+          <p className={ui.panelText}>
+            Kirim link proyekmu (Google Drive, GitHub, atau Loom).
           </p>
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+          <div className={ui.formRow}>
             <input
               type="url"
               placeholder="https://drive.google.com/..."
               required
-              style={{ flex: 1, minWidth: "200px" }}
+              className={ui.textInput}
               value={link}
               onChange={(e) => setLink(e.target.value)}
             />
-            <button
-              className="btn btn-primary"
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? "Mengirim..." : "Kirim Proyek"}
+            <button className={ui.primaryBtn} type="submit" disabled={loading}>
+              {loading ? "⏳ Mengirim..." : "🚀 Kirim Proyek"}
             </button>
           </div>
-          {error && (
-            <p style={{ color: "#DC2626", fontSize: "0.875rem", marginTop: "12px" }}>
-              {error}
-            </p>
-          )}
+          {error && <p className={ui.errorText}>{error}</p>}
         </form>
       ) : (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            color: "var(--success)",
-          }}
-        >
+        <div className={ui.successBox}>
           <span>✅</span>
           <div>
-            <div style={{ fontWeight: 600 }}>Proyek Berhasil Dikirim!</div>
+            <div style={{ fontWeight: 700 }}>Proyek berhasil dikirim!</div>
             <div style={{ fontSize: "0.875rem" }}>
               Instruktur akan meninjau dan memberi nilai segera.
             </div>
