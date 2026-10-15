@@ -20,16 +20,14 @@
 }
 
 .logo {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--primary);
-  margin-bottom: 32px;
   display: inline-block;
-  letter-spacing: -0.025em;
+  margin-bottom: 32px;
 }
 
-.logo span {
-  color: var(--secondary);
+.logoImage {
+  display: block;
+  height: 48px;
+  width: auto;
 }
 
 .title {
