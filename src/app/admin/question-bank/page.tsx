@@ -2,6 +2,11 @@ import { createClient } from "@/utils/supabase/server";
 import QuestionBankList from "./QuestionBankList";
 import QuestionForm from "./QuestionForm";
 import CSVImport from "./CSVImport";
+import AITextImport from "./AITextImport";
+import { MAX_SOURCE_TEXT_LENGTH } from "@/lib/ai-questions";
+
+// Pengolahan soal oleh AI bisa makan waktu lebih dari batas default server action.
+export const maxDuration = 120;
 
 export default async function QuestionBankPage() {
   const supabase = await createClient();
@@ -45,6 +50,11 @@ export default async function QuestionBankPage() {
         <QuestionForm subjects={subjects || []} />
         <CSVImport subjects={subjects || []} />
       </div>
+
+      <AITextImport
+        subjects={subjects || []}
+        maxLength={MAX_SOURCE_TEXT_LENGTH}
+      />
 
       <hr
         style={{
