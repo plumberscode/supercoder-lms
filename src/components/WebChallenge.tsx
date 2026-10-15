@@ -157,6 +157,7 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
     setIsLoadingHint(true);
     try {
       const hintText = await getWebChallengeHint({
+        lessonId: challenge.lesson_id,
         description: challenge.description,
         mode: challenge.mode,
         studentHtml: htmlCode,

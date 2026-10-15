@@ -15,7 +15,9 @@ import {
   deleteModule,
   updateModule,
   updateLesson,
+  updateModulePrograms,
 } from "./actions";
+import { PROGRAMS, type Program } from "@/lib/student-access";
 import LessonForm from "./LessonForm";
 import Link from "next/link";
 import styles from "../../admin.module.css";
@@ -181,6 +183,57 @@ export default function ModuleList({
     }
   };
 
+  const modulePrograms = (module: any): Program[] =>
+    module.programs ?? ["supercoder"];
+
+  const saveModulePrograms = async (
+    updates: { id: string; programs: Program[] }[],
+  ) => {
+    if (updates.length === 0) return;
+
+    // Optimistic update
+    setModules(
+      modules.map((m) => {
+        const update = updates.find((u) => u.id === m.id);
+        return update ? { ...m, programs: update.programs } : m;
+      }),
+    );
+
+    try {
+      await updateModulePrograms(subjectId, updates);
+    } catch (error) {
+      console.error("Failed to update module programs:", error);
+      setModules(initialModules);
+    }
+  };
+
+  const toggleModuleProgram = (module: any, program: Program) => {
+    const current = modulePrograms(module);
+    saveModulePrograms([
+      {
+        id: module.id,
+        programs: current.includes(program)
+          ? current.filter((p) => p !== program)
+          : [...current, program],
+      },
+    ]);
+  };
+
+  // Centang/hapus satu program di semua modul subject ini sekaligus.
+  const toggleProgramForAll = (program: Program) => {
+    const enable = !modules.every((m) => modulePrograms(m).includes(program));
+    saveModulePrograms(
+      modules
+        .filter((m) => modulePrograms(m).includes(program) !== enable)
+        .map((m) => ({
+          id: m.id,
+          programs: enable
+            ? [...modulePrograms(m), program]
+            : modulePrograms(m).filter((p) => p !== program),
+        })),
+    );
+  };
+
   const handleDeleteModule = async () => {
     if (!moduleToDelete) return;
 
@@ -201,6 +254,49 @@ export default function ModuleList({
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
+      {modules.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "16px",
+            fontSize: "0.875rem",
+          }}
+        >
+          <span style={{ fontWeight: 600, color: "#64748B" }}>
+            SEMUA MODUL UNTUK:
+          </span>
+          {PROGRAMS.map((p) => {
+            const allChecked = modules.every((m) =>
+              modulePrograms(m).includes(p.value),
+            );
+            return (
+              <button
+                key={p.value}
+                type="button"
+                onClick={() => toggleProgramForAll(p.value)}
+                className="btn"
+                style={{
+                  padding: "6px 12px",
+                  fontSize: "0.8rem",
+                  backgroundColor: allChecked ? "var(--secondary)" : "#F1F5F9",
+                  color: allChecked ? "white" : "var(--secondary)",
+                }}
+                title={
+                  allChecked
+                    ? `Hapus ${p.label} dari semua modul`
+                    : `Centang ${p.label} di semua modul`
+                }
+              >
+                {allChecked ? "✓ " : "+ "}
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
       <Droppable droppableId="modules" type="module">
         {(provided) => (
           <div
@@ -379,6 +475,45 @@ export default function ModuleList({
                           🗑️
                         </button>
                       </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                        gap: "16px",
+                        marginTop: "-12px",
+                        marginBottom: "20px",
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      <span style={{ fontWeight: 600, color: "#64748B" }}>
+                        Tersedia untuk:
+                      </span>
+                      {PROGRAMS.map((p) => (
+                        <label
+                          key={p.value}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={modulePrograms(module).includes(p.value)}
+                            onChange={() => toggleModuleProgram(module, p.value)}
+                          />
+                          {p.label}
+                        </label>
+                      ))}
+                      {modulePrograms(module).length === 0 && (
+                        <span style={{ color: "#EF4444", fontSize: "0.8rem" }}>
+                          Tidak terlihat oleh siswa mana pun
+                        </span>
+                      )}
                     </div>
 
                     <Droppable droppableId={module.id} type="lesson">

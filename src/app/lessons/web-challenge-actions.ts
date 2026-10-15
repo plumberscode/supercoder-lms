@@ -2,7 +2,7 @@
 
 import { descriptionToPlainText } from "@/lib/challenge-description";
 
-import { createClient } from "@/utils/supabase/server";
+import { getLessonAccess, LESSON_ACCESS_DENIED } from "@/lib/lesson-access";
 import { revalidatePath } from "next/cache";
 import OpenAI from "openai";
 
@@ -21,11 +21,9 @@ export async function submitWebChallengeSolution(params: {
   description: string;
   maxScore: number;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
+  const access = await getLessonAccess(params.lessonId);
+  if (!access) return { error: LESSON_ACCESS_DENIED };
+  const { supabase, user } = access;
 
   // Fetch existing submission
   const { data: existing } = await supabase
@@ -215,6 +213,7 @@ Balas HANYA dengan JSON valid:
 }
 
 export async function getWebChallengeHint(params: {
+  lessonId: string;
   description: string;
   mode: WebMode;
   studentHtml: string;
@@ -222,6 +221,8 @@ export async function getWebChallengeHint(params: {
   studentJs: string;
   attemptNumber: number;
 }): Promise<string> {
+  if (!(await getLessonAccess(params.lessonId))) return LESSON_ACCESS_DENIED;
+
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
     return "Fitur AI Hint belum dikonfigurasi. Hubungi admin untuk mengaktifkan.";

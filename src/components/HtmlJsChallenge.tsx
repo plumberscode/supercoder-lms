@@ -171,6 +171,7 @@ export default function HtmlJsChallenge({
     setIsLoadingHint(true);
     try {
       const hintText = await getHtmlJsHint({
+        lessonId: challenge.lesson_id,
         description: challenge.description,
         studentHtml: htmlCode,
         studentJs: jsCode,

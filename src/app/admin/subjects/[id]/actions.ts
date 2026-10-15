@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { prepareChallengeDescription } from "@/lib/challenge-description";
+import { PROGRAMS, type Program } from "@/lib/student-access";
 
 export async function createModule(subjectId: string, formData: FormData) {
   const supabase = await createClient();
@@ -152,6 +153,33 @@ export async function updateModule(
 
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/subjects/${subjectId}`);
+}
+
+// Program yang boleh membuka modul ini (lihat migration_program_access.sql).
+export async function updateModulePrograms(
+  subjectId: string,
+  updates: { id: string; programs: Program[] }[],
+) {
+  const supabase = await createClient();
+
+  const results = await Promise.all(
+    updates.map((u) =>
+      supabase
+        .from("modules")
+        .update({
+          programs: PROGRAMS.map((p) => p.value).filter((p) =>
+            u.programs.includes(p),
+          ),
+        })
+        .eq("id", u.id),
+    ),
+  );
+
+  const failed = results.find((r) => r.error);
+  if (failed?.error) throw new Error(failed.error.message);
+  revalidatePath(`/admin/subjects/${subjectId}`);
+  revalidatePath(`/subjects/${subjectId}`);
+  revalidatePath("/dashboard");
 }
 export async function updateLesson(
   lessonId: string,

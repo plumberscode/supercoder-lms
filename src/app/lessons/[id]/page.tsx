@@ -1,6 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { blockedStudentPath } from "@/lib/student-access";
+import {
+  blockedStudentPath,
+  canAccessModule,
+  isStaff,
+} from "@/lib/student-access";
 import Link from "next/link";
 import QuizView from "./quiz-view";
 import ProjectSubmission from "./project-submission";
@@ -22,24 +26,30 @@ export default async function LessonPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) {
-    const { data: viewer } = await supabase
-      .from("profiles")
-      .select("role, status")
-      .eq("id", user.id)
-      .single();
-    if (viewer?.role === "student" && viewer.status !== "approved") {
-      redirect(blockedStudentPath(viewer.status));
-    }
+  if (!user) redirect("/login");
+
+  const { data: viewer } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+  if (!viewer) redirect("/login");
+  if (!isStaff(viewer.role) && viewer.status !== "approved") {
+    redirect(blockedStudentPath(viewer.status));
   }
 
   const { data: lesson } = await supabase
     .from("lessons")
-    .select("*, module_id(subject_id, title)")
+    .select("*, module_id(*)")
     .eq("id", id)
     .single();
 
   if (!lesson) return <div>Materi tidak ditemukan</div>;
+
+  // Materi dari modul program lain: kembali ke halaman subject-nya.
+  if (!canAccessModule(viewer, (lesson.module_id as any).programs)) {
+    redirect(`/subjects/${(lesson.module_id as any).subject_id}`);
+  }
 
   let lessonScore = null;
   let codeSubmission = null;

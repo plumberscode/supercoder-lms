@@ -1,6 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { blockedStudentPath } from "@/lib/student-access";
+import {
+  blockedStudentPath,
+  canAccessModule,
+  isStaff,
+} from "@/lib/student-access";
 import Link from "next/link";
 import styles from "./subject.module.css";
 
@@ -11,6 +15,21 @@ export default async function SubjectPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: viewer } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+  if (!viewer) redirect("/login");
+  if (!isStaff(viewer.role) && viewer.status !== "approved") {
+    redirect(blockedStudentPath(viewer.status));
+  }
 
   const { data: subject } = await supabase
     .from("subjects")
@@ -26,52 +45,39 @@ export default async function SubjectPage({
     .eq("id", id)
     .single();
 
-  if (!subject)
+  const modules = (subject?.modules ?? [])
+    .filter((m: any) => canAccessModule(viewer, m.programs))
+    .sort((a: any, b: any) => a.order_index - b.order_index);
+
+  if (!subject || modules.length === 0)
     return (
       <div className="container" style={{ padding: "40px" }}>
         Mata Pelajaran tidak ditemukan
       </div>
     );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    const { data: viewer } = await supabase
-      .from("profiles")
-      .select("role, status")
-      .eq("id", user.id)
-      .single();
-    if (viewer?.role === "student" && viewer.status !== "approved") {
-      redirect(blockedStudentPath(viewer.status));
-    }
-  }
-
   const userScores: Record<string, number> = {};
 
-  if (user && subject.modules) {
-    const lessonIds = subject.modules.flatMap(
-      (m: any) => m.lessons?.map((l: any) => l.id) || [],
-    );
+  const lessonIds = modules.flatMap(
+    (m: any) => m.lessons?.map((l: any) => l.id) || [],
+  );
 
-    if (lessonIds.length > 0) {
-      const { data: submissions } = await supabase
-        .from("submissions")
-        .select("content_id, score")
-        .eq("student_id", user.id)
-        .in("content_id", lessonIds);
+  if (lessonIds.length > 0) {
+    const { data: submissions } = await supabase
+      .from("submissions")
+      .select("content_id, score")
+      .eq("student_id", user.id)
+      .in("content_id", lessonIds);
 
-      if (submissions) {
-        submissions.forEach((sub) => {
-          if (sub.score !== null) {
-            userScores[sub.content_id] = Math.max(
-              userScores[sub.content_id] || 0,
-              sub.score,
-            );
-          }
-        });
-      }
+    if (submissions) {
+      submissions.forEach((sub) => {
+        if (sub.score !== null) {
+          userScores[sub.content_id] = Math.max(
+            userScores[sub.content_id] || 0,
+            sub.score,
+          );
+        }
+      });
     }
   }
 
@@ -151,9 +157,7 @@ export default async function SubjectPage({
           <div
             style={{ display: "flex", flexDirection: "column", gap: "24px" }}
           >
-            {subject.modules
-              ?.sort((a: any, b: any) => a.order_index - b.order_index)
-              .map((module: any) => (
+            {modules.map((module: any, moduleIndex: number) => (
                 <div key={module.id}>
                   <h3
                     style={{
@@ -176,7 +180,7 @@ export default async function SubjectPage({
                         fontSize: "0.875rem",
                       }}
                     >
-                      {module.order_index}
+                      {moduleIndex + 1}
                     </span>
                     {module.title}
                   </h3>

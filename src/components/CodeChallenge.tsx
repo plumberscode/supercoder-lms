@@ -151,6 +151,7 @@ function StandardCodeChallenge({
 
     try {
       const hintText = await getCodeHint({
+        lessonId: challenge.lesson_id,
         challengeDescription: challenge.description,
         language: challenge.language,
         studentCode: code,

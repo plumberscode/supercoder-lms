@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { getLessonAccess, LESSON_ACCESS_DENIED } from "@/lib/lesson-access";
 import { revalidatePath } from "next/cache";
 import { getAIHint } from "@/lib/ai-hints";
 
@@ -11,11 +11,9 @@ export async function submitCodeSolution(params: {
   score: number;
   html?: string;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
+  const access = await getLessonAccess(params.lessonId);
+  if (!access) throw new Error(LESSON_ACCESS_DENIED);
+  const { supabase, user } = access;
 
   const { data: existing } = await supabase
     .from("submissions")
@@ -97,6 +95,7 @@ export async function submitCodeSolution(params: {
 }
 
 export async function getCodeHint(params: {
+  lessonId: string;
   challengeDescription: string;
   language: string;
   studentCode: string;
@@ -108,5 +107,7 @@ export async function getCodeHint(params: {
   }[];
   attemptNumber: number;
 }): Promise<string> {
+  if (!(await getLessonAccess(params.lessonId))) return LESSON_ACCESS_DENIED;
+
   return getAIHint(params);
 }

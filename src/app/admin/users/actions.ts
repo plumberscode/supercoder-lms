@@ -3,13 +3,13 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
+// Approve = jadikan siswa Supercoder. Lewat RPC (lihat migration_program_access.sql).
 export async function approveUser(userId: string) {
   const supabase = await createClient();
 
-  const { error } = await supabase
-    .from("profiles")
-    .update({ status: "approved" })
-    .eq("id", userId);
+  const { error } = await supabase.rpc("approve_student", {
+    p_student_id: userId,
+  });
 
   if (error) throw new Error(error.message);
   revalidatePath("/admin/users");

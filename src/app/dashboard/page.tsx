@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
-import { blockedStudentPath } from "@/lib/student-access";
+import { blockedStudentPath, canAccessModule } from "@/lib/student-access";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,12 +50,15 @@ export default async function DashboardPage() {
     redirect(blockedStudentPath(profile?.status));
   }
 
-  // Subjects
-  const { data: subjects } = await supabase
+  // Subjects yang punya minimal satu modul untuk program siswa ini
+  const { data: allSubjects } = await supabase
     .from("subjects")
-    .select("*")
+    .select("*, modules(*)")
     .eq("is_active", true)
     .order("order_index", { ascending: true });
+  const subjects = allSubjects?.filter((s) =>
+    s.modules?.some((m: any) => canAccessModule(profile, m.programs)),
+  );
 
   // Recent activity from submissions (lesson + quiz)
   const { data: recentActivity } = await supabase

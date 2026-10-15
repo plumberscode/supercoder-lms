@@ -121,6 +121,7 @@ export default function CssChallengeComponent({
     setIsLoadingHint(true);
     try {
       const hintText = await getCssHint({
+        lessonId: challenge.lesson_id,
         description: challenge.description,
         studentCss: cssCode,
         referenceCss: challenge.reference_css,
