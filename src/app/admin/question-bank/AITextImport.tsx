@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { generateQuestionsFromText, saveDraftQuestions } from "./actions";
 import { useToast } from "@/components/ToastProvider";
+import ModuleSelect, { type ModuleOption } from "./ModuleSelect";
 import type { DraftQuestion } from "@/lib/ai-questions";
 
 interface AITextImportProps {
-  subjects: any[];
+  modules: ModuleOption[];
   maxLength: number;
 }
 
@@ -15,10 +16,10 @@ type Draft = DraftQuestion & { selected: boolean };
 
 const LETTERS = ["A", "B", "C", "D"];
 
-export default function AITextImport({ subjects, maxLength }: AITextImportProps) {
+export default function AITextImport({ modules, maxLength }: AITextImportProps) {
   const router = useRouter();
   const { showToast } = useToast();
-  const [subjectId, setSubjectId] = useState(subjects[0]?.id || "");
+  const [moduleId, setModuleId] = useState(modules[0]?.id || "");
   const [defaultCategory, setDefaultCategory] = useState("");
   const [sourceText, setSourceText] = useState("");
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -57,7 +58,7 @@ export default function AITextImport({ subjects, maxLength }: AITextImportProps)
       const chosen = drafts
         .filter((d) => d.selected)
         .map(({ selected, ...q }) => q);
-      const result = await saveDraftQuestions(subjectId, chosen);
+      const result = await saveDraftQuestions(moduleId, chosen);
       if ("error" in result) {
         showToast(result.error, "error");
         return;
@@ -112,20 +113,9 @@ export default function AITextImport({ subjects, maxLength }: AITextImportProps)
       >
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <label style={{ fontWeight: 600, fontSize: "0.875rem" }}>
-            Mata Pelajaran
+            Modul
           </label>
-          <select
-            value={subjectId}
-            onChange={(e) => setSubjectId(e.target.value)}
-            className="input"
-            style={{ width: "100%" }}
-          >
-            {subjects.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.title}
-              </option>
-            ))}
-          </select>
+          <ModuleSelect modules={modules} value={moduleId} onChange={setModuleId} />
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <label style={{ fontWeight: 600, fontSize: "0.875rem" }}>

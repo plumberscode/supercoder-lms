@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { addQuestion } from "./actions";
 import { useToast } from "@/components/ToastProvider";
+import ModuleSelect, { type ModuleOption } from "./ModuleSelect";
 
 interface QuestionFormProps {
-  subjects: any[];
+  modules: ModuleOption[];
 }
 
-export default function QuestionForm({ subjects }: QuestionFormProps) {
+export default function QuestionForm({ modules }: QuestionFormProps) {
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correctIndex, setCorrectIndex] = useState(0);
@@ -56,19 +57,8 @@ export default function QuestionForm({ subjects }: QuestionFormProps) {
           }}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontWeight: 600 }}>Mata Pelajaran</label>
-            <select
-              name="subject_id"
-              required
-              className="input"
-              style={{ width: "100%" }}
-            >
-              {subjects.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.title}
-                </option>
-              ))}
-            </select>
+            <label style={{ fontWeight: 600 }}>Modul</label>
+            <ModuleSelect modules={modules} name="module_id" />
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <label style={{ fontWeight: 600 }}>Kategori / Tag</label>

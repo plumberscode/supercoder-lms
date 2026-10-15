@@ -3,6 +3,7 @@ import QuestionBankList from "./QuestionBankList";
 import QuestionForm from "./QuestionForm";
 import CSVImport from "./CSVImport";
 import AITextImport from "./AITextImport";
+import type { ModuleOption } from "./ModuleSelect";
 import { MAX_SOURCE_TEXT_LENGTH } from "@/lib/ai-questions";
 
 // Pengolahan soal oleh AI bisa makan waktu lebih dari batas default server action.
@@ -11,24 +12,35 @@ export const maxDuration = 120;
 export default async function QuestionBankPage() {
   const supabase = await createClient();
 
-  // Fetch subjects for the form
-  const { data: subjects } = await supabase
-    .from("subjects")
-    .select("id, title")
-    .order("title");
+  // Bank soal dikelompokkan per modul; modul diurutkan mengikuti mata pelajarannya.
+  const [{ data: moduleRows }, { data: questions }] = await Promise.all([
+    supabase
+      .from("modules")
+      .select("id, title, order_index, subjects(title, order_index)"),
+    supabase
+      .from("question_bank")
+      .select("*")
+      .order("created_at", { ascending: false }),
+  ]);
 
-  // Fetch all questions with subject info
-  const { data: questions } = await supabase
-    .from("question_bank")
-    .select(
-      `
-      *,
-      subjects (
-        title
-      )
-    `,
+  const modules: ModuleOption[] = (moduleRows ?? [])
+    .map((m) => {
+      const subject = Array.isArray(m.subjects) ? m.subjects[0] : m.subjects;
+      return {
+        id: m.id as string,
+        title: m.title as string,
+        subjectTitle: (subject?.title as string) ?? "Tanpa Mata Pelajaran",
+        subjectOrder: (subject?.order_index as number) ?? 0,
+        order: (m.order_index as number) ?? 0,
+      };
+    })
+    .sort(
+      (a, b) =>
+        a.subjectOrder - b.subjectOrder ||
+        a.subjectTitle.localeCompare(b.subjectTitle) ||
+        a.order - b.order,
     )
-    .order("created_at", { ascending: false });
+    .map(({ id, title, subjectTitle }) => ({ id, title, subjectTitle }));
 
   return (
     <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "24px" }}>
@@ -47,12 +59,12 @@ export default async function QuestionBankPage() {
           alignItems: "start",
         }}
       >
-        <QuestionForm subjects={subjects || []} />
-        <CSVImport subjects={subjects || []} />
+        <QuestionForm modules={modules} />
+        <CSVImport modules={modules} />
       </div>
 
       <AITextImport
-        subjects={subjects || []}
+        modules={modules}
         maxLength={MAX_SOURCE_TEXT_LENGTH}
       />
 
@@ -65,7 +77,7 @@ export default async function QuestionBankPage() {
       />
 
       <h2 style={{ marginBottom: "24px" }}>Daftar Soal</h2>
-      <QuestionBankList initialQuestions={questions || []} />
+      <QuestionBankList questions={questions || []} modules={modules} />
     </div>
   );
 }
