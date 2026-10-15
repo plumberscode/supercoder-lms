@@ -93,10 +93,16 @@ export async function createMinasStudents(
       continue;
     }
 
-    // Akun buatan guru langsung aktif, tanpa menunggu persetujuan.
+    // Akun buatan guru langsung aktif. Program & username juga diisi di sini, tidak hanya
+    // mengandalkan trigger: app_metadata belum tentu sudah ada saat baris auth.users dibuat.
     const { error: approveError } = await admin
       .from("profiles")
-      .update({ status: "approved" })
+      .update({
+        status: "approved",
+        program: "minas",
+        username,
+        full_name: fullName,
+      })
       .eq("id", data.user.id);
     if (approveError) {
       failed.push({
