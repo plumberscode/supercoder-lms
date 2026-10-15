@@ -12,7 +12,8 @@ import {
 export async function addQuestion(formData: FormData) {
   const supabase = await createClient();
 
-  const subject_id = formData.get("subject_id") as string;
+  const module_id = formData.get("module_id") as string;
+  if (!module_id) throw new Error("Pilih modul dulu.");
   const category = formData.get("category") as string;
   const question_text = formData.get("question_text") as string;
   const options = JSON.parse(formData.get("options") as string);
@@ -22,7 +23,7 @@ export async function addQuestion(formData: FormData) {
   const points = parseInt((formData.get("points") as string) || "10");
 
   const { error } = await supabase.from("question_bank").insert({
-    subject_id,
+    module_id,
     category,
     question_text,
     options,
@@ -90,10 +91,10 @@ export async function generateQuestionsFromText(
 }
 
 export async function saveDraftQuestions(
-  subjectId: string,
+  moduleId: string,
   drafts: DraftQuestion[],
 ): Promise<{ saved: number } | { error: string }> {
-  if (!subjectId) return { error: "Pilih mata pelajaran dulu." };
+  if (!moduleId) return { error: "Pilih modul dulu." };
 
   const rows = [];
   for (const [i, d] of drafts.entries()) {
@@ -109,7 +110,7 @@ export async function saveDraftQuestions(
       return { error: `Soal #${i + 1} belum lengkap.` };
     }
     rows.push({
-      subject_id: subjectId,
+      module_id: moduleId,
       category: d.category.trim() || "Umum",
       question_text: d.question_text.trim(),
       options,

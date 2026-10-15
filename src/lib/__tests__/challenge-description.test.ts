@@ -10,6 +10,7 @@ describe("isRichDescription", () => {
   it("mengenali HTML TipTap", () => {
     expect(isRichDescription("<h1>Judul</h1><p>isi</p>")).toBe(true);
     expect(isRichDescription("<p>isi</p>")).toBe(true);
+    expect(isRichDescription('<img src="https://x.com/a.png"><p>isi</p>')).toBe(true);
   });
   it("teks polos lama, termasuk yang menyebut tag, tidak dianggap HTML", () => {
     expect(isRichDescription("Buat fungsi tambah\n\nContoh: tambah(2,3)")).toBe(false);
@@ -29,6 +30,14 @@ describe("prepareChallengeDescription", () => {
     const html = "<h1>A</h1><p><strong>b</strong></p><ul><li>c</li></ul><pre><code>x</code></pre>";
     expect(prepareChallengeDescription(html)).toBe(html);
   });
+  it("mempertahankan gambar https, membuang gambar dengan src lain", () => {
+    const out = prepareChallengeDescription(
+      '<p>Lihat:</p><img src="https://res.cloudinary.com/x/a.png" alt="Contoh">',
+    );
+    expect(out).toContain('<img src="https://res.cloudinary.com/x/a.png" alt="Contoh"');
+    expect(prepareChallengeDescription('<p>a</p><img src="http://x.com/a.png">')).not.toMatch(/<img/);
+    expect(prepareChallengeDescription('<p>a</p><img src="data:image/png;base64,AAA">')).not.toMatch(/<img/);
+  });
   it("memblokir link javascript:", () => {
     expect(prepareChallengeDescription('<p><a href="javascript:alert(1)">x</a></p>')).not.toMatch(
       /javascript:/,
@@ -44,6 +53,10 @@ describe("isEmptyDescription / descriptionToPlainText", () => {
     expect(isEmptyDescription("<p></p>")).toBe(true);
     expect(isEmptyDescription("  ")).toBe(true);
     expect(isEmptyDescription("<p>x</p>")).toBe(false);
+  });
+  it("deskripsi berisi gambar saja tidak dianggap kosong", () => {
+    expect(isEmptyDescription('<img src="https://res.cloudinary.com/x/a.png" alt="a">')).toBe(false);
+    expect(isEmptyDescription('<p></p><img src="https://res.cloudinary.com/x/a.png">')).toBe(false);
   });
   it("mengubah HTML jadi teks untuk AI", () => {
     expect(descriptionToPlainText("<h2>Soal</h2><p>Buat <strong>fungsi</strong></p>")).toBe(

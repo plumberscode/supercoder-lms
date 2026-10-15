@@ -35,15 +35,14 @@
 }
 
 .sidebarLogo {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--primary);
   margin-bottom: 48px;
   padding-left: 12px;
 }
 
-.sidebarLogo span {
-  color: white;
+.sidebarLogoImage {
+  display: block;
+  height: 36px;
+  width: auto;
 }
 
 .nav {

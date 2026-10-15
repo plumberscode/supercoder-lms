@@ -4,9 +4,9 @@
  * (lihat `prepareChallengeDescription` di src/lib/challenge-description.ts).
  */
 
-/** HTML TipTap selalu diawali tag blok; teks polos lama (mis. "<div> adalah…") tidak. */
+/** HTML TipTap selalu diawali tag blok (atau gambar); teks polos lama (mis. "<div> adalah…") tidak. */
 export function isRichDescription(description: string): boolean {
-  return /^\s*<(p|h[1-6]|ul|ol|pre|blockquote|hr)[\s>/]/i.test(description);
+  return /^\s*<(p|h[1-6]|ul|ol|pre|blockquote|hr|img)[\s>/]/i.test(description);
 }
 
 export default function ChallengeDescription({

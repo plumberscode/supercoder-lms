@@ -29,9 +29,9 @@
 }
 
 .ideBrand {
-  font-weight: 800;
-  color: #ef4444;
-  font-size: 0.9rem;
+  display: block;
+  height: 26px;
+  width: auto;
 }
 
 .ideBody {
@@ -76,7 +76,7 @@
     overflow: visible;
   }
 
-  /* Logo teks disembunyikan; tombol tanya instruktur lebih penting. */
+  /* Logo disembunyikan; tombol tanya instruktur lebih penting. */
   .ideBrand {
     display: none;
   }

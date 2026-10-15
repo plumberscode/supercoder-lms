@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { createClient } from "@/utils/supabase/client";
 import { minasEmail } from "@/lib/minas";
 import styles from "./login.module.css";
@@ -88,7 +89,14 @@ export default function LoginForm({ mode }: { mode: LoginMode }) {
     <div className={styles.loginContainer}>
       <div className={styles.loginCard}>
         <div className={styles.logo}>
-          Super<span>coder</span>
+          <Image
+            src="/images/Logo transparent orange.webp"
+            alt="Supercoder"
+            width={144}
+            height={48}
+            className={styles.logoImage}
+            priority
+          />
         </div>
         <h1 className={styles.title}>
           {mode === "minas" ? "Masuk Siswa MINAS" : "Selamat Datang Kembali"}

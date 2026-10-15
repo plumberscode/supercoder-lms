@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { createClient } from "@/utils/supabase/client";
 import styles from "../login/login.module.css";
 
@@ -42,7 +43,14 @@ export default function SignupPage() {
     <div className={styles.loginContainer}>
       <div className={styles.loginCard}>
         <div className={styles.logo}>
-          Super<span>coder</span>
+          <Image
+            src="/images/Logo transparent orange.webp"
+            alt="Supercoder"
+            width={144}
+            height={48}
+            className={styles.logoImage}
+            priority
+          />
         </div>
         <h1 className={styles.title}>Buat Akun Gratis</h1>
         <p className={styles.subtitle}>

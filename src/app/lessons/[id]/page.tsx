@@ -6,6 +6,7 @@ import {
   isStaff,
 } from "@/lib/student-access";
 import Link from "next/link";
+import Image from "next/image";
 import QuizView from "./quiz-view";
 import ProjectSubmission from "./project-submission";
 import CodeChallenge from "@/components/CodeChallenge";
@@ -206,7 +207,13 @@ export default async function LessonPage({
           </Link>
           <div className={styles.headerActions}>
             {waButton}
-            <div className={styles.ideBrand}>Supercoder</div>
+            <Image
+              src="/images/Logo transparent orange.webp"
+              alt="Supercoder"
+              width={78}
+              height={26}
+              className={styles.ideBrand}
+            />
           </div>
         </header>
 

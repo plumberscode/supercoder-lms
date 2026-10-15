@@ -52,7 +52,9 @@ export async function createLesson(
 
   if (type === "quiz") {
     const isDynamic = formData.get("is_dynamic") === "true";
-    const targetCategory = formData.get("target_category") as string;
+    // Kosong = semua soal di bank soal modul ini.
+    const targetCategory =
+      ((formData.get("target_category") as string) || "").trim() || null;
     const questionCount = parseInt(
       (formData.get("question_count") as string) || "10",
     );
