@@ -240,13 +240,13 @@ export default function CssChallengeComponent({
                   className={styles.hintButton}
                 >
                   {isLoadingHint
-                    ? "⏳ Meminta bantuan AI..."
-                    : "💡 Minta Petunjuk (AI Hint)"}
+                    ? "⏳ Sebentar ya..."
+                    : "💡 Kasih Petunjuk Dong"}
                 </button>
               )}
               {hint && (
                 <div className={styles.hintPanel}>
-                  <div className={styles.hintTitle}>💡 Petunjuk dari AI Tutor</div>
+                  <div className={styles.hintTitle}>💡 Petunjuk dari Kakak</div>
                   <div className={styles.hintText}>{hint}</div>
                   <button
                     onClick={handleGetHint}
@@ -263,7 +263,7 @@ export default function CssChallengeComponent({
                       cursor: "pointer",
                     }}
                   >
-                    {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Lagi"}
+                    {isLoadingHint ? "⏳ Sebentar ya..." : "🔄 Petunjuk Lain, Kak"}
                   </button>
                 </div>
               )}
@@ -316,10 +316,10 @@ export default function CssChallengeComponent({
                 className={styles.submitButton}
               >
                 {isSubmitting
-                  ? "⏳ Memeriksa..."
+                  ? "⏳ Lagi dinilai, tunggu ya..."
                   : isMaxedOut
-                    ? "📤 Batas tercapai"
-                    : `📤 Submit ke AI (${remainingAttempts}x)`}
+                    ? "🔒 Kesempatan habis"
+                    : `🎯 Nilai Kodeku (sisa ${remainingAttempts}x)`}
               </button>
               <button onClick={handleReset} className={styles.resetButton}>
                 ↺ Reset

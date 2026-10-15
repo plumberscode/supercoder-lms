@@ -406,8 +406,8 @@ function StandardCodeChallenge({
                         className={styles.hintButton}
                       >
                         {isLoadingHint
-                          ? "⏳ Meminta bantuan AI..."
-                          : "💡 Minta Petunjuk (AI Hint)"}
+                          ? "⏳ Sebentar ya..."
+                          : "💡 Kasih Petunjuk Dong"}
                       </button>
                     )}
                   </>
@@ -420,7 +420,7 @@ function StandardCodeChallenge({
                 {!hint ? (
                   <div>
                     <p style={{ color: "#94a3b8", fontSize: "0.8rem", marginBottom: "10px" }}>
-                      Butuh bantuan? AI Tutor dapat menganalisis kodemu dan memberikan petunjuk tanpa memberi jawaban langsung.
+                      Butuh bantuan? Kakak bisa lihat kodemu dan kasih petunjuk, tanpa langsung kasih jawabannya.
                     </p>
                     <button
                       onClick={handleGetHint}
@@ -428,15 +428,15 @@ function StandardCodeChallenge({
                       className={styles.hintButton}
                     >
                       {isLoadingHint
-                        ? "⏳ Meminta bantuan AI..."
+                        ? "⏳ Sebentar ya..."
                         : !testResults
                           ? "Submit kode terlebih dahulu untuk mendapat hint"
-                          : "💡 Minta Petunjuk (AI Hint)"}
+                          : "💡 Kasih Petunjuk Dong"}
                     </button>
                   </div>
                 ) : (
                   <div className={styles.hintPanel}>
-                    <div className={styles.hintTitle}>💡 Petunjuk dari AI Tutor</div>
+                    <div className={styles.hintTitle}>💡 Petunjuk dari Kakak</div>
                     <div className={styles.hintText}>{hint}</div>
                     <button
                       onClick={handleGetHint}
@@ -453,7 +453,7 @@ function StandardCodeChallenge({
                         cursor: "pointer",
                       }}
                     >
-                      {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Baru"}
+                      {isLoadingHint ? "⏳ Sebentar ya..." : "🔄 Petunjuk Lain, Kak"}
                     </button>
                   </div>
                 )}

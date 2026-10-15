@@ -159,7 +159,7 @@ export default function HtmlJsChallenge({
       setLastSubmittedHtml(htmlCode);
       setLastSubmittedJs(jsCode);
     } catch (err: any) {
-      setOutputError(err.message || "Terjadi kesalahan saat submit ke AI");
+      setOutputError(err.message || "Terjadi kesalahan saat menilai kodemu");
     } finally {
       setIsSubmitting(false);
     }
@@ -257,10 +257,10 @@ export default function HtmlJsChallenge({
                 className={styles.submitButton}
               >
                 {isSubmitting
-                  ? "⏳ Memeriksa..."
+                  ? "⏳ Lagi dinilai, tunggu ya..."
                   : isMaxedOut
-                    ? "📤 Batas tercapai"
-                    : `📤 Submit ke AI (sisa: ${remainingAttempts})`}
+                    ? "🔒 Kesempatan habis"
+                    : `🎯 Nilai Kodeku (sisa ${remainingAttempts}x)`}
               </button>
               <button onClick={handleReset} className={styles.resetButton}>
                 ↺ Reset
@@ -412,13 +412,13 @@ export default function HtmlJsChallenge({
               style={{ marginTop: "16px" }}
             >
               {isLoadingHint
-                ? "⏳ Meminta bantuan AI..."
-                : "💡 Minta Petunjuk (AI Hint)"}
+                ? "⏳ Sebentar ya..."
+                : "💡 Kasih Petunjuk Dong"}
             </button>
           )}
           {hint && (
             <div className={styles.hintPanel} style={{ marginTop: "16px" }}>
-              <div className={styles.hintTitle}>💡 Petunjuk dari AI Tutor</div>
+              <div className={styles.hintTitle}>💡 Petunjuk dari Kakak</div>
               <div className={styles.hintText}>{hint}</div>
               <button
                 onClick={handleGetHint}
@@ -435,7 +435,7 @@ export default function HtmlJsChallenge({
                   cursor: "pointer",
                 }}
               >
-                {isLoadingHint ? "⏳ Memuat..." : "🔄 Minta Petunjuk Lagi"}
+                {isLoadingHint ? "⏳ Sebentar ya..." : "🔄 Petunjuk Lain, Kak"}
               </button>
             </div>
           )}
