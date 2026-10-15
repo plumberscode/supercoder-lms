@@ -30,10 +30,27 @@ export type QuizResult =
 async function loadQuiz(lessonId: string) {
   const { data } = await createAdminClient()
     .from("quizzes")
-    .select("id, title, pass_score, is_dynamic, target_category, question_count")
+    .select(
+      "id, title, pass_score, is_dynamic, target_category, question_count, lessons(module_id)",
+    )
     .eq("lesson_id", lessonId)
     .maybeSingle();
   return data;
+}
+
+type LoadedQuiz = NonNullable<Awaited<ReturnType<typeof loadQuiz>>>;
+
+// Kuis dinamis mengambil soal dari bank soal modul materinya; kategori (opsional)
+// menyaring lebih sempit.
+function dynamicFilter(quiz: LoadedQuiz) {
+  const lesson = Array.isArray(quiz.lessons) ? quiz.lessons[0] : quiz.lessons;
+  return {
+    // UUID nol: materi tanpa modul → tidak ada soal (bukan error UUID tidak valid).
+    moduleId:
+      (lesson?.module_id as string | undefined) ??
+      "00000000-0000-0000-0000-000000000000",
+    category: quiz.target_category?.trim() || null,
+  };
 }
 
 function shuffle<T>(items: T[]) {
@@ -55,10 +72,13 @@ export async function getQuizForStudent(lessonId: string): Promise<StudentQuiz> 
   const admin = createAdminClient();
   let questions: StudentQuizQuestion[] = [];
   if (quiz.is_dynamic) {
-    const { data } = await admin
+    const { moduleId, category } = dynamicFilter(quiz);
+    let query = admin
       .from("question_bank")
       .select("id, question_text, options")
-      .eq("category", quiz.target_category);
+      .eq("module_id", moduleId);
+    if (category) query = query.eq("category", category);
+    const { data } = await query;
     questions = shuffle(data ?? []).slice(0, quiz.question_count || 10);
   } else {
     const { data } = await admin
@@ -95,17 +115,21 @@ export async function submitQuiz(
   let expected: number;
   let key: { id: string; correct_option_index: number }[];
   if (quiz.is_dynamic) {
-    const [{ data }, { count }] = await Promise.all([
-      admin
-        .from("question_bank")
-        .select("id, correct_option_index")
-        .eq("category", quiz.target_category)
-        .in("id", ids),
-      admin
-        .from("question_bank")
-        .select("id", { count: "exact", head: true })
-        .eq("category", quiz.target_category),
-    ]);
+    const { moduleId, category } = dynamicFilter(quiz);
+    let keyQuery = admin
+      .from("question_bank")
+      .select("id, correct_option_index")
+      .eq("module_id", moduleId)
+      .in("id", ids);
+    let countQuery = admin
+      .from("question_bank")
+      .select("id", { count: "exact", head: true })
+      .eq("module_id", moduleId);
+    if (category) {
+      keyQuery = keyQuery.eq("category", category);
+      countQuery = countQuery.eq("category", category);
+    }
+    const [{ data }, { count }] = await Promise.all([keyQuery, countQuery]);
     key = data ?? [];
     expected = Math.min(quiz.question_count || 10, count ?? 0);
   } else {

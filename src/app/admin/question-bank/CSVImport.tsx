@@ -3,14 +3,15 @@
 import { useState } from "react";
 import { bulkAddQuestions } from "./actions";
 import { useToast } from "@/components/ToastProvider";
+import ModuleSelect, { type ModuleOption } from "./ModuleSelect";
 
 interface CSVImportProps {
-  subjects: any[];
+  modules: ModuleOption[];
 }
 
-export default function CSVImport({ subjects }: CSVImportProps) {
+export default function CSVImport({ modules }: CSVImportProps) {
   const [loading, setLoading] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState(subjects[0]?.id || "");
+  const [selectedModule, setSelectedModule] = useState(modules[0]?.id || "");
   const { showToast } = useToast();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +38,7 @@ export default function CSVImport({ subjects }: CSVImportProps) {
             if (parts.length < 7) return null;
 
             return {
-              subject_id: selectedSubject,
+              module_id: selectedModule,
               category: parts[0],
               question_text: parts[1],
               options: [parts[2], parts[3], parts[4], parts[5]],
@@ -98,20 +99,13 @@ export default function CSVImport({ subjects }: CSVImportProps) {
           }}
         >
           <label style={{ fontWeight: 600, fontSize: "0.875rem" }}>
-            Pilih Mata Pelajaran
+            Pilih Modul
           </label>
-          <select
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-            className="input"
-            style={{ width: "100%" }}
-          >
-            {subjects.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.title}
-              </option>
-            ))}
-          </select>
+          <ModuleSelect
+            modules={modules}
+            value={selectedModule}
+            onChange={setSelectedModule}
+          />
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>

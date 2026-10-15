@@ -341,14 +341,23 @@ export default function LessonForm({
                     gap: "16px",
                   }}
                 >
+                  <p
+                    style={{
+                      gridColumn: "1 / -1",
+                      margin: 0,
+                      fontSize: "0.875rem",
+                      color: "#64748B",
+                    }}
+                  >
+                    Soal diambil acak dari Bank Soal modul ini.
+                  </p>
                   <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Pilih Kategori</label>
+                    <label style={labelStyle}>Filter Kategori (opsional)</label>
                     <input
                       type="text"
-                      placeholder="Contoh: JavaScript Basic"
+                      placeholder="Kosongkan untuk semua soal modul"
                       value={targetCategory}
                       onChange={(e) => setTargetCategory(e.target.value)}
-                      required
                       className="input"
                     />
                   </div>
