@@ -1,7 +1,7 @@
 "use server";
 
-import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
 import { requireBlogAdmin } from "@/lib/blog/auth";
+import { uploadImage } from "@/lib/cloudinary";
 
 export type MediaItem = {
   id: string;
@@ -11,45 +11,13 @@ export type MediaItem = {
   height: number | null;
 };
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
-// Batas body request serverless Vercel ±4,5MB; lihat serverActions.bodySizeLimit di next.config.ts
-const MAX_SIZE = 4 * 1024 * 1024;
-
-function configureCloudinary() {
-  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
-  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
-    throw new Error("Cloudinary belum dikonfigurasi (CLOUDINARY_* di .env).");
-  }
-  cloudinary.config({
-    cloud_name: CLOUDINARY_CLOUD_NAME,
-    api_key: CLOUDINARY_API_KEY,
-    api_secret: CLOUDINARY_API_SECRET,
-    secure: true,
-  });
-}
-
 export async function uploadMedia(
   formData: FormData,
 ): Promise<{ success: true; media: MediaItem } | { success: false; error: string }> {
   try {
     const { supabase } = await requireBlogAdmin();
-    configureCloudinary();
-
-    const file = formData.get("file");
-    if (!(file instanceof File)) return { success: false, error: "File tidak ditemukan." };
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return { success: false, error: "Format tidak didukung. Gunakan JPG, PNG, WebP, GIF, atau AVIF." };
-    }
-    if (file.size > MAX_SIZE) return { success: false, error: "Ukuran file maksimal 4MB. Kompres gambar dulu (mis. ke WebP)." };
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const result = await new Promise<UploadApiResponse>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream({ folder: "supercoder-blog", resource_type: "image" }, (error, res) =>
-          error || !res ? reject(error ?? new Error("Upload gagal")) : resolve(res),
-        )
-        .end(buffer);
-    });
+    const file = formData.get("file") as File;
+    const result = await uploadImage(file, "supercoder-blog");
 
     const { data, error } = await supabase
       .from("blog_media")

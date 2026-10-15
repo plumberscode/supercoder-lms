@@ -7,14 +7,19 @@ export function sanitizeChallengeHtml(html: string): string {
   return sanitizeHtml(html, {
     allowedTags: [
       "p", "br", "hr", "h1", "h2", "h3", "h4", "strong", "b", "em", "i", "u", "s",
-      "a", "ul", "ol", "li", "blockquote", "pre", "code", "span",
+      "a", "ul", "ol", "li", "blockquote", "pre", "code", "span", "img",
     ],
     allowedAttributes: {
       a: ["href", "title", "target", "rel"],
       code: ["class"],
+      img: ["src", "alt", "title", "width", "height"],
     },
     allowedClasses: { code: ["language-*"] },
     allowedSchemes: ["http", "https", "mailto"],
+    allowedSchemesByTag: { img: ["https"] },
+    // Gambar hanya dari URL https absolut (unggahan Cloudinary); src relatif dibuang.
+    exclusiveFilter: (frame) =>
+      frame.tag === "img" && !/^https:\/\//i.test(frame.attribs.src ?? ""),
     transformTags: {
       a: sanitizeHtml.simpleTransform("a", { target: "_blank", rel: "noopener noreferrer" }),
     },
@@ -26,10 +31,10 @@ export function prepareChallengeDescription(description: string): string {
   return isRichDescription(description) ? sanitizeChallengeHtml(description) : description;
 }
 
-/** True bila deskripsi tidak punya teks (mis. TipTap kosong menghasilkan `<p></p>`). */
+/** True bila deskripsi tidak punya teks maupun gambar (mis. TipTap kosong menghasilkan `<p></p>`). */
 export function isEmptyDescription(description: string): boolean {
   return isRichDescription(description)
-    ? htmlToText(description).length === 0
+    ? htmlToText(description).length === 0 && !/<img\s/i.test(description)
     : description.trim().length === 0;
 }
 

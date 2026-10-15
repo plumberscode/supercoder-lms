@@ -380,6 +380,7 @@ input:focus {
 .challenge-rich a { color: #dc2626; text-decoration: underline; }
 .challenge-rich blockquote { border-left: 3px solid #cbd5e1; padding-left: 0.9em; color: #475569; }
 .challenge-rich hr { border: 0; border-top: 1px solid #e2e8f0; }
+.challenge-rich img { display: block; max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #e2e8f0; }
 .challenge-rich code { background: #e2e8f0; border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .challenge-rich pre { background: #0d1117; color: #e6edf3; border-radius: 8px; padding: 12px 14px; overflow-x: auto; white-space: pre; }
 .challenge-rich pre code { background: none; padding: 0; color: inherit; font-size: 0.85em; }
