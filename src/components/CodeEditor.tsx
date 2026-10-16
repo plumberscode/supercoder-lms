@@ -1,6 +1,16 @@
 "use client";
 
-import Editor from "@monaco-editor/react";
+import { useEffect, useRef } from "react";
+import Editor, { type OnMount } from "@monaco-editor/react";
+
+type MonacoEditor = Parameters<OnMount>[0];
+
+// Starter code HTML/CSS sering tersimpan dalam satu baris panjang.
+// Rapikan otomatis bila ada baris yang terlalu panjang.
+const LONG_LINE = 80;
+function needsFormat(value: string) {
+  return value.split("\n").some((line) => line.length > LONG_LINE);
+}
 
 interface Props {
   language: "python" | "javascript" | "html" | "css";
@@ -17,6 +27,22 @@ export default function CodeEditor({
   readOnly = false,
   height = "400px",
 }: Props) {
+  const editorRef = useRef<MonacoEditor | null>(null);
+
+  const formatIfNeeded = () => {
+    const editor = editorRef.current;
+    if (!editor || readOnly) return;
+    if (language !== "html" && language !== "css") return;
+    if (!needsFormat(editor.getValue())) return;
+    editor.getAction("editor.action.formatDocument")?.run();
+  };
+
+  useEffect(() => {
+    const t = setTimeout(formatIfNeeded, 150);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, language, readOnly]);
+
   return (
     <div
       style={{
@@ -32,6 +58,10 @@ export default function CodeEditor({
         value={value}
         onChange={(val) => onChange(val || "")}
         theme="vs-dark"
+        onMount={(editor) => {
+          editorRef.current = editor;
+          setTimeout(formatIfNeeded, 300);
+        }}
         loading={
           <div
             style={{
