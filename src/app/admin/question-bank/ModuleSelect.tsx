@@ -1,10 +1,8 @@
 "use client";
 
-export interface ModuleOption {
-  id: string;
-  title: string;
-  subjectTitle: string;
-}
+import type { ModuleOption } from "@/lib/question-bank-summary";
+
+export type { ModuleOption };
 
 interface ModuleSelectProps {
   modules: ModuleOption[];

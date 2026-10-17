@@ -4,6 +4,27 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { prepareChallengeDescription } from "@/lib/challenge-description";
 import { PROGRAMS, type Program } from "@/lib/student-access";
+import {
+  sanitizeSources,
+  validateSources,
+  type QuizSource,
+} from "@/lib/quiz-sources";
+
+function parseSources(raw: string | null): QuizSource[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw || "[]");
+  } catch {
+    throw new Error("Sumber soal tidak valid.");
+  }
+  const sources = sanitizeSources(parsed);
+  const error = validateSources(sources);
+  if (error) throw new Error(error);
+  return sources;
+}
+
+const totalCount = (sources: QuizSource[]) =>
+  sources.reduce((sum, s) => sum + s.count, 0);
 
 export async function createModule(subjectId: string, formData: FormData) {
   const supabase = await createClient();
@@ -35,6 +56,12 @@ export async function createLesson(
     type === "text" ? prepareChallengeDescription(rawContent) : rawContent;
   const orderIndex = parseInt((formData.get("orderIndex") as string) || "0");
 
+  // Divalidasi sebelum materi disimpan agar tidak ada materi kuis tanpa kuis.
+  const isDynamic = type === "quiz" && formData.get("is_dynamic") === "true";
+  const sources = isDynamic
+    ? parseSources(formData.get("sources") as string)
+    : null;
+
   const { data: lesson, error } = await supabase
     .from("lessons")
     .insert({
@@ -51,20 +78,13 @@ export async function createLesson(
   if (error) throw new Error(error.message);
 
   if (type === "quiz") {
-    const isDynamic = formData.get("is_dynamic") === "true";
-    // Kosong = semua soal di bank soal modul ini.
-    const targetCategory =
-      ((formData.get("target_category") as string) || "").trim() || null;
-    const questionCount = parseInt(
-      (formData.get("question_count") as string) || "10",
-    );
-
     const { error: quizError } = await supabase.from("quizzes").insert({
       lesson_id: lesson.id,
       title,
       is_dynamic: isDynamic,
-      target_category: targetCategory,
-      question_count: questionCount,
+      sources,
+      target_category: null,
+      question_count: sources ? totalCount(sources) : 10,
     });
 
     if (quizError) throw new Error(quizError.message);

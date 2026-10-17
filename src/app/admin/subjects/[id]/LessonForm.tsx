@@ -5,24 +5,45 @@ import { createClient } from "@/utils/supabase/client";
 import { createLesson } from "./actions";
 import { useToast } from "@/components/ToastProvider";
 import ChallengeRichEditor from "@/components/admin/ChallengeRichEditor";
+import QuizSourcePicker from "@/components/admin/QuizSourcePicker";
+import {
+  availableCount,
+  type ModuleOption,
+  type QuestionBankSummary,
+} from "@/lib/question-bank-summary";
+import { validateSources, type QuizSource } from "@/lib/quiz-sources";
 
 export default function LessonForm({
   moduleId,
   subjectId,
   orderIndex,
   initialType = "text",
+  modules,
+  bank,
 }: {
   moduleId: string;
   subjectId: string;
   orderIndex: number;
   initialType?: string;
+  modules: ModuleOption[];
+  bank: QuestionBankSummary;
 }) {
   const [type, setType] = useState(initialType);
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [isDynamic, setIsDynamic] = useState(false);
-  const [targetCategory, setTargetCategory] = useState("");
-  const [questionCount, setQuestionCount] = useState(10);
+  // Default: semua soal dari modul tempat kuis ini dibuat.
+  const [sources, setSources] = useState<QuizSource[]>(() => [
+    {
+      module_id: moduleId,
+      category: null,
+      count: Math.max(1, Math.min(10, bank[moduleId]?.total ?? 10)),
+    },
+  ]);
+  const sourceError =
+    type === "quiz" && isDynamic
+      ? validateSources(sources, (s) => availableCount(bank, s))
+      : null;
 
   const supabase = createClient();
   const { showToast } = useToast();
@@ -64,8 +85,7 @@ export default function LessonForm({
 
     if (type === "quiz") {
       finalData.append("is_dynamic", isDynamic.toString());
-      finalData.append("target_category", targetCategory);
-      finalData.append("question_count", questionCount.toString());
+      if (isDynamic) finalData.append("sources", JSON.stringify(sources));
     }
 
     try {
@@ -336,45 +356,28 @@ export default function LessonForm({
               {isDynamic ? (
                 <div
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "12px",
                   }}
                 >
                   <p
                     style={{
-                      gridColumn: "1 / -1",
                       margin: 0,
                       fontSize: "0.875rem",
                       color: "#64748B",
                     }}
                   >
-                    Soal diambil acak dari Bank Soal modul ini.
+                    Soal diambil acak dari Bank Soal modul yang dipilih. Pilih
+                    kategori untuk mempersempit topik.
                   </p>
-                  <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Filter Kategori (opsional)</label>
-                    <input
-                      type="text"
-                      placeholder="Kosongkan untuk semua soal modul"
-                      value={targetCategory}
-                      onChange={(e) => setTargetCategory(e.target.value)}
-                      className="input"
-                    />
-                  </div>
-                  <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Jumlah Soal</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="100"
-                      value={questionCount}
-                      onChange={(e) =>
-                        setQuestionCount(parseInt(e.target.value))
-                      }
-                      required
-                      className="input"
-                    />
-                  </div>
+                  <QuizSourcePicker
+                    modules={modules}
+                    bank={bank}
+                    value={sources}
+                    onChange={setSources}
+                    error={sourceError}
+                  />
                 </div>
               ) : (
                 <p
@@ -516,7 +519,7 @@ export default function LessonForm({
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={loading}
+            disabled={loading || !!sourceError}
             style={{ minWidth: "160px" }}
           >
             {loading

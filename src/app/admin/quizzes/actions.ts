@@ -2,8 +2,18 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { currentUserIsStaff } from "@/lib/staff";
+import {
+  sanitizeSources,
+  validateSources,
+  type QuizSource,
+} from "@/lib/quiz-sources";
 
-export async function addQuestion(quizId: string, formData: FormData) {
+export async function addQuestion(
+  quizId: string,
+  lessonId: string,
+  formData: FormData,
+) {
   const supabase = await createClient();
 
   const questionText = formData.get("questionText") as string;
@@ -23,7 +33,7 @@ export async function addQuestion(quizId: string, formData: FormData) {
   });
 
   if (error) throw new Error(error.message);
-  revalidatePath(`/admin/quizzes/${quizId}`);
+  revalidatePath(`/admin/quizzes/${lessonId}`);
 }
 
 export async function deleteQuestion(questionId: string, lessonId: string) {
@@ -34,4 +44,39 @@ export async function deleteQuestion(questionId: string, lessonId: string) {
     .eq("id", questionId);
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/quizzes/${lessonId}`);
+}
+
+export async function updateQuizSettings(
+  lessonId: string,
+  isDynamic: boolean,
+  rawSources: QuizSource[],
+): Promise<{ ok: true } | { error: string }> {
+  if (!(await currentUserIsStaff())) {
+    return { error: "Hanya admin atau guru yang bisa mengubah kuis." };
+  }
+
+  const sources = isDynamic ? sanitizeSources(rawSources) : null;
+  if (sources) {
+    const error = validateSources(sources);
+    if (error) return { error };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("quizzes")
+    .update({
+      is_dynamic: isDynamic,
+      // Mode statik menyimpan sumber terakhir agar tidak hilang saat dinyalakan lagi.
+      ...(sources && {
+        sources,
+        target_category: null,
+        question_count: sources.reduce((sum, s) => sum + s.count, 0),
+      }),
+    })
+    .eq("lesson_id", lessonId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/admin/quizzes/${lessonId}`);
+  revalidatePath(`/lessons/${lessonId}`);
+  return { ok: true };
 }

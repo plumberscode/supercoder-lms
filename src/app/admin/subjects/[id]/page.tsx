@@ -4,6 +4,10 @@ import { createModule, createLesson, deleteLesson } from "./actions";
 import Link from "next/link";
 import LessonForm from "./LessonForm";
 import ModuleList from "./ModuleList";
+import {
+  getModuleOptions,
+  getQuestionBankSummary,
+} from "@/lib/question-bank-summary";
 
 export default async function SubjectDetailPage({
   params,
@@ -13,19 +17,24 @@ export default async function SubjectDetailPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: subject } = await supabase
-    .from("subjects")
-    .select(
-      `
+  // Modul semua mata pelajaran + jumlah soal bank, untuk sumber soal kuis dinamis.
+  const [{ data: subject }, quizModules, quizBank] = await Promise.all([
+    supabase
+      .from("subjects")
+      .select(
+        `
       *,
       modules (
         *,
         lessons (*)
       )
     `,
-    )
-    .eq("id", id)
-    .single();
+      )
+      .eq("id", id)
+      .single(),
+    getModuleOptions(supabase),
+    getQuestionBankSummary(supabase),
+  ]);
 
   if (!subject) return <div>Mata Pelajaran tidak ditemukan</div>;
 
@@ -62,6 +71,8 @@ export default async function SubjectDetailPage({
                 })) || []
             }
             subjectId={id}
+            quizModules={quizModules}
+            quizBank={quizBank}
           />
 
           {/* Add Module Form */}
