@@ -4,6 +4,12 @@ import { useState } from "react";
 import { saveWebChallenge } from "./actions";
 import { useToast } from "@/components/ToastProvider";
 import ChallengeRichEditor from "@/components/admin/ChallengeRichEditor";
+import {
+  WEB_MODES,
+  WEB_MODE_LABEL,
+  webModeParts,
+  type WebMode,
+} from "@/lib/web-mode";
 
 interface Props {
   lessonId: string;
@@ -15,13 +21,12 @@ export default function WebChallengeEditor({
   existingChallenge,
 }: Props) {
   const [saving, setSaving] = useState(false);
-  const [mode, setMode] = useState<string>(
+  const [mode, setMode] = useState<WebMode>(
     existingChallenge?.mode || "html-css-js",
   );
   const { showToast } = useToast();
 
-  const includeCss = mode === "html-css" || mode === "html-css-js";
-  const includeJs = mode === "html-css-js";
+  const parts = webModeParts(mode);
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -133,12 +138,14 @@ export default function WebChallengeEditor({
             <select
               name="mode"
               value={mode}
-              onChange={(e) => setMode(e.target.value)}
+              onChange={(e) => setMode(e.target.value as WebMode)}
               style={inputStyle}
             >
-              <option value="html">HTML saja</option>
-              <option value="html-css">HTML + CSS</option>
-              <option value="html-css-js">HTML + CSS + JavaScript</option>
+              {WEB_MODES.map((m) => (
+                <option key={m} value={m}>
+                  {WEB_MODE_LABEL[m]}
+                </option>
+              ))}
             </select>
             <span style={{ fontSize: "0.75rem", color: "#64748B" }}>
               Menentukan kolom editor mana yang ditampilkan ke siswa.
@@ -156,38 +163,42 @@ export default function WebChallengeEditor({
             />
           </div>
 
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>Starter HTML (boilerplate awal)</label>
-            <textarea
-              name="starterHtml"
-              placeholder={
-                '<div class="app">\n  <h1>To-Do List</h1>\n</div>'
-              }
-              defaultValue={existingChallenge?.starter_html || ""}
-              rows={8}
-              style={monoInputStyle}
-            />
-          </div>
+          {parts.html && (
+            <>
+              <div style={inputGroupStyle}>
+                <label style={labelStyle}>Starter HTML (boilerplate awal)</label>
+                <textarea
+                  name="starterHtml"
+                  placeholder={
+                    '<div class="app">\n  <h1>To-Do List</h1>\n</div>'
+                  }
+                  defaultValue={existingChallenge?.starter_html || ""}
+                  rows={8}
+                  style={monoInputStyle}
+                />
+              </div>
 
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>Reference HTML (jawaban referensi guru)</label>
-            <textarea
-              name="referenceHtml"
-              placeholder={
-                '<div class="app">\n  <h1>To-Do List</h1>\n  <input id="new-item" />\n  <button onclick="addItem()">Tambah</button>\n  <ul id="list"></ul>\n</div>'
-              }
-              defaultValue={existingChallenge?.reference_html || ""}
-              required
-              rows={8}
-              style={monoInputStyle}
-            />
-            <span style={{ fontSize: "0.75rem", color: "#64748B" }}>
-              HTML referensi yang digunakan AI sebagai acuan penilaian. Hanya
-              terlihat oleh guru.
-            </span>
-          </div>
+              <div style={inputGroupStyle}>
+                <label style={labelStyle}>Reference HTML (jawaban referensi guru)</label>
+                <textarea
+                  name="referenceHtml"
+                  placeholder={
+                    '<div class="app">\n  <h1>To-Do List</h1>\n  <input id="new-item" />\n  <button onclick="addItem()">Tambah</button>\n  <ul id="list"></ul>\n</div>'
+                  }
+                  defaultValue={existingChallenge?.reference_html || ""}
+                  required
+                  rows={8}
+                  style={monoInputStyle}
+                />
+                <span style={{ fontSize: "0.75rem", color: "#64748B" }}>
+                  HTML referensi yang digunakan AI sebagai acuan penilaian. Hanya
+                  terlihat oleh guru.
+                </span>
+              </div>
+            </>
+          )}
 
-          {includeCss && (
+          {parts.css && (
             <>
               <div style={inputGroupStyle}>
                 <label style={labelStyle}>Starter CSS (CSS awal — opsional)</label>
@@ -216,7 +227,7 @@ export default function WebChallengeEditor({
             </>
           )}
 
-          {includeJs && (
+          {parts.js && (
             <>
               <div style={inputGroupStyle}>
                 <label style={labelStyle}>Starter JS (JavaScript awal — opsional)</label>
@@ -236,6 +247,7 @@ export default function WebChallengeEditor({
                     "function addItem() {\n  const input = document.getElementById('new-item');\n  const li = document.createElement('li');\n  li.textContent = input.value;\n  document.getElementById('list').appendChild(li);\n  input.value = '';\n}"
                   }
                   defaultValue={existingChallenge?.reference_js || ""}
+                  required={mode === "js"}
                   rows={8}
                   style={monoInputStyle}
                 />

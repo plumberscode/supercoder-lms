@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { isEmptyDescription, prepareChallengeDescription } from "@/lib/challenge-description";
+import { isWebMode, webModeParts } from "@/lib/web-mode";
 
 export async function saveWebChallenge(
   lessonId: string,
@@ -19,12 +20,23 @@ export async function saveWebChallenge(
   if (isEmptyDescription(rawDescription)) return { error: "Deskripsi soal wajib diisi" };
   const description = prepareChallengeDescription(rawDescription);
   const mode = (formData.get("mode") as string) || "html-css-js";
-  const starterHtml = (formData.get("starterHtml") as string) || "";
-  const starterCss = (formData.get("starterCss") as string) || "";
-  const starterJs = (formData.get("starterJs") as string) || "";
-  const referenceHtml = (formData.get("referenceHtml") as string) || "";
-  const referenceCss = (formData.get("referenceCss") as string) || "";
-  const referenceJs = (formData.get("referenceJs") as string) || "";
+  if (!isWebMode(mode)) return { error: "Mode soal tidak valid" };
+  // Bagian yang tidak dipakai mode ini disimpan kosong.
+  const parts = webModeParts(mode);
+  const field = (name: string, used: boolean) =>
+    used ? (formData.get(name) as string) || "" : "";
+  const starterHtml = field("starterHtml", parts.html);
+  const starterCss = field("starterCss", parts.css);
+  const starterJs = field("starterJs", parts.js);
+  const referenceHtml = field("referenceHtml", parts.html);
+  const referenceCss = field("referenceCss", parts.css);
+  const referenceJs = field("referenceJs", parts.js);
+  if (parts.html && !referenceHtml.trim()) {
+    return { error: "Reference HTML wajib diisi" };
+  }
+  if (mode === "js" && !referenceJs.trim()) {
+    return { error: "Reference JS wajib diisi untuk mode JavaScript saja" };
+  }
   const maxScore = parseInt((formData.get("maxScore") as string) || "100", 10);
 
   // Check if challenge already exists
