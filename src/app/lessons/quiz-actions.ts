@@ -14,6 +14,7 @@ import {
 
 // XP untuk lulus kuis, hanya sekali per kuis per siswa.
 const QUIZ_XP = 50;
+const UNIQUE_VIOLATION = "23505";
 
 export type StudentQuizQuestion = {
   id: string;
@@ -155,7 +156,9 @@ export async function submitQuiz(
   const passScore = quiz.pass_score ?? 70;
   const passed = score >= passScore;
 
-  // Bug lama: XP diberikan setiap kali lulus. Sekarang hanya kelulusan pertama.
+  // XP hanya untuk kelulusan pertama. Cek ini menangani data lama; unique index
+  // submissions_quiz_xp_once (migration_quiz_xp_once.sql) mencegah dua kiriman
+  // bersamaan sama-sama mendapat XP.
   const { data: previousPass } = await admin
     .from("submissions")
     .select("id")
@@ -165,20 +168,30 @@ export async function submitQuiz(
     .gte("score", passScore)
     .limit(1);
 
-  const { error } = await admin.from("submissions").insert({
+  const row = {
     student_id: user.id,
     content_id: quiz.id,
     type: "quiz",
-    data: answers,
     score,
     status: "graded",
+  };
+  let xpAwarded = passed && !previousPass?.length ? QUIZ_XP : 0;
+  let { error } = await admin.from("submissions").insert({
+    ...row,
+    data: xpAwarded ? { answers, xp_awarded: xpAwarded } : { answers },
   });
+  if (error?.code === UNIQUE_VIOLATION && xpAwarded) {
+    // Kiriman lain sudah lebih dulu mendapat XP kuis ini.
+    xpAwarded = 0;
+    ({ error } = await admin
+      .from("submissions")
+      .insert({ ...row, data: { answers } }));
+  }
   if (error) {
     console.error("Insert quiz submission failed:", error);
     return { error: "Gagal menyimpan jawaban. Coba lagi." };
   }
 
-  const xpAwarded = passed && !previousPass?.length ? QUIZ_XP : 0;
   if (xpAwarded) await awardXp(user.id, xpAwarded);
 
   revalidatePath(`/lessons/${lessonId}`);
