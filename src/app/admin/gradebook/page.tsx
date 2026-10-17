@@ -64,21 +64,35 @@ export default async function GradebookPage({
       if (lessons.length > 0) {
         const lessonIds = lessons.map((l) => l.id);
 
+        // Submission kuis menyimpan id kuis (bukan id materi) di content_id.
+        const { data: quizzes } = await supabase
+          .from("quizzes")
+          .select("id, lesson_id")
+          .in("lesson_id", lessonIds);
+        const quizToLesson = new Map(
+          (quizzes ?? []).map((q) => [q.id as string, q.lesson_id as string]),
+        );
+
         // Single query: all submissions for all students for this subject
         // Filter by relevant types to prevent score mixing between different submission types
         const { data: submissions } = await supabase
           .from("submissions")
           .select("student_id, content_id, score, type")
-          .in("content_id", lessonIds)
+          .in("content_id", [...lessonIds, ...quizToLesson.keys()])
           .in("type", ["code", "css", "quiz", "lesson", "web"]);
 
         if (submissions) {
           submissions.forEach((sub) => {
             if (sub.score === null) return;
+            const lessonId =
+              sub.type === "quiz"
+                ? quizToLesson.get(sub.content_id)
+                : sub.content_id;
+            if (!lessonId) return;
             if (!allScoresMap[sub.student_id])
               allScoresMap[sub.student_id] = {};
-            const cur = allScoresMap[sub.student_id][sub.content_id] || 0;
-            allScoresMap[sub.student_id][sub.content_id] = Math.max(
+            const cur = allScoresMap[sub.student_id][lessonId] || 0;
+            allScoresMap[sub.student_id][lessonId] = Math.max(
               cur,
               sub.score,
             );

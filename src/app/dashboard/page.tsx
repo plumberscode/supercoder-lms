@@ -188,11 +188,15 @@ export default async function DashboardPage() {
     .eq("student_id", user.id)
     .eq("type", "lesson");
 
-  const { count: completedQuizzes } = await supabase
+  // Kuis unik: mengulang kuis yang sama tidak menambah hitungan.
+  const { data: quizSubmissions } = await supabase
     .from("submissions")
-    .select("*", { count: "exact", head: true })
+    .select("content_id")
     .eq("student_id", user.id)
     .eq("type", "quiz");
+  const completedQuizzes = new Set(
+    (quizSubmissions ?? []).map((s) => s.content_id),
+  ).size;
 
   const xpThisLevel = (profile.level - 1) * (profile.level - 1) * 100;
   const xpToNextLevel = profile.level * profile.level * 100;
@@ -305,7 +309,7 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <p className={styles.statLabel}>Quiz Dikerjakan</p>
-                <p className={styles.statValue}>{completedQuizzes ?? 0}</p>
+                <p className={styles.statValue}>{completedQuizzes}</p>
               </div>
             </div>
 
