@@ -11,8 +11,8 @@ import {
   getWebChallengeHint,
 } from "@/app/lessons/web-challenge-actions";
 import { buildWebPreview } from "@/lib/web-preview";
-
-type WebMode = "html" | "html-css" | "html-css-js";
+import { runJavaScript, type CodeResult } from "@/lib/code-runner";
+import { webModeParts, type WebMode } from "@/lib/web-mode";
 
 interface WebChallengeData {
   id: string;
@@ -35,8 +35,13 @@ interface Props {
 export default function WebChallenge({ challenge, existingSubmission }: Props) {
   const descPanel = usePanelSize("lms:panel:desc-w");
   const bottomPanel = usePanelSize("lms:panel:bottom-h");
-  const includeCss = challenge.mode === "html-css" || challenge.mode === "html-css-js";
-  const includeJs = challenge.mode === "html-css-js";
+  const {
+    html: includeHtml,
+    css: includeCss,
+    js: includeJs,
+  } = webModeParts(challenge.mode);
+  // Mode JavaScript saja: tidak ada halaman untuk dipratinjau, hasilnya di console.
+  const jsOnly = challenge.mode === "js";
 
   const initialHtml =
     existingSubmission?.data?.html || challenge.starter_html || "";
@@ -49,11 +54,15 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
   const [jsCode, setJsCode] = useState(initialJs);
 
   const tabs: { key: "html" | "css" | "js"; label: string }[] = [
-    { key: "html", label: "📄 HTML" },
+    ...(includeHtml ? [{ key: "html" as const, label: "📄 HTML" }] : []),
     ...(includeCss ? [{ key: "css" as const, label: "🎨 CSS" }] : []),
     ...(includeJs ? [{ key: "js" as const, label: "⚡ JavaScript" }] : []),
   ];
-  const [activeTab, setActiveTab] = useState<"html" | "css" | "js">("html");
+  const [activeTab, setActiveTab] = useState<"html" | "css" | "js">(
+    tabs[0].key,
+  );
+  const [consoleResult, setConsoleResult] = useState<CodeResult | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [celebration, setCelebration] = useState<{
@@ -120,7 +129,7 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
       const result = await submitWebChallengeSolution({
         challengeId: challenge.id,
         lessonId: challenge.lesson_id,
-        html: htmlCode,
+        html: includeHtml ? htmlCode : "",
         css: includeCss ? cssCode : "",
         js: includeJs ? jsCode : "",
       });
@@ -177,6 +186,12 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
     }
   };
 
+  const handleRun = async () => {
+    setIsRunning(true);
+    setConsoleResult(await runJavaScript(jsCode));
+    setIsRunning(false);
+  };
+
   const handleReset = () => {
     setHtmlCode(challenge.starter_html || "");
     setCssCode(challenge.starter_css || "");
@@ -184,6 +199,7 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
     setOutputError(null);
     setGradeResult(null);
     setHint("");
+    setConsoleResult(null);
     setPreviewKey((prev) => prev + 1);
   };
 
@@ -201,7 +217,9 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
       ? "🕸️ HTML"
       : challenge.mode === "html-css"
         ? "🕸️ HTML + CSS"
-        : "🕸️ HTML + CSS + JS";
+        : jsOnly
+          ? "⚡ JavaScript"
+          : "🕸️ HTML + CSS + JS";
 
   return (
     <div className={styles.container}>
@@ -412,8 +430,14 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
             )}
           </div>
 
-          {/* Live Preview */}
-          <ResizeHandle axis="y" panel={bottomPanel} label="Ubah tinggi live preview" min={120} reserve={240} />
+          {/* Live Preview, atau Console untuk mode JavaScript saja */}
+          <ResizeHandle
+            axis="y"
+            panel={bottomPanel}
+            label={jsOnly ? "Ubah tinggi console" : "Ubah tinggi live preview"}
+            min={120}
+            reserve={240}
+          />
           <div
             className={styles.previewPanel}
             style={
@@ -422,23 +446,63 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
                 : undefined
             }
           >
-            <div className={styles.previewHeader}>
-              <span>🖥️ Live Preview</span>
-              <span style={{ color: "#10B981", fontSize: "0.6875rem" }}>
-                ● Live
-              </span>
-            </div>
-            <iframe
-              ref={iframeRef}
-              className={styles.previewIframe}
-              srcDoc={buildWebPreview(
-                htmlCode,
-                includeCss ? cssCode : "",
-                includeJs ? jsCode : "",
-              )}
-              title="Web Preview"
-              sandbox="allow-scripts"
-            />
+            {jsOnly ? (
+              <>
+                <div className={styles.previewHeader}>
+                  <span>🖥️ Console</span>
+                  <button
+                    type="button"
+                    onClick={handleRun}
+                    disabled={isRunning}
+                    className={styles.runButton}
+                  >
+                    {isRunning ? "⏳ Menjalankan..." : "▶ Jalankan"}
+                  </button>
+                </div>
+                <pre className={styles.consoleBody}>
+                  {!consoleResult ? (
+                    <span className={styles.consoleMuted}>
+                      Klik ▶ Jalankan untuk melihat hasil console.log.
+                    </span>
+                  ) : (
+                    <>
+                      {consoleResult.output}
+                      {consoleResult.error && (
+                        <span className={styles.consoleError}>
+                          {consoleResult.output ? "\n" : ""}❌{" "}
+                          {consoleResult.error}
+                        </span>
+                      )}
+                      {!consoleResult.output && !consoleResult.error && (
+                        <span className={styles.consoleMuted}>
+                          (tidak ada output)
+                        </span>
+                      )}
+                    </>
+                  )}
+                </pre>
+              </>
+            ) : (
+              <>
+                <div className={styles.previewHeader}>
+                  <span>🖥️ Live Preview</span>
+                  <span style={{ color: "#10B981", fontSize: "0.6875rem" }}>
+                    ● Live
+                  </span>
+                </div>
+                <iframe
+                  ref={iframeRef}
+                  className={styles.previewIframe}
+                  srcDoc={buildWebPreview(
+                    htmlCode,
+                    includeCss ? cssCode : "",
+                    includeJs ? jsCode : "",
+                  )}
+                  title="Web Preview"
+                  sandbox="allow-scripts"
+                />
+              </>
+            )}
           </div>
         </div>
       </div>

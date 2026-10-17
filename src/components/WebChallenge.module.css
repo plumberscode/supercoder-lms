@@ -205,6 +205,38 @@
   background: white;
 }
 
+/* ── Console (mode JavaScript saja) ──────────────────────────────────── */
+.runButton {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.runButton:hover { background: #059669; }
+.runButton:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.consoleBody {
+  flex: 1;
+  margin: 0;
+  padding: 10px 14px;
+  overflow: auto;
+  background: #1a1a1a;
+  color: #d4d4d4;
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+}
+
+.consoleMuted { color: #6b7280; }
+.consoleError { color: #f87171; }
+
 /* ── Feedback & Results inside Description Panel ─────────────────────── */
 .resultPanel {
   margin-top: 20px;

@@ -13,8 +13,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { awardXp } from "@/lib/xp";
 import OpenAI from "openai";
-
-type WebMode = "html" | "html-css" | "html-css-js";
+import { WEB_MODE_LABEL, webModeParts, type WebMode } from "@/lib/web-mode";
 
 export async function submitWebChallengeSolution(params: {
   challengeId: string;
@@ -62,29 +61,31 @@ export async function submitWebChallengeSolution(params: {
     apiKey: apiKey,
   });
 
-  const includeCss = mode === "html-css" || mode === "html-css-js";
-  const includeJs = mode === "html-css-js";
+  const {
+    html: includeHtml,
+    css: includeCss,
+    js: includeJs,
+  } = webModeParts(mode);
+  const modeLabel = WEB_MODE_LABEL[mode];
+  const subject = mode === "js" ? "JavaScript" : "Web";
 
-  const modeLabel =
-    mode === "html"
-      ? "HTML saja"
-      : mode === "html-css"
-        ? "HTML + CSS"
-        : "HTML + CSS + JavaScript";
-
-  const prompt = `Kamu adalah penilai proyek Web (HTML${includeCss ? "[+ CSS]" : ""}${includeJs ? "[+ JavaScript]" : ""}) untuk siswa pemula.
+  const prompt = `Kamu adalah penilai soal ${subject} (${modeLabel}) untuk siswa pemula.
 
 ## Soal / Deskripsi
 ${descriptionToPlainText(challenge.description)}
 
 ## Mode Soal
 ${modeLabel}
-
+${
+  includeHtml
+    ? `
 ## Jawaban HTML Siswa
 \`\`\`html
 ${params.html}
 \`\`\`
-${
+`
+    : ""
+}${
   includeCss
     ? `
 ## Jawaban CSS Siswa
@@ -103,11 +104,16 @@ ${params.js}
 `
     : ""
 }
+${
+  includeHtml
+    ? `
 ## Referensi Jawaban HTML (dari guru)
 \`\`\`html
 ${challenge.reference_html}
 \`\`\`
-${
+`
+    : ""
+}${
   includeCss
     ? `
 ## Referensi Jawaban CSS (dari guru)
@@ -129,8 +135,7 @@ ${challenge.reference_js}
 ## Instruksi Penilaian
 1. HANYA nilai bagian yang sesuai mode soal (${mode}). Jangan kurangi nilai karena CSS/JS tidak ada jika mode tidak memintanya.
 2. Bandingkan jawaban siswa dengan referensi guru dari sisi hasil visual dan/atau fungsional, bukan kesamaan kode literal.
-3. Untuk HTML: struktur elemen dan semantik yang relevan dengan soal.
-${includeCss ? "4. Untuk CSS: fokus pada apakah CSS MENGHASILKAN VISUAL YANG SAMA, bukan kode identik.\n" : ""}${includeJs ? "5. Untuk JavaScript: periksa apakah logika benar dan interaksi berjalan sesuai soal.\n" : ""}6. Berikan skor 0-100:
+${includeHtml ? "3. Untuk HTML: struktur elemen dan semantik yang relevan dengan soal.\n" : ""}${includeCss ? "4. Untuk CSS: fokus pada apakah CSS MENGHASILKAN VISUAL YANG SAMA, bukan kode identik.\n" : ""}${includeJs ? (mode === "js" ? "5. Untuk JavaScript: periksa apakah logika benar dan output (mis. console.log) sesuai soal. Soal ini tanpa HTML/CSS; jangan kurangi nilai karena itu.\n" : "5. Untuk JavaScript: periksa apakah logika benar dan interaksi berjalan sesuai soal.\n") : ""}6. Berikan skor 0-100:
    - 90-100: Sempurna atau hampir sempurna
    - 70-89: Sebagian besar benar, ada minor issue
    - 50-69: Konsep dasar benar tapi ada error signifikan
@@ -177,7 +182,7 @@ ${KAKAK_STYLE_JSON}`;
   const bestScore = Math.max(score, existing?.score || 0);
 
   const data = {
-    html: params.html,
+    html: includeHtml ? params.html : "",
     css: includeCss ? params.css : "",
     js: includeJs ? params.js : "",
     attempts: newAttempts,
@@ -250,8 +255,11 @@ export async function getWebChallengeHint(params: {
     return "Fitur AI Hint belum dikonfigurasi. Hubungi admin untuk mengaktifkan.";
   }
 
-  const includeCss = params.mode === "html-css" || params.mode === "html-css-js";
-  const includeJs = params.mode === "html-css-js";
+  const {
+    html: includeHtml,
+    css: includeCss,
+    js: includeJs,
+  } = webModeParts(params.mode);
 
   try {
     const openai = new OpenAI({
@@ -266,15 +274,19 @@ export async function getWebChallengeHint(params: {
           ? "Berikan petunjuk yang lebih spesifik, tunjukkan bagian kode mana yang mungkin salah."
           : "Berikan petunjuk yang cukup detail, hampir menunjukkan solusi tapi jangan berikan jawaban langsung.";
 
-    const prompt = `Kamu adalah tutor Web (HTML${includeCss ? "/CSS" : ""}${includeJs ? "/JS" : ""}) yang ramah dan sabar untuk siswa pemula.
+    const prompt = `Kamu adalah tutor ${params.mode === "js" ? "JavaScript" : "Web"} (${WEB_MODE_LABEL[params.mode]}) yang ramah dan sabar untuk siswa pemula.
 
 Soal: ${descriptionToPlainText(params.description)}
-
+${
+  includeHtml
+    ? `
 ## Jawaban HTML Siswa
 \`\`\`html
 ${params.studentHtml}
 \`\`\`
-${
+`
+    : ""
+}${
   includeCss
     ? `
 ## Jawaban CSS Siswa
