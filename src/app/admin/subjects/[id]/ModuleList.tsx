@@ -914,69 +914,6 @@ export default function ModuleList({
                           onClick={() =>
                             setActiveAddForm(
                               activeAddForm?.moduleId === module.id &&
-                                activeAddForm?.type === "code"
-                                ? null
-                                : { moduleId: module.id, type: "code" },
-                            )
-                          }
-                          className="btn"
-                          style={{
-                            padding: "8px 16px",
-                            fontSize: "0.875rem",
-                            backgroundColor:
-                              activeAddForm?.moduleId === module.id &&
-                              activeAddForm?.type === "code"
-                                ? "var(--primary)"
-                                : "#F1F5F9",
-                            color:
-                              activeAddForm?.moduleId === module.id &&
-                              activeAddForm?.type === "code"
-                                ? "white"
-                                : "var(--secondary)",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}
-                        >
-                          💻 Soal Coding
-                        </button>
-                        <button
-                          onClick={() =>
-                            setActiveAddForm(
-                              activeAddForm?.moduleId === module.id &&
-                                activeAddForm?.type === "css-challenge"
-                                ? null
-                                : {
-                                    moduleId: module.id,
-                                    type: "css-challenge",
-                                  },
-                            )
-                          }
-                          className="btn"
-                          style={{
-                            padding: "8px 16px",
-                            fontSize: "0.875rem",
-                            backgroundColor:
-                              activeAddForm?.moduleId === module.id &&
-                              activeAddForm?.type === "css-challenge"
-                                ? "var(--primary)"
-                                : "#F1F5F9",
-                            color:
-                              activeAddForm?.moduleId === module.id &&
-                              activeAddForm?.type === "css-challenge"
-                                ? "white"
-                                : "var(--secondary)",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}
-                        >
-                          🎨 Soal CSS
-                        </button>
-                        <button
-                          onClick={() =>
-                            setActiveAddForm(
-                              activeAddForm?.moduleId === module.id &&
                                 activeAddForm?.type === "web-challenge"
                                 ? null
                                 : {
