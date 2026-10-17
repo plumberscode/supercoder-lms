@@ -22,15 +22,23 @@ import LessonForm from "./LessonForm";
 import Link from "next/link";
 import styles from "../../admin.module.css";
 import ConfirmModal from "@/components/ConfirmModal";
+import type {
+  ModuleOption,
+  QuestionBankSummary,
+} from "@/lib/question-bank-summary";
 
 interface ModuleListProps {
   initialModules: any[];
   subjectId: string;
+  quizModules: ModuleOption[];
+  quizBank: QuestionBankSummary;
 }
 
 export default function ModuleList({
   initialModules,
   subjectId,
+  quizModules,
+  quizBank,
 }: ModuleListProps) {
   const [modules, setModules] = useState(initialModules);
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
@@ -1025,6 +1033,8 @@ export default function ModuleList({
                               subjectId={subjectId}
                               orderIndex={(module.lessons?.length || 0) + 1}
                               initialType={activeAddForm.type}
+                              modules={quizModules}
+                              bank={quizBank}
                             />
                           </div>
                         )}

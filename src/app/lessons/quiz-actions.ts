@@ -4,6 +4,13 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { getLessonAccess, LESSON_ACCESS_DENIED } from "@/lib/lesson-access";
 import { awardXp } from "@/lib/xp";
+import {
+  answersMatchSources,
+  groupBySource,
+  pickQuestions,
+  resolveSources,
+  type QuizSource,
+} from "@/lib/quiz-sources";
 
 // XP untuk lulus kuis, hanya sekali per kuis per siswa.
 const QUIZ_XP = 50;
@@ -22,8 +29,7 @@ export type StudentQuiz =
     };
 
 export type QuizResult =
-  | { error: string }
-  | { score: number; passed: boolean; xpAwarded: number };
+  { error: string } | { score: number; passed: boolean; xpAwarded: number };
 
 // Tabel soal hanya bisa dibaca staf (migration_xp_integrity.sql), jadi soal & kunci
 // jawaban diambil lewat service role setelah akses materi dicek.
@@ -31,7 +37,7 @@ async function loadQuiz(lessonId: string) {
   const { data } = await createAdminClient()
     .from("quizzes")
     .select(
-      "id, title, pass_score, is_dynamic, target_category, question_count, lessons(module_id)",
+      "id, title, pass_score, is_dynamic, sources, target_category, question_count, lessons(module_id)",
     )
     .eq("lesson_id", lessonId)
     .maybeSingle();
@@ -40,48 +46,49 @@ async function loadQuiz(lessonId: string) {
 
 type LoadedQuiz = NonNullable<Awaited<ReturnType<typeof loadQuiz>>>;
 
-// Kuis dinamis mengambil soal dari bank soal modul materinya; kategori (opsional)
-// menyaring lebih sempit.
-function dynamicFilter(quiz: LoadedQuiz) {
+function quizSources(quiz: LoadedQuiz) {
   const lesson = Array.isArray(quiz.lessons) ? quiz.lessons[0] : quiz.lessons;
-  return {
-    // UUID nol: materi tanpa modul → tidak ada soal (bukan error UUID tidak valid).
-    moduleId:
-      (lesson?.module_id as string | undefined) ??
-      "00000000-0000-0000-0000-000000000000",
-    category: quiz.target_category?.trim() || null,
-  };
+  return resolveSources(quiz, lesson?.module_id as string | undefined);
 }
 
-function shuffle<T>(items: T[]) {
-  const a = [...items];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+// Soal bank dari semua modul sumber, dikelompokkan per sumber.
+async function loadPools(sources: QuizSource[], columns: string) {
+  if (sources.length === 0) return [];
+  const { data } = await createAdminClient()
+    .from("question_bank")
+    .select(`id, module_id, category, ${columns}`)
+    .in("module_id", [...new Set(sources.map((s) => s.module_id))]);
+  return groupBySource(
+    sources,
+    (data ?? []) as unknown as ({
+      id: string;
+      module_id: string;
+      category: string | null;
+    } & Record<string, unknown>)[],
+  );
 }
 
 // Soal untuk siswa, TANPA correct_option_index.
-export async function getQuizForStudent(lessonId: string): Promise<StudentQuiz> {
-  if (!(await getLessonAccess(lessonId))) return { error: LESSON_ACCESS_DENIED };
+export async function getQuizForStudent(
+  lessonId: string,
+): Promise<StudentQuiz> {
+  if (!(await getLessonAccess(lessonId)))
+    return { error: LESSON_ACCESS_DENIED };
 
   const quiz = await loadQuiz(lessonId);
   if (!quiz) return { error: "Kuis tidak ditemukan untuk materi ini." };
 
-  const admin = createAdminClient();
   let questions: StudentQuizQuestion[] = [];
   if (quiz.is_dynamic) {
-    const { moduleId, category } = dynamicFilter(quiz);
-    let query = admin
-      .from("question_bank")
-      .select("id, question_text, options")
-      .eq("module_id", moduleId);
-    if (category) query = query.eq("category", category);
-    const { data } = await query;
-    questions = shuffle(data ?? []).slice(0, quiz.question_count || 10);
+    const sources = quizSources(quiz);
+    const pools = await loadPools(sources, "question_text, options");
+    questions = pickQuestions(sources, pools).map((q) => ({
+      id: q.id,
+      question_text: q.question_text as string,
+      options: q.options as string[],
+    }));
   } else {
-    const { data } = await admin
+    const { data } = await createAdminClient()
       .from("quiz_questions")
       .select("id, question_text, options")
       .eq("quiz_id", quiz.id);
@@ -112,41 +119,38 @@ export async function submitQuiz(
   }
 
   const admin = createAdminClient();
-  let expected: number;
   let key: { id: string; correct_option_index: number }[];
+  let complete: boolean;
   if (quiz.is_dynamic) {
-    const { moduleId, category } = dynamicFilter(quiz);
-    let keyQuery = admin
-      .from("question_bank")
-      .select("id, correct_option_index")
-      .eq("module_id", moduleId)
-      .in("id", ids);
-    let countQuery = admin
-      .from("question_bank")
-      .select("id", { count: "exact", head: true })
-      .eq("module_id", moduleId);
-    if (category) {
-      keyQuery = keyQuery.eq("category", category);
-      countQuery = countQuery.eq("category", category);
-    }
-    const [{ data }, { count }] = await Promise.all([keyQuery, countQuery]);
-    key = data ?? [];
-    expected = Math.min(quiz.question_count || 10, count ?? 0);
+    const sources = quizSources(quiz);
+    const pools = await loadPools(sources, "correct_option_index");
+    complete = answersMatchSources(sources, pools, ids);
+    key = pools
+      .flat()
+      .filter((q) => ids.includes(q.id))
+      .map((q) => ({
+        id: q.id,
+        correct_option_index: q.correct_option_index as number,
+      }));
   } else {
     const { data } = await admin
       .from("quiz_questions")
       .select("id, correct_option_index")
       .eq("quiz_id", quiz.id);
     key = (data ?? []).filter((q) => ids.includes(q.id));
-    expected = data?.length ?? 0;
+    complete = key.length === ids.length && ids.length === (data?.length ?? 0);
   }
 
   // Semua soal yang tampil harus dijawab, dan hanya soal milik kuis ini.
-  if (key.length !== ids.length || ids.length !== expected) {
-    return { error: "Jawaban tidak lengkap. Muat ulang halaman lalu coba lagi." };
+  if (!complete) {
+    return {
+      error: "Jawaban tidak lengkap. Muat ulang halaman lalu coba lagi.",
+    };
   }
 
-  const correct = key.filter((q) => answers[q.id] === q.correct_option_index).length;
+  const correct = key.filter(
+    (q) => answers[q.id] === q.correct_option_index,
+  ).length;
   const score = Math.round((correct / key.length) * 100);
   const passScore = quiz.pass_score ?? 70;
   const passed = score >= passScore;
@@ -202,13 +206,15 @@ export async function submitProject(
     return { error: "Link harus diawali http:// atau https://" };
   }
 
-  const { error } = await createAdminClient().from("submissions").insert({
-    student_id: access.user.id,
-    content_id: lessonId,
-    type: "project",
-    data: { link: url.toString() },
-    status: "submitted",
-  });
+  const { error } = await createAdminClient()
+    .from("submissions")
+    .insert({
+      student_id: access.user.id,
+      content_id: lessonId,
+      type: "project",
+      data: { link: url.toString() },
+      status: "submitted",
+    });
   if (error) {
     console.error("Insert project submission failed:", error);
     return { error: "Gagal mengirim proyek. Coba lagi." };
