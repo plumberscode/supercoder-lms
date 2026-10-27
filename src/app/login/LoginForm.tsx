@@ -10,7 +10,13 @@ export type LoginMode = "umum" | "minas";
 
 // /login: Google + email (Supercoder & teaser). /minas: username + password.
 // Sengaja dua halaman terpisah agar pengunjung umum tidak melihat login MINAS.
-export default function LoginForm({ mode }: { mode: LoginMode }) {
+export default function LoginForm({
+  mode,
+  gratis = false,
+}: {
+  mode: LoginMode;
+  gratis?: boolean;
+}) {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -99,12 +105,18 @@ export default function LoginForm({ mode }: { mode: LoginMode }) {
           />
         </div>
         <h1 className={styles.title}>
-          {mode === "minas" ? "Masuk Siswa MINAS" : "Selamat Datang Kembali"}
+          {mode === "minas"
+            ? "Masuk Siswa MINAS"
+            : gratis
+              ? "Mulai Belajar Gratis"
+              : "Selamat Datang Kembali"}
         </h1>
         <p className={styles.subtitle}>
           {mode === "minas"
             ? "Pakai username dan password dari kartu gurumu"
-            : "Masuk untuk melanjutkan pembelajaran Anda"}
+            : gratis
+              ? "Masuk dengan Google, akunmu langsung aktif"
+              : "Masuk untuk melanjutkan pembelajaran Anda"}
         </p>
 
         {mode === "umum" ? (
