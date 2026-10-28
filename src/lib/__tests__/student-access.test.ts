@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   blockedStudentPath,
   canAccessModule,
+  followsLessonSequence,
+  lockedBySequence,
   moduleVisibility,
 } from "@/lib/student-access";
 
@@ -68,5 +70,48 @@ describe("moduleVisibility", () => {
     expect(moduleVisibility(student("minas"), ["supercoder"])).toBe("hidden");
     expect(moduleVisibility(student("supercoder"), ["teaser"])).toBe("hidden");
     expect(moduleVisibility(student("teaser", "inactive"), ["supercoder"])).toBe("hidden");
+  });
+});
+
+describe("followsLessonSequence", () => {
+  it("applies only to teaser students", () => {
+    expect(followsLessonSequence(student("teaser"))).toBe(true);
+    expect(followsLessonSequence(student("supercoder"))).toBe(false);
+    expect(followsLessonSequence(student("minas"))).toBe(false);
+    expect(followsLessonSequence({ role: "admin", status: "approved", program: "teaser" })).toBe(false);
+  });
+});
+
+describe("lockedBySequence", () => {
+  const lessons = [
+    { id: "video", type: "video" },
+    { id: "quiz1", type: "quiz" },
+    { id: "text", type: "text" },
+    { id: "code", type: "code" },
+    { id: "quiz2", type: "quiz" },
+  ];
+  const locked = (scores: [string, number | null][]) =>
+    [...lockedBySequence(lessons, new Map(scores))];
+
+  it("opens everything up to the first graded lesson not yet passed", () => {
+    expect(locked([])).toEqual(["text", "code", "quiz2"]);
+  });
+
+  it("opens the next lessons once a graded lesson is passed", () => {
+    expect(locked([["quiz1", 70]])).toEqual(["quiz2"]);
+    expect(locked([["quiz1", 100], ["code", 85]])).toEqual([]);
+  });
+
+  it("keeps later lessons locked for failed or ungraded submissions", () => {
+    expect(locked([["quiz1", 69]])).toEqual(["text", "code", "quiz2"]);
+    expect(locked([["quiz1", null]])).toEqual(["text", "code", "quiz2"]);
+  });
+
+  it("treats reading lessons with a required project as graded", () => {
+    const withProject = [
+      { id: "a", type: "text", is_project_required: true },
+      { id: "b", type: "video" },
+    ];
+    expect([...lockedBySequence(withProject, new Map())]).toEqual(["b"]);
   });
 });

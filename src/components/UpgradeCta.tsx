@@ -24,14 +24,14 @@ export default function UpgradeCta({
         alignItems: "center",
         justifyContent: "space-between",
         gap: "16px",
-        padding: "20px 24px",
+        padding: "20px clamp(16px, 4vw, 24px)",
         marginBottom: "24px",
         borderRadius: "16px",
         border: "1px solid #FED7AA",
         background: "linear-gradient(135deg, #FFF7ED, #FFEDD5)",
       }}
     >
-      <div style={{ flex: "1 1 280px" }}>
+      <div style={{ flex: "1 1 240px", minWidth: 0 }}>
         <p style={{ fontWeight: 800, color: "#9A3412", margin: 0 }}>{title}</p>
         <p style={{ color: "#7C2D12", fontSize: "0.9rem", margin: "6px 0 0" }}>
           {message}
@@ -45,7 +45,7 @@ export default function UpgradeCta({
       <Link
         href="/daftar"
         className="btn btn-primary"
-        style={{ whiteSpace: "nowrap" }}
+        style={{ flex: "0 1 auto", textAlign: "center" }}
       >
         Daftar Kelas Supercoder →
       </Link>

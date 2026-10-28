@@ -37,17 +37,20 @@ export default function StudentTopBar({ profile, email }: StudentTopBarProps) {
 
         <div className={styles.topBarRight}>
           {isStaff && (
-            <Link href="/admin/users" className={styles.adminPill}>
-              ⚙️ Admin
+            <Link href="/admin/users" className={styles.adminPill} aria-label="Admin">
+              ⚙️<span className={styles.hideOnMobile}> Admin</span>
             </Link>
           )}
-          <div className={styles.levelPill}>
+          <div className={styles.levelPill} title={`Level ${profile.level ?? 1}`}>
             <span>⚡</span>
-            <span>Level {profile.level ?? 1}</span>
+            <span>
+              <span className={styles.hideOnMobile}>Level</span>
+              <span className={styles.showOnMobile}>Lv</span> {profile.level ?? 1}
+            </span>
           </div>
           <form action={signOut} className={styles.signOutForm}>
-            <button type="submit" className={styles.signOutBtn}>
-              Keluar 🚪
+            <button type="submit" className={styles.signOutBtn} aria-label="Keluar">
+              <span className={styles.hideOnMobile}>Keluar </span>🚪
             </button>
           </form>
           <div className={styles.userAvatar} aria-hidden="true">

@@ -37,6 +37,49 @@ export function canAccessModule(
   return (modulePrograms ?? [DEFAULT_PROGRAM]).includes(program);
 }
 
+// Nilai minimal agar materi dianggap lulus (sama dengan pemberian XP di server action).
+export const PASSING_SCORE = 70;
+
+// Teaser mengerjakan materi secara berurutan; siswa lain dan staf bebas memilih materi.
+export function followsLessonSequence(viewer: Viewer) {
+  return !isStaff(viewer.role) && viewer.program === "teaser";
+}
+
+const GRADED_LESSON_TYPES = new Set(["quiz", "code", "css-challenge", "web-challenge"]);
+
+export type SequenceLesson = {
+  id: string;
+  type: string;
+  is_project_required?: boolean | null;
+};
+
+// Materi bernilai harus lulus dulu; materi bacaan (video/teks/PDF/link tanpa proyek)
+// tidak punya nilai, jadi tidak menahan materi sesudahnya.
+export function isGradedLesson(lesson: SequenceLesson) {
+  return GRADED_LESSON_TYPES.has(lesson.type) || !!lesson.is_project_required;
+}
+
+// Materi yang masih terkunci: semua materi setelah materi bernilai pertama yang belum
+// lulus. `lessons` harus sudah urut (modul lalu materi); bestScore null = menunggu dinilai.
+export function lockedBySequence(
+  lessons: SequenceLesson[],
+  bestScore: Map<string, number | null>,
+) {
+  const locked = new Set<string>();
+  let blocked = false;
+  for (const lesson of lessons) {
+    if (blocked) {
+      locked.add(lesson.id);
+      continue;
+    }
+    const score = bestScore.get(lesson.id);
+    if (isGradedLesson(lesson) && (score == null || score < PASSING_SCORE)) {
+      blocked = true;
+    }
+  }
+  return locked;
+}
+
 export type ModuleVisibility = "open" | "locked" | "hidden";
 
 // open: bisa dikerjakan. locked: teaser melihat judulnya sebagai ajakan ke kelas Supercoder.

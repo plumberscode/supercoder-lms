@@ -20,6 +20,7 @@ import WhatsAppButton from "@/components/student/WhatsAppButton";
 import { lessonTypeTheme } from "@/components/student/themes";
 import ui from "@/components/student/student.module.css";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { isLockedBySequence } from "@/lib/lesson-access";
 
 export default async function LessonPage({
   params,
@@ -71,7 +72,17 @@ export default async function LessonPage({
   }
 
   // Materi dari modul program lain: kembali ke halaman subject-nya.
-  if (!canAccessModule(viewer, (lesson.module_id as any).programs)) {
+  // Teaser yang belum lulus materi sebelumnya juga dikembalikan ke sana.
+  if (
+    !canAccessModule(viewer, (lesson.module_id as any).programs) ||
+    (await isLockedBySequence(
+      supabase,
+      viewer,
+      user.id,
+      (lesson.module_id as any).subject_id,
+      lesson.id,
+    ))
+  ) {
     redirect(`/subjects/${(lesson.module_id as any).subject_id}`);
   }
 

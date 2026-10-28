@@ -2,9 +2,13 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import {
   blockedStudentPath,
+  followsLessonSequence,
   isStaff,
+  lockedBySequence,
   moduleVisibility,
+  PASSING_SCORE,
 } from "@/lib/student-access";
+import { loadBestScores } from "@/lib/lesson-access";
 import UpgradeCta from "@/components/UpgradeCta";
 import Link from "next/link";
 import StudentTopBar from "@/components/student/StudentTopBar";
@@ -16,8 +20,6 @@ import {
   subjectTheme,
 } from "@/components/student/themes";
 import ui from "@/components/student/student.module.css";
-
-const PASSING_SCORE = 70;
 
 type LessonStatus = "done" | "retry" | "pending" | "new";
 
@@ -110,33 +112,15 @@ export default async function SubjectPage({
   const theme = subjectTheme(visibleSubjectIds.indexOf(subject.id));
 
   // ── Status materi dari submission ──────────────────────────────────────
-  // Submission kuis memakai id kuis, jadi dipetakan kembali ke id materinya.
   const openLessons = openModules.flatMap((m: any) => m.lessons);
   const lessonIds: string[] = openLessons.map((l: any) => l.id as string);
-  const bestScore = new Map<string, number | null>();
+  const bestScore = await loadBestScores(supabase, user.id, lessonIds);
 
-  if (lessonIds.length > 0) {
-    const { data: quizzes } = await supabase
-      .from("quizzes")
-      .select("id, lesson_id")
-      .in("lesson_id", lessonIds);
-    const quizLesson = new Map((quizzes ?? []).map((q) => [q.id, q.lesson_id]));
-
-    const { data: submissions } = await supabase
-      .from("submissions")
-      .select("content_id, score")
-      .eq("student_id", user.id)
-      .in("content_id", [...lessonIds, ...quizLesson.keys()]);
-
-    submissions?.forEach((sub) => {
-      const lessonId = quizLesson.get(sub.content_id) ?? sub.content_id;
-      const prev = bestScore.get(lessonId) ?? null;
-      bestScore.set(
-        lessonId,
-        sub.score === null ? prev : Math.max(prev ?? 0, sub.score),
-      );
-    });
-  }
+  // Teaser: materi berikutnya baru terbuka setelah materi sebelumnya lulus.
+  const isSequential = followsLessonSequence(viewer);
+  const sequenceLocked = isSequential
+    ? lockedBySequence(openLessons, bestScore)
+    : new Set<string>();
 
   const statusOf = (lessonId: string): LessonStatus => {
     if (!bestScore.has(lessonId)) return "new";
@@ -247,6 +231,13 @@ export default async function SubjectPage({
               <span className={ui.sectionCount}>{modules.length} modul</span>
             </div>
 
+            {isSequential && sequenceLocked.size > 0 && (
+              <p className={ui.sequenceNote}>
+                🔐 Kerjakan materi secara berurutan. Materi berikutnya terbuka setelah
+                kamu lulus materi sebelumnya (nilai minimal {PASSING_SCORE}).
+              </p>
+            )}
+
             {modules.map((module: any, moduleIndex: number) => {
               const locked = module.visibility === "locked";
               const lessons = module.lessons as any[];
@@ -290,13 +281,17 @@ export default async function SubjectPage({
                   <ul className={ui.lessonList}>
                     {lessons.map((lesson) => {
                       const type = lessonTypeTheme(lesson.type);
+                      const waiting = !locked && sequenceLocked.has(lesson.id);
                       const status = locked ? null : statusOf(lesson.id);
                       const score = bestScore.get(lesson.id);
                       const content = (
                         <>
                           <div
                             className={ui.lessonIcon}
-                            style={{ background: locked ? LOCKED_GRADIENT : type.gradient }}
+                            style={{
+                              background:
+                                locked || waiting ? LOCKED_GRADIENT : type.gradient,
+                            }}
                             aria-hidden="true"
                           >
                             {type.icon}
@@ -310,6 +305,13 @@ export default async function SubjectPage({
                           </div>
                           {locked ? (
                             <span className={`${ui.status} ${ui.statusLocked}`}>🔒</span>
+                          ) : waiting ? (
+                            <span
+                              className={`${ui.status} ${ui.statusLocked}`}
+                              title="Lulus materi sebelumnya dulu untuk membuka materi ini"
+                            >
+                              🔒<span className={ui.statusText}> Terkunci</span>
+                            </span>
                           ) : status === "done" ? (
                             <span
                               className={`${ui.status} ${ui.statusDone}`}
@@ -342,7 +344,7 @@ export default async function SubjectPage({
 
                       return (
                         <li key={lesson.id}>
-                          {locked ? (
+                          {locked || waiting ? (
                             <div className={`${ui.lessonRow} ${ui.lessonRowLocked}`}>
                               {content}
                             </div>
