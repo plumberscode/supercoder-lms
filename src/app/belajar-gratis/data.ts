@@ -110,8 +110,4 @@ export const faqs = (total: number) => [
     q: "Bagaimana cara daftarnya?",
     a: "Klik “Masuk & Mulai Gratis”, lalu masuk dengan akun Google. Akunmu langsung aktif dan bisa dipakai belajar.",
   },
-  {
-    q: "Kalau semua latihan sudah selesai?",
-    a: "Lanjutkan ke Kelas Supercoder untuk membuka seluruh materi, proyek nyata, dan bimbingan instruktur.",
-  },
 ];
