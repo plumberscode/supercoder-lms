@@ -1,5 +1,6 @@
 import Navbar from "@/components/homepage/Navbar";
 import HeroSection from "@/components/homepage/HeroSection";
+import BelajarGratisSection from "@/components/homepage/BelajarGratisSection";
 import ManifestoSection from "@/components/homepage/ManifestoSection";
 import TestimoniSection from "@/components/homepage/TestimoniSection";
 import KaryaSiswaSection from "@/components/homepage/KaryaSiswaSection";
@@ -33,6 +34,7 @@ export default function Home() {
       <Navbar />
       <main>
         <HeroSection />
+        <BelajarGratisSection />
         <ManifestoSection />
         <TestimoniSection />
         <KaryaSiswaSection />
