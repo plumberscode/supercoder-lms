@@ -28,11 +28,6 @@ type Rule = {
 // Nilai disalin dari animasi GSAP sebelumnya agar tampilannya sama
 const RULES: Rule[] = [
   { targets: ".school-logo-item", y: 12, duration: 0.55, stagger: 0.04 },
-  { targets: ".manifesto-card", y: 24 },
-  { targets: ".manifesto-point", trigger: ".manifesto-grid", y: 18, stagger: 0.06 },
-  { targets: ".value-header", y: 20 },
-  { targets: ".value-card", trigger: ".value-grid", y: 24, stagger: 0.06 },
-  { targets: ".value-icon", trigger: ".value-grid", y: 0, scale: 0.75, duration: 0.55, stagger: 0.06, delay: 0.15 },
   { targets: ".program-header", y: 20 },
   { targets: ".program-card", trigger: ".program-grid", y: 24, stagger: 0.07 },
   { targets: ".tech-header", y: 20 },

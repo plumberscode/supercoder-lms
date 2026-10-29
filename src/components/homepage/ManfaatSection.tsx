@@ -2,20 +2,15 @@ import { Badge } from "@/components/ui/badge";
 import UnderstandTechVisual from "@/components/manfaat/UnderstandTechVisual";
 import LogicVisual from "@/components/manfaat/LogicVisual";
 import BuildWithAIVisual from "@/components/manfaat/BuildWithAIVisual";
-import { Globe2, Brain, Sparkles, CheckCircle2 } from "lucide-react";
+import { Globe2, Brain, Sparkles } from "lucide-react";
 
 const rows = [
   {
     badge: "01. UNDERSTAND TECH",
     icon: Globe2,
     badgeColor: "border-blue-200 bg-blue-50 text-blue-600",
-    title: "Memahami Teknologi, Bukan Sekadar Memakai",
-    text: "AI bisa membantu membuatkan sesuatu, tetapi coding fundamentals membuatmu paham cara kerjanya. Kamu tahu apa yang dibangun, bisa mengevaluasi hasil, dan tidak bergantung sepenuhnya pada teknologi.",
-    points: [
-      "Memahami logika di balik kode hasil AI",
-      "Mampu mengevaluasi dan memperbaiki error secara mandiri",
-      "Memegang kendali penuh atas produk teknologi yang dibuat",
-    ],
+    title: "Paham Teknologi, Bukan Sekadar Memakai",
+    text: "AI bisa membuatkan kode, tapi fundamental membuatmu paham cara kerjanya, bisa mengevaluasi hasilnya, dan memperbaiki error sendiri.",
     Visual: UnderstandTechVisual,
     imageLeft: false,
   },
@@ -24,12 +19,7 @@ const rows = [
     icon: Brain,
     badgeColor: "border-orange-200 bg-orange-50 text-orange-700",
     title: "Melatih Logika dan Problem Solving",
-    text: "Coding mengajarkan cara memecah masalah besar menjadi langkah-langkah terstruktur yang logis, mencari sumber error, dan merancang solusi yang sistematis dan teruji.",
-    points: [
-      "Problem solving bertahap dan sistematis",
-      "Meningkatkan fokus dan ketelitian berpikir",
-      "Terbiasa mencari solusi saat menemui error/kegagalan",
-    ],
+    text: "Coding melatih cara memecah masalah besar menjadi langkah-langkah kecil, mencari sumber error, dan merancang solusi yang teruji.",
     Visual: LogicVisual,
     imageLeft: true,
   },
@@ -37,13 +27,8 @@ const rows = [
     badge: "03. BUILD WITH AI",
     icon: Sparkles,
     badgeColor: "border-red-200 bg-red-50 text-red-700",
-    title: "Mengubah Ide Menjadi Nyata Lebih Cepat",
-    text: "Kombinasi coding fundamentals dan AI membuka kekuatan penuh seorang Digital Builder. Kamu bisa mengeksplorasi ide, membuat prototype, dan membangun project nyata jauh lebih cepat.",
-    points: [
-      "Eksplorasi ide dan prototyping jauh lebih cepat",
-      "Menggabungkan fondasi solid dengan modern AI tools",
-      "Membangun portofolio karya digital nyata yang membanggakan",
-    ],
+    title: "Ide Jadi Project Nyata, Lebih Cepat",
+    text: "Setiap konsep langsung dipraktikkan. Dengan fondasi yang kuat dan AI sebagai partner, siswa bisa membuat prototype dan membangun portofolio sendiri.",
     Visual: BuildWithAIVisual,
     imageLeft: false,
   },
@@ -73,25 +58,26 @@ export default function ManfaatSection() {
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Title Header */}
-        <div className="text-center max-w-2xl mx-auto mb-20">
+        <div className="text-center max-w-2xl mx-auto mb-14 sm:mb-20">
           <div className="inline-flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-red-500" />
             <span className="font-poppins text-xs font-bold text-slate-500 uppercase tracking-widest">
-              Manfaat Utama
+              Kenapa Supercoder
             </span>
           </div>
           <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-            Mengapa Harus Belajar <br />
-            <span className="text-red-500">Coding &amp; AI?</span>
+            Kenapa Belajar Coding &amp; AI{" "}
+            <span className="text-red-500">di Supercoder?</span>
           </h2>
           <p className="font-sans text-base sm:text-lg text-slate-600">
-            Investasi skill esensial yang mempersiapkan generasi muda menjadi
-            Digital Builder unggul.
+            Siswa SMP, SMA, dan pemula belajar coding fundamentals sekaligus
+            memakai AI secara terarah, lalu langsung mempraktikkannya untuk
+            membangun website dan aplikasi nyata.
           </p>
         </div>
 
         {/* 3 Showcase Rows */}
-        <div className="space-y-20 lg:space-y-28">
+        <div className="space-y-16 lg:space-y-28">
           {rows.map((row, idx) => {
             const Icon = row.icon;
             const Visual = row.Visual;
@@ -99,7 +85,7 @@ export default function ManfaatSection() {
             return (
               <div
                 key={row.title}
-                className={`group flex flex-col lg:flex-row items-center gap-10 lg:gap-16 ${
+                className={`group flex flex-col lg:flex-row items-center gap-8 lg:gap-16 ${
                   row.imageLeft ? "lg:flex-row-reverse" : ""
                 }`}
               >
@@ -121,21 +107,9 @@ export default function ManfaatSection() {
                     {row.title}
                   </h3>
 
-                  <p className="font-sans text-base sm:text-lg text-slate-600 leading-relaxed mb-6">
+                  <p className="font-sans text-base sm:text-lg text-slate-600 leading-relaxed">
                     {row.text}
                   </p>
-
-                  {/* Bullet points */}
-                  <div className="space-y-2.5 w-full pt-2">
-                    {row.points.map((point) => (
-                      <div key={point} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                        <span className="font-sans text-sm text-slate-700 font-medium">
-                          {point}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Visual (Mini UI berbasis ikon) */}

@@ -55,7 +55,7 @@ export class ToolNotConfiguredError extends Error {}
 const hostOf = (site: string) => toUrl(site).hostname.replace(/^www\./, "");
 
 function ourNap(): NapHints {
-  return { phones: [BUSINESS.phone], address: BUSINESS.shortAddress.split("(")[0].trim(), city: BUSINESS.city };
+  return { phones: [BUSINESS.phone], address: BUSINESS.streetAddress.split(", ").pop()!, city: BUSINESS.city };
 }
 
 function requireSerp() {

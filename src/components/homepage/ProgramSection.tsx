@@ -35,7 +35,7 @@ const programs = [
         label: "Frekuensi",
         value: "1x seminggu (Minggu: 09.00 - 10.30)",
       },
-      { icon: MapPin, label: "Lokasi", value: BUSINESS.shortAddress },
+      { icon: MapPin, label: "Lokasi", value: BUSINESS.fullAddress },
       { icon: Sparkles, label: "Investasi", value: "Rp 399.000 / bulan" },
     ],
   },
@@ -119,7 +119,7 @@ export default function ProgramSection() {
                       src={prog.image}
                       alt={prog.title}
                       fill
-                      sizes="(max-width: 768px) 100vw, 500px"
+                      sizes="(min-width: 1024px) 365px, (min-width: 768px) 50vw, 100vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute top-4 left-4 z-10">

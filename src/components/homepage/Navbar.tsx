@@ -14,12 +14,12 @@ import {
 import { Menu, MessageCircle } from "lucide-react";
 
 const navLinks = [
+  { label: "Program", href: "/#program" },
   { label: "Testimoni", href: "/#testimoni" },
   { label: "Galeri", href: "/#galeri" },
-  { label: "Program", href: "/#program" },
+  { label: "Journey", href: "/#journey" },
   { label: "Manfaat", href: "/#manfaat" },
   { label: "Tech Stack", href: "/#bahasa" },
-  { label: "Journey", href: "/#journey" },
   { label: "FAQ", href: "/#faq" },
   { label: "Blog", href: "/blog" },
 ];

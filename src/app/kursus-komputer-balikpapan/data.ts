@@ -105,7 +105,7 @@ export const faqs = [
   },
   {
     q: "Di mana lokasi kelas tatap mukanya?",
-    a: "Di Kompleks Masjid An-Nasa'i, Jl. Syarifuddin Yoes, Balikpapan. Kelas berlangsung setiap Minggu pukul 09.00–10.30 WITA.",
+    a: `Di ${BUSINESS.fullAddress}. Kelas berlangsung setiap Minggu pukul 09.00–10.30 WITA.`,
   },
 ];
 

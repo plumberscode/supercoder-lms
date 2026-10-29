@@ -46,7 +46,7 @@ export default function Footer({ showLocalLinks = false }: { showLocalLinks?: bo
               <p className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-orange-500" />
                 <span>
-                  {BUSINESS.streetAddress}, {BUSINESS.city}, {BUSINESS.region}
+                  {BUSINESS.fullAddress}
                 </span>
               </p>
               {BUSINESS.schedule.map((item) => (
@@ -299,7 +299,7 @@ export default function Footer({ showLocalLinks = false }: { showLocalLinks?: bo
                     </Link>
                   ) : (
                     <a
-                      href="https://wa.me/62816331126"
+                      href={BUSINESS.mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:text-red-600 transition-colors"

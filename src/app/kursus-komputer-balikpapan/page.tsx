@@ -116,8 +116,7 @@ export default function KursusKomputerBalikpapanPage() {
                   komputer: website, aplikasi web, sampai tools kerja sendiri, dengan bantuan AI.
                 </p>
                 <p className={pClass}>
-                  Kelas tatap muka berlangsung setiap Minggu di Jl. Syarifuddin Yoes (Kompleks
-                  Masjid An-Nasa&apos;i), Balikpapan. Ada juga kelas online privat 1-on-1 yang
+                  Kelas tatap muka berlangsung setiap Minggu di {BUSINESS.fullAddress}. Ada juga kelas online privat 1-on-1 yang
                   jadwalnya fleksibel. Pesertanya mulai dari siswa SMP, SMA, mahasiswa, sampai
                   karyawan yang sama sekali belum pernah coding.
                 </p>
@@ -391,8 +390,7 @@ export default function KursusKomputerBalikpapanPage() {
           <section id="lokasi" className="scroll-mt-28">
             <h2 className={h2Class}>Lokasi dan Jadwal Kelas</h2>
             <p className={pClass}>
-              Kelas tatap muka Supercoder ada di Kompleks Masjid An-Nasa&apos;i, Jl. Syarifuddin
-              Yoes, Balikpapan, Kalimantan Timur. Di lantai bawah ada Falya Risol, jadi siswa dan
+              Kelas tatap muka Supercoder ada di {BUSINESS.fullAddress}. Di lantai bawah ada Falya Risol, jadi siswa dan
               orang tua yang menunggu bisa jajan saat jeda.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">

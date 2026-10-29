@@ -42,7 +42,7 @@ export const daftarFaqs = [
   },
   {
     q: "Setelah mendaftar, kapan kelas dimulai?",
-    a: `Tim kami menghubungi Anda via WhatsApp untuk konfirmasi jadwal. Weekend Coding Class berlangsung setiap Minggu pukul 09.00–10.30 WITA di ${BUSINESS.shortAddress}, Balikpapan. Jadwal kelas online disepakati bersama mentor.`,
+    a: `Tim kami menghubungi Anda via WhatsApp untuk konfirmasi jadwal. Weekend Coding Class berlangsung setiap Minggu pukul 09.00–10.30 WITA di ${BUSINESS.fullAddress}. Jadwal kelas online disepakati bersama mentor.`,
   },
   {
     q: "Anak saya belum pernah coding, apakah bisa ikut?",

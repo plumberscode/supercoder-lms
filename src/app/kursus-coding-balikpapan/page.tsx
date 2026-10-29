@@ -141,8 +141,7 @@ export default function KursusCodingBalikpapanPage() {
                   web lengkap dengan bantuan AI.
                 </p>
                 <p className={pClass}>
-                  Kelas tatap muka berlangsung setiap Minggu di Jl. Syarifuddin Yoes (Kompleks
-                  Masjid An-Nasa&apos;i), Balikpapan, dengan maksimal 6 siswa per sesi. Bagi yang
+                  Kelas tatap muka berlangsung setiap Minggu di {BUSINESS.fullAddress}, dengan maksimal 6 siswa per sesi. Bagi yang
                   jadwalnya padat atau tinggal di luar kota, ada kelas online privat 1-on-1.
                 </p>
                 <p className={`${pClass} mb-8`}>
@@ -361,8 +360,7 @@ export default function KursusCodingBalikpapanPage() {
           <section id="lokasi" className="scroll-mt-28">
             <h2 className={h2Class}>Lokasi dan Jadwal Kelas</h2>
             <p className={pClass}>
-              Kelas coding tatap muka Supercoder ada di {BUSINESS.streetAddress}, Balikpapan,
-              Kalimantan Timur. Kelas online bisa diikuti dari mana saja.
+              Kelas coding tatap muka Supercoder ada di {BUSINESS.fullAddress}. Kelas online bisa diikuti dari mana saja.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <address className="not-italic">

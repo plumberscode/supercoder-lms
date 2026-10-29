@@ -9,9 +9,8 @@ interface StudentProject {
   school: string;
   project: string;
   desc: string;
-  url: string;
-  /** Live-website CTA — hidden for internal/private projects (e.g. Citra's). */
-  showCta?: boolean;
+  /** Live website; tanpa url (project internal/privat, mis. milik Citra) kartu dirender tanpa link & CTA. */
+  url?: string;
   gradient: string;
   /** Real screenshot, when available — falls back to the gradient tile otherwise. */
   image?: string;
@@ -50,8 +49,6 @@ const projects: StudentProject[] = [
     school: "Karyawan Swasta, Sektor Pertambangan",
     project: "Maintenance & Monitoring Service",
     desc: "Aplikasi web internal perusahaan yang dikembangkan solo untuk menunjang kegiatan pemeliharaan dan perawatan berkala.",
-    url: "#",
-    showCta: false,
     gradient: "from-emerald-500 via-teal-500 to-emerald-400",
     image: "/images/karya/citra-mockup.webp",
   },
@@ -160,60 +157,62 @@ export default function KaryaSiswaSection() {
             onScroll={handleScroll}
             className="karya-track flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {projects.map((p) => (
-              <a
-                key={p.name}
-                href={p.url}
-                {...(p.url.startsWith("http")
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-                className="group karya-card snap-start shrink-0 basis-[88%] sm:basis-[46%] lg:basis-[calc((100%-48px)/3)] flex flex-col bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-orange-500/40 transition-all duration-300"
-              >
-                <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
-                  {p.image ? (
-                    <Image
-                      src={p.image}
-                      alt={`Screenshot ${p.project} oleh ${p.name}`}
-                      fill
-                      sizes="(max-width: 640px) 88vw, (max-width: 1024px) 46vw, 380px"
-                      className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${p.gradient} flex flex-col items-center justify-center gap-2`}
-                    >
-                      <Code2 className="w-7 h-7 text-white/85" strokeWidth={1.6} />
-                      <span className="font-poppins text-xs font-semibold text-white/90 text-center px-6">
-                        {p.project}
+            {projects.map((p) => {
+              const Card = p.url ? "a" : "div";
+              return (
+                <Card
+                  key={p.name}
+                  {...(p.url
+                    ? { href: p.url, target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                  className="group karya-card snap-start shrink-0 basis-[88%] sm:basis-[46%] lg:basis-[calc((100%-48px)/3)] flex flex-col bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-orange-500/40 transition-all duration-300"
+                >
+                  <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
+                    {p.image ? (
+                      <Image
+                        src={p.image}
+                        alt={`Screenshot ${p.project} oleh ${p.name}`}
+                        fill
+                        sizes="(max-width: 640px) 88vw, (max-width: 1024px) 46vw, 380px"
+                        className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-br ${p.gradient} flex flex-col items-center justify-center gap-2`}
+                      >
+                        <Code2 className="w-7 h-7 text-white/85" strokeWidth={1.6} />
+                        <span className="font-poppins text-xs font-semibold text-white/90 text-center px-6">
+                          {p.project}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+  
+                  <div className="flex flex-col gap-3 p-6">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-sans text-sm font-semibold text-slate-700">
+                        {p.name}
+                      </span>
+                      <span className="font-sans text-xs text-slate-500">
+                        {p.school}
                       </span>
                     </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-3 p-6">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="font-sans text-sm font-semibold text-slate-700">
-                      {p.name}
-                    </span>
-                    <span className="font-sans text-xs text-slate-500">
-                      {p.school}
-                    </span>
+                    <h3 className="font-poppins text-lg font-bold text-slate-900 leading-snug">
+                      {p.project}
+                    </h3>
+                    <p className="font-sans text-sm text-slate-600 leading-relaxed">
+                      {p.desc}
+                    </p>
+                    {p.url && (
+                      <span className="mt-1 inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-orange-600">
+                        Lihat Website
+                        <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                      </span>
+                    )}
                   </div>
-                  <h3 className="font-poppins text-lg font-bold text-slate-900 leading-snug">
-                    {p.project}
-                  </h3>
-                  <p className="font-sans text-sm text-slate-600 leading-relaxed">
-                    {p.desc}
-                  </p>
-                  {p.showCta !== false && (
-                    <span className="mt-1 inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-orange-600">
-                      Lihat Website
-                      <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-                    </span>
-                  )}
-                </div>
-              </a>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         </div>
 

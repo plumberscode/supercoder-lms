@@ -37,12 +37,8 @@ export default function CTASection() {
             </h2>
 
             <p className="font-sans text-base sm:text-lg text-white/90 leading-relaxed max-w-2xl mb-10">
-              AI membuka kesempatan tanpa batas bagi siapa saja yang memiliki
-              ide. Bekali dirimu dengan coding fundamentals yang kuat dan
-              workflow modern untuk mengubah ide menjadi produk digital nyata.
-              Lebih dari sekadar belajar coding, ini adalah perjalanan untuk
-              menjadi Digital Builder yang mampu memahami, membuat, dan memimpin
-              masa depan.
+              Mulai dari nol, bangun website dan aplikasimu sendiri bersama
+              mentor.
             </p>
 
             <Button

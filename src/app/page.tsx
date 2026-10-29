@@ -1,13 +1,11 @@
 import Navbar from "@/components/homepage/Navbar";
 import HeroSection from "@/components/homepage/HeroSection";
 import BelajarGratisSection from "@/components/homepage/BelajarGratisSection";
-import ManifestoSection from "@/components/homepage/ManifestoSection";
 import TestimoniSection from "@/components/homepage/TestimoniSection";
 import KaryaSiswaSection from "@/components/homepage/KaryaSiswaSection";
 import GallerySection from "@/components/homepage/GallerySection";
 import ProgramSection from "@/components/homepage/ProgramSection";
 import ManfaatSection from "@/components/homepage/ManfaatSection";
-import BerkembangSection from "@/components/homepage/BerkembangSection";
 import BahasaSection from "@/components/homepage/BahasaSection";
 import JourneySection from "@/components/homepage/JourneySection";
 import FAQSection from "@/components/homepage/FAQSection";
@@ -34,16 +32,14 @@ export default function Home() {
       <Navbar />
       <main>
         <HeroSection />
+        <ProgramSection />
         <BelajarGratisSection />
-        <ManifestoSection />
         <TestimoniSection />
         <KaryaSiswaSection />
         <GallerySection />
-        <ProgramSection />
-        <ManfaatSection />
-        <BerkembangSection />
-        <BahasaSection />
         <JourneySection />
+        <ManfaatSection />
+        <BahasaSection />
         <FAQSection />
         <CTASection />
       </main>

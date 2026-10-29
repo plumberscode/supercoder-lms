@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { HelpCircle } from "lucide-react";
+import Link from "next/link";
 import { faqs } from "./faq-data";
 
 export default function FAQSection() {
@@ -67,7 +68,20 @@ export default function FAQSection() {
                 forceMount
                 className="[[data-state=closed]>&]:hidden font-sans text-base text-slate-600 leading-relaxed pb-6 pt-1 sm:pl-8"
               >
-                {faq.a}
+                {faq.link ? (
+                  <>
+                    {faq.a.slice(0, faq.a.indexOf(faq.link.text))}
+                    <Link
+                      href={faq.link.href}
+                      className="font-semibold text-orange-600 underline underline-offset-2 hover:text-red-600"
+                    >
+                      {faq.link.text}
+                    </Link>
+                    {faq.a.slice(faq.a.indexOf(faq.link.text) + faq.link.text.length)}
+                  </>
+                ) : (
+                  faq.a
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}

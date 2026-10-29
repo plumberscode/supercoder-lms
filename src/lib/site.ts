@@ -17,16 +17,17 @@ export const SITE_LOGO = `${SITE_URL}/images/Logo%20transparent%20orange.webp`;
 export const DEFAULT_OG_IMAGE = "/images/hero-image-supercoder.webp";
 
 export const HOME_TITLE =
-  "Kursus Coding & AI Balikpapan | SMP, SMA & Umum";
+  "Kursus Coding & AI Balikpapan untuk SMP, SMA & Umum | Supercoder";
 
 export const HOME_DESCRIPTION =
-  "Kursus coding Balikpapan untuk SMP, SMA & umum. Kuasai coding dasar dan AI untuk membuat website & aplikasi nyata. Kelas tatap muka & online.";
+  "Belajar coding dasar dan AI untuk membuat website & aplikasi nyata. Kelas tatap muka di Balikpapan Rp 399.000/bulan atau online 1-on-1. Coba 63 latihan gratis.";
 
 // Satu sumber data NAP (Name, Address, Phone) — harus identik dengan Google Business Profile.
 export const BUSINESS = {
   name: "Supercoder",
-  streetAddress: "Kompleks Masjid An-Nasa'i, Jln. Syarifuddin Yoes",
-  shortAddress: "Jl. Syarifuddin Yoes (Kompleks Masjid An-Nasa'i)",
+  streetAddress: "Kompleks Masjid An-Nasa'i, Jl. Syarifuddin Yoes",
+  // Penulisan alamat lengkap yang dipakai di semua teks halaman
+  fullAddress: "Kompleks Masjid An-Nasa'i, Jl. Syarifuddin Yoes, Balikpapan, Kalimantan Timur",
   city: "Balikpapan",
   region: "Kalimantan Timur",
   country: "ID",
