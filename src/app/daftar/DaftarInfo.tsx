@@ -113,7 +113,7 @@ export default function DaftarInfo() {
           <p className={`${pClass} mb-5 flex items-start gap-2`}>
             <MapPin className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" aria-hidden />
             <span>
-              Kelas tatap muka: {BUSINESS.shortAddress}, {BUSINESS.city}.{" "}
+              Kelas tatap muka: {BUSINESS.fullAddress}.{" "}
               <a href={BUSINESS.mapsUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-orange-600 underline underline-offset-2 hover:text-red-600">
                 Lihat di Google Maps
               </a>

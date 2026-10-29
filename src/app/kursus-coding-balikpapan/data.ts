@@ -65,7 +65,7 @@ export const faqs = [
   },
   {
     q: "Di mana lokasi kelas coding tatap mukanya?",
-    a: `Di ${BUSINESS.streetAddress}, Balikpapan. Weekend Coding Class berlangsung setiap Minggu pukul 09.00–10.30 WITA.`,
+    a: `Di ${BUSINESS.fullAddress}. Weekend Coding Class berlangsung setiap Minggu pukul 09.00–10.30 WITA.`,
   },
   {
     q: "Bahasa pemrograman apa saja yang dipelajari?",

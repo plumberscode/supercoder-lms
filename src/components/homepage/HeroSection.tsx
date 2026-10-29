@@ -66,12 +66,17 @@ export default function HeroSection() {
             <span className="flex items-center gap-2 mb-6 text-xs font-bold text-slate-500 uppercase tracking-widest leading-normal">
               <span className="w-2 h-2 rounded-full bg-red-500" />
               Kursus Coding &amp; AI Balikpapan
-            </span>
+            </span>{" "}
             Belajar Membangun{" "}
             <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
               Aplikasi Web
             </span>
           </h1>
+
+          <p style={{ animationDelay: "30ms" }} className="hero-elem font-sans text-sm sm:text-base font-semibold text-slate-800 mb-4 max-w-lg">
+            Untuk siswa SMP, SMA &amp; umum, kelas tatap muka di Balikpapan atau
+            online 1-on-1.
+          </p>
 
           <p style={{ animationDelay: "60ms" }} className="hero-elem font-sans text-base sm:text-lg lg:text-xl text-slate-600 leading-relaxed mb-4 max-w-lg">
             Kuasai coding fundamentals dan manfaatkan AI untuk mengubah ide
@@ -146,7 +151,8 @@ export default function HeroSection() {
                 alt={logo.alt}
                 width={logo.width}
                 height={logo.height}
-                sizes="(min-width: 640px) 160px, 120px"
+                // Tinggi tampil tetap 46px, jadi lebar tampil = rasio aspek x 46
+                sizes={`${Math.ceil((logo.width * 46) / logo.height)}px`}
                 className="h-[46px] w-auto"
               />
             </div>

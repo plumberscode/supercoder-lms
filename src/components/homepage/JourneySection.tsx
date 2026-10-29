@@ -7,7 +7,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Sparkles } from "lucide-react";
+import { CheckCircle2, ChevronDown, Sparkles } from "lucide-react";
 
 const levels = [
   {
@@ -117,7 +117,7 @@ export default function JourneySection() {
                     src={lvl.image}
                     alt={lvl.title}
                     fill
-                    sizes="(max-width: 768px) 100vw, 400px"
+                    sizes="(min-width: 1152px) 365px, (min-width: 768px) 33vw, 100vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute top-3.5 left-3.5 z-10 flex items-center gap-2">
@@ -142,14 +142,18 @@ export default function JourneySection() {
                   </CardDescription>
                 </CardHeader>
 
-                {/* Curriculum Checklist */}
+                {/* Curriculum Checklist: accordion di HP (default tertutup), selalu terbuka mulai md.
+                    Isi <details> tetap ada di HTML server, hanya disembunyikan browser saat tertutup. */}
                 <CardContent className="p-6 pt-2">
-                  <div className="pt-4 border-t border-slate-100">
-                    <p className="font-poppins text-xs font-bold text-slate-400 uppercase tracking-wider mb-3.5 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                      Materi yang dipelajari:
-                    </p>
-                    <ul className="space-y-2.5">
+                  <details className="group/materi pt-4 border-t border-slate-100 md:[&::details-content]:[content-visibility:visible]">
+                    <summary className="list-none [&::-webkit-details-marker]:hidden cursor-pointer md:cursor-default md:pointer-events-none flex items-center justify-between gap-2 py-1">
+                      <span className="font-poppins text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                        Materi yang dipelajari:
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-slate-400 transition-transform group-open/materi:rotate-180 md:hidden" />
+                    </summary>
+                    <ul className="space-y-2.5 mt-2.5">
                       {lvl.list.map((item) => (
                         <li key={item} className="flex items-start gap-2.5">
                           <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
@@ -159,7 +163,7 @@ export default function JourneySection() {
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </details>
                 </CardContent>
               </div>
             </Card>

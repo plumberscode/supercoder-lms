@@ -77,7 +77,7 @@ export default function GallerySection() {
                         src={photo.src}
                         alt={`${photo.title} - Suasana Kelas Coding dan AI Supercoder Balikpapan`}
                         fill
-                        sizes="(max-width: 768px) 100vw, 400px"
+                        sizes="(min-width: 1152px) 365px, (min-width: 768px) 33vw, 100vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       {/* Zoom Indicator */}
@@ -111,7 +111,7 @@ export default function GallerySection() {
                     alt={photo.title}
                     fill
                     className="object-contain"
-                    sizes="100vw"
+                    sizes="(min-width: 900px) 896px, 100vw"
                   />
                   <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent text-white">
                     <p className="font-poppins font-bold text-base">
