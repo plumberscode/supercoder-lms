@@ -24,7 +24,7 @@ export default async function AdminReportsPage({
   const { data: reports, error } = await supabase
     .from("monthly_reports")
     .select(
-      "id, status, sent_at, published_at, profiles!monthly_reports_student_id_fkey(full_name, email, parent_whatsapp, status)",
+      "id, student_id, status, sent_at, published_at, profiles!monthly_reports_student_id_fkey(full_name, email, parent_whatsapp, status)",
     )
     .eq("period", period);
 
@@ -143,7 +143,7 @@ export default async function AdminReportsPage({
                 </td>
                 <td style={cell}>
                   <Link
-                    href={`/admin/reports/${r.id}`}
+                    href={`/admin/gradebook/${r.student_id}/rapor?period=${period.slice(0, 7)}&from=reports`}
                     className="btn"
                     style={{ padding: "6px 12px", fontSize: "0.8rem" }}
                   >

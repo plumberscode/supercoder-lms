@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
+  buildNoteHints,
   formatPeriod,
+  shiftPeriod,
   normalizePeriod,
   periodRange,
   previousPeriod,
@@ -84,8 +86,11 @@ describe("summarizeSubmissions", () => {
         progressPct: 75,
         monthAverage: 90,
         monthCount: 2,
+        completedBefore: 1,
+        monthXp: 0,
       },
     ]);
+    expect(result.completedThisMonth).toBe(2);
     expect(result.activities.map((a) => [a.lesson, a.score, a.feedback])).toEqual([
       ["CSS", 80, "Rapi!"],
       ["Kuis Web", 100, null],
@@ -122,6 +127,33 @@ describe("summarizeSubmissions", () => {
     expect(result.totals.monthAverage).toBe(60);
   });
 
+  it("summarizes sources, active days and the previous month", () => {
+    const result = summarizeSubmissions({
+      ...base,
+      submissions: [
+        sub("l1", "code", 60, "2026-08-10T02:00:00Z"), // Agustus: rata-rata bulan lalu
+        sub("l2", "css", 80, "2026-08-20T02:00:00Z"),
+        sub("l1", "code", 75, "2026-09-02T02:00:00Z"),
+        sub("l1", "code", 95, "2026-09-03T02:00:00Z"),
+        sub("l2", "lesson", 20, "2026-09-04T02:00:00Z"), // XP
+        sub("q1", "quiz", 50, "2026-09-10T02:00:00Z"),
+        sub("p1", "project", null, "2026-09-10T03:00:00Z"),
+      ],
+    });
+    expect(result.sources).toEqual([
+      { type: "quiz", label: "Kuis", lessons: 1, avg: 50, passed: 0, xp: 0, pending: 0 },
+      { type: "code", label: "Tantangan Kode", lessons: 1, avg: 95, passed: 1, xp: 0, pending: 0 },
+      { type: "lesson", label: "Nilai Guru", lessons: 1, avg: null, passed: 1, xp: 20, pending: 0 },
+      { type: "project", label: "Proyek", lessons: 1, avg: null, passed: 0, xp: 0, pending: 1 },
+    ]);
+    // 2, 3, 4, dan 10 Sep: empat hari aktif, terpanjang tiga hari berturut-turut.
+    expect(result.activeDays).toBe(4);
+    expect(result.longestStreak).toBe(3);
+    // l2 sudah lulus di Agustus (CSS 80), jadi yang baru selesai bulan ini hanya l1.
+    expect(result.completedThisMonth).toBe(1);
+    expect(result.previous).toEqual({ monthCount: 2, monthAverage: 70 });
+  });
+
   it("treats submissions just after midnight WITA on the 1st as the new month", () => {
     const result = summarizeSubmissions({
       ...base,
@@ -129,6 +161,48 @@ describe("summarizeSubmissions", () => {
       submissions: [sub("l1", "code", 90, "2026-09-30T16:30:00Z")],
     });
     expect(result.activities).toHaveLength(0);
+  });
+});
+
+describe("buildNoteHints", () => {
+  const snapshot = (over: Record<string, unknown> = {}) => ({
+    period: "2026-09-01",
+    student: { name: "Raka Pratama", xp: 0, level: 1 },
+    totals: { monthCount: 3, monthAverage: 88, completed: 10, total: 20 },
+    subjects: [{ title: "Web", completed: 8, total: 10, progressPct: 80, monthAverage: 90, monthCount: 2, completedBefore: 4 }],
+    activities: [
+      { date: "2026-09-02T02:00:00Z", subject: "Python", lesson: "Kuis Loop", type: "quiz", score: 65, feedback: null },
+      { date: "2026-09-05T02:00:00Z", subject: "Desain", lesson: "Figma Recipe", type: "lesson", score: null, xp: 20, feedback: null },
+    ],
+    achievements: [],
+    sources: [{ type: "web", label: "Tantangan Web", lessons: 2, avg: 97, passed: 2, xp: 0, pending: 0 }],
+    activeDays: 12,
+    completedThisMonth: 4,
+    previous: { monthCount: 5, monthAverage: 84 },
+    ...over,
+  });
+
+  it("suggests sentences from the month's data", () => {
+    const hints = buildNoteHints(snapshot());
+    expect(hints.map((h) => [h.field, h.label])).toEqual([
+      ["month_note", "Aktif 12 hari bulan ini"],
+      ["strengths", "Paling kuat: Tantangan Web (97)"],
+      ["strengths", "Rata-rata naik 4 poin"],
+      ["strengths", "4 materi Web selesai"],
+      ["improvements", "Perlu diulang: Kuis Loop (65)"],
+      ["parent_advice", "Ajak cerita: Figma Recipe"],
+      ["parent_advice", "Latihan di rumah: Kuis Loop"],
+    ]);
+    expect(hints[0].text).toBe("Bulan ini Raka aktif belajar selama 12 hari dan menyelesaikan 4 materi.");
+  });
+
+  it("asks for a reason when there is no LMS activity", () => {
+    const hints = buildNoteHints(snapshot({ activities: [], sources: [], previous: undefined }));
+    expect(hints[0]).toMatchObject({ field: "month_note", label: "Tidak ada tugas LMS bulan ini" });
+  });
+
+  it("shifts periods across years", () => {
+    expect(shiftPeriod("2026-01-01", -1)).toBe("2025-12-01");
   });
 });
 

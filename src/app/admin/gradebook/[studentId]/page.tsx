@@ -149,7 +149,10 @@ export default async function StudentGradebookPage({
               WA orang tua{student.parent_name ? ` (${student.parent_name})` : ""}
             </a>
           )}
-          <Link href="/admin/reports" className={styles.btnMain}>
+          <Link
+            href={`/admin/gradebook/${student.id}/rapor${back ? `?back=${encodeURIComponent(back)}` : ""}`}
+            className={styles.btnMain}
+          >
             <FileText size={16} aria-hidden="true" />
             Rapor bulanan
           </Link>

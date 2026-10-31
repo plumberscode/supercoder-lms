@@ -16,9 +16,39 @@ function notesFrom(formData: FormData) {
   };
 }
 
-function revalidateReport(id: string) {
+function revalidateReport() {
   revalidatePath("/admin/reports");
-  revalidatePath(`/admin/reports/${id}`);
+  revalidatePath("/admin/gradebook/[studentId]/rapor", "page");
+}
+
+// Rapor satu siswa per bulan; barisnya dibuat saat pertama kali disimpan dari profil siswa.
+async function ensureReport(studentId: string, rawPeriod: string) {
+  const period = normalizePeriod(rawPeriod);
+  if (!period) throw new Error("Periode tidak valid");
+  const supabase = await createClient();
+
+  const { data: existing, error } = await supabase
+    .from("monthly_reports")
+    .select("id, public_token")
+    .eq("student_id", studentId)
+    .eq("period", period)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (existing) return { supabase, period, report: existing };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: created, error: insertError } = await supabase
+    .from("monthly_reports")
+    .upsert(
+      { student_id: studentId, period, created_by: user?.id ?? null },
+      { onConflict: "student_id,period" },
+    )
+    .select("id, public_token")
+    .single();
+  if (insertError || !created) throw new Error(`Gagal membuat rapor: ${insertError?.message}`);
+  return { supabase, period, report: created };
 }
 
 export async function createDrafts(formData: FormData) {
@@ -55,31 +85,23 @@ export async function createDrafts(formData: FormData) {
   redirect(`/admin/reports?period=${period.slice(0, 7)}`);
 }
 
-export async function saveNotes(id: string, formData: FormData) {
-  const supabase = await createClient();
+export async function saveReport(studentId: string, period: string, formData: FormData) {
+  const { supabase, report } = await ensureReport(studentId, period);
   const { error } = await supabase
     .from("monthly_reports")
     .update(notesFrom(formData))
-    .eq("id", id);
+    .eq("id", report.id);
   if (error) throw new Error(`Gagal menyimpan catatan: ${error.message}`);
-  revalidateReport(id);
+  revalidateReport();
 }
 
 // Menyimpan catatan, membekukan data nilai saat ini, lalu menerbitkan.
 // Jika dipanggil lagi untuk rapor yang sudah terbit, snapshot diperbarui dan token tetap sama.
-export async function publishReport(id: string, formData: FormData) {
-  const supabase = await createClient();
+export async function publishReport(studentId: string, period: string, formData: FormData) {
+  const { supabase, period: normalized, report } = await ensureReport(studentId, period);
+  const snapshot = await buildReportSnapshot(supabase, studentId, normalized);
 
-  const { data: report, error } = await supabase
-    .from("monthly_reports")
-    .select("student_id, period, public_token")
-    .eq("id", id)
-    .single();
-  if (error || !report) throw new Error("Rapor tidak ditemukan");
-
-  const snapshot = await buildReportSnapshot(supabase, report.student_id, report.period);
-
-  const { error: updateError } = await supabase
+  const { error } = await supabase
     .from("monthly_reports")
     .update({
       ...notesFrom(formData),
@@ -88,10 +110,9 @@ export async function publishReport(id: string, formData: FormData) {
       public_token: report.public_token || randomBytes(24).toString("base64url"),
       published_at: new Date().toISOString(),
     })
-    .eq("id", id);
-  if (updateError) throw new Error(`Gagal menerbitkan rapor: ${updateError.message}`);
-
-  revalidateReport(id);
+    .eq("id", report.id);
+  if (error) throw new Error(`Gagal menerbitkan rapor: ${error.message}`);
+  revalidateReport();
 }
 
 export async function unpublishReport(id: string) {
@@ -101,7 +122,7 @@ export async function unpublishReport(id: string) {
     .update({ status: "draft" })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidateReport(id);
+  revalidateReport();
 }
 
 export async function markSent(id: string) {
@@ -111,5 +132,5 @@ export async function markSent(id: string) {
     .update({ sent_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidateReport(id);
+  revalidateReport();
 }

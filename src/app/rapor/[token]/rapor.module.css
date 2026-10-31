@@ -1,11 +1,12 @@
 .page {
   min-height: 100vh;
-  background: #f1f5f9;
-  padding: 24px 16px 40px;
+  background: #f8fafc;
+  padding: 20px 16px 40px;
+  font-family: var(--font-sans);
 }
 
 .toolbar {
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto 16px;
   display: flex;
   justify-content: space-between;
@@ -17,30 +18,36 @@
 }
 
 .printBtn {
-  background: #0f172a;
-  color: #ffffff;
-  border: none;
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
-  padding: 10px 16px;
+  min-height: 40px;
+  padding: 0 14px;
+  font: inherit;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
 }
 
 .printBtn:hover {
-  background: #1e293b;
+  border-color: #94a3b8;
 }
 
 .contact {
-  max-width: 760px;
-  margin: 20px auto 0;
-  text-align: center;
-  font-size: 0.85rem;
+  max-width: 720px;
+  margin: 16px auto 0;
+  padding: 0 4px;
+  font-size: 0.8rem;
+  line-height: 1.6;
   color: #64748b;
 }
 
 .contact a {
-  color: #16a34a;
+  color: #15803d;
   font-weight: 600;
 }
 
