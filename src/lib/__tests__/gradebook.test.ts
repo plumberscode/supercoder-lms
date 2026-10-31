@@ -67,7 +67,7 @@ describe("summarizeStudents", () => {
     expect(b.attention).toBeNull();
   });
 
-  it("restricts everything to the selected subject", () => {
+  it("scores the selected subject but keeps activity from all subjects", () => {
     const [b] = summarizeStudents({
       ...catalog,
       subjectId: "s1",
@@ -76,7 +76,13 @@ describe("summarizeStudents", () => {
       submissions: [sub("b", "l4", "web", 75, daysAgo(1))],
     });
     expect(b.total).toBe(2);
-    expect(b.lastActivityAt).toBeNull();
+    expect(b.done).toBe(0);
+    expect(b.avg30).toBeNull();
+    // Aktif di mapel lain tetap terhitung aktif, bukan "belum pernah mengerjakan".
+    expect(b.lastActivityAt).toBe(daysAgo(1));
+    expect(b.lastLesson?.subject).toBe("Web");
+    expect(b.weekly[7]).toBe(1);
+    expect(b.attention).toBeNull();
   });
 
   it("buckets activity into 8 rolling weeks, oldest first", () => {

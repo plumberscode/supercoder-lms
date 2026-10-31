@@ -188,12 +188,15 @@ export interface GradebookRow {
 export function summarizeStudents(
   input: CatalogInput & { students: GbStudent[]; submissions: GbSubmission[]; now: Date },
 ): GradebookRow[] {
+  // Aktivitas (terakhir aktif, materi terakhir, grafik mingguan) selalu dari semua mapel;
+  // nilai dan progres mengikuti mapel yang dipilih.
+  const fullCatalog = buildCatalog({ ...input, subjectId: undefined });
   const catalog = buildCatalog(input);
   const now = input.now.getTime();
 
   const byStudent = new Map<string, { lessonId: string; sub: GbSubmission; at: number }[]>();
   for (const sub of input.submissions) {
-    const lesson = catalog.resolve(sub);
+    const lesson = fullCatalog.resolve(sub);
     if (!lesson) continue;
     const list = byStudent.get(sub.student_id) ?? [];
     list.push({ lessonId: lesson.id, sub, at: Date.parse(sub.submitted_at) });
@@ -203,7 +206,9 @@ export function summarizeStudents(
   return input.students.map((student) => {
     const program = student.program || "supercoder";
     const entries = byStudent.get(student.id) ?? [];
-    const flat = entries.map((e) => ({ lessonId: e.lessonId, score: e.sub.score, at: e.at }));
+    const flat = entries
+      .filter((e) => catalog.lessonById.has(e.lessonId))
+      .map((e) => ({ lessonId: e.lessonId, score: e.sub.score, at: e.at }));
     const stats = lessonStats(flat);
     const total = catalog.totalFor(program);
 
@@ -224,7 +229,7 @@ export function summarizeStudents(
       (acc, e) => (!acc || e.at > acc.at ? e : acc),
       null,
     );
-    const lastLesson = last ? catalog.lessonById.get(last.lessonId)! : null;
+    const lastLesson = last ? fullCatalog.lessonById.get(last.lessonId)! : null;
 
     const weekly = new Array(WEEKS).fill(0);
     for (const e of entries) {
