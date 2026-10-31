@@ -1,4 +1,4 @@
-import { PASS_SCORE } from "@/lib/reports";
+import { PASS_SCORE, isXpGrade } from "@/lib/reports";
 
 // Tipe submission yang menghasilkan nilai, sama dengan rapor bulanan.
 export const SCORED_TYPES = ["quiz", "code", "css", "web", "lesson", "project"] as const;
@@ -134,13 +134,6 @@ interface Attempt {
   xp: number | null;
   passed: boolean;
   at: number;
-}
-
-// Nilai guru pada materi tanpa bobot XP diisi sebagai jumlah XP materi itu
-// (mis. "Figma Recipe Page (20 XP)" diberi 20), bukan skala 0–100. Nilai seperti ini
-// berarti materi sudah selesai dan tidak ikut dihitung dalam rata-rata nilai.
-export function isXpGrade(type: string, lesson: { xp_reward?: number | null }) {
-  return type === "lesson" && !((lesson.xp_reward ?? 0) > 0);
 }
 
 function toAttempt(sub: GbSubmission, lesson: CatalogLesson): Attempt {

@@ -141,9 +141,14 @@ export default function ReportView({
                     <div className={styles.activityFeedback}>“{a.feedback}”</div>
                   )}
                 </div>
-                <div className={`${styles.score} ${scoreClass(a.score)}`}>
-                  {a.score ?? "Menunggu"}
-                </div>
+                {a.score === null && a.xp != null ? (
+                  // Nilai guru berupa XP: materi selesai, bukan nilai 0–100.
+                  <div className={`${styles.score} ${styles.scoreGood}`}>+{a.xp} XP</div>
+                ) : (
+                  <div className={`${styles.score} ${scoreClass(a.score)}`}>
+                    {a.score ?? "Menunggu"}
+                  </div>
+                )}
               </li>
             ))}
           </ul>

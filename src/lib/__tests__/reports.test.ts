@@ -103,6 +103,25 @@ describe("summarizeSubmissions", () => {
     expect(result.subjects[0]).toMatchObject({ title: "Python", completed: 0, total: 1 });
   });
 
+  it("treats teacher scores on lessons without an XP weight as XP, not low grades", () => {
+    const result = summarizeSubmissions({
+      ...base,
+      lessons: [...base.lessons.slice(0, 2), { ...base.lessons[2], xp_reward: 40 }, ...base.lessons.slice(3)],
+      submissions: [
+        // HTML tanpa bobot XP: 20 = XP penuh (mis. "Figma Recipe Page (20 XP)").
+        sub("l1", "lesson", 20, "2026-09-10T02:00:00Z"),
+        // JS punya bobot XP, jadi skala 0–100: 60 belum selesai.
+        sub("l3", "lesson", 60, "2026-09-11T02:00:00Z"),
+      ],
+    });
+    expect(result.activities.map((a) => [a.lesson, a.score, a.xp])).toEqual([
+      ["HTML", null, 20],
+      ["JS", 60, null],
+    ]);
+    expect(result.subjects[0]).toMatchObject({ completed: 1, monthAverage: 60 });
+    expect(result.totals.monthAverage).toBe(60);
+  });
+
   it("treats submissions just after midnight WITA on the 1st as the new month", () => {
     const result = summarizeSubmissions({
       ...base,

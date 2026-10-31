@@ -6,6 +6,13 @@ export const PASS_SCORE = 70;
 const WITA_OFFSET_MS = 8 * 60 * 60 * 1000;
 const SCORED_TYPES = ["quiz", "project", "lesson", "code", "css", "web"];
 
+// Nilai guru pada materi tanpa bobot XP diisi sebagai jumlah XP materi itu
+// (mis. "Figma Recipe Page (20 XP)" diberi 20), bukan skala 0–100. Nilai seperti ini
+// berarti materi sudah selesai dan tidak ikut dihitung dalam rata-rata nilai.
+export function isXpGrade(type: string, lesson: { xp_reward?: number | null }) {
+  return type === "lesson" && !((lesson.xp_reward ?? 0) > 0);
+}
+
 export interface ReportSubjectSummary {
   title: string;
   completed: number;
@@ -20,7 +27,10 @@ export interface ReportActivity {
   subject: string;
   lesson: string;
   type: string;
+  // Nilai skala 0–100; null bila belum dinilai atau nilainya berupa XP.
   score: number | null;
+  // Nilai guru berupa XP (lihat isXpGrade). Tidak ada di snapshot lama.
+  xp?: number | null;
   feedback: string | null;
 }
 
@@ -92,7 +102,7 @@ interface SummarizeInput {
   period: string;
   subjects: { id: string; title: string }[];
   modules: { id: string; subject_id: string }[];
-  lessons: { id: string; module_id: string; title: string }[];
+  lessons: { id: string; module_id: string; title: string; xp_reward?: number | null }[];
   quizzes: { id: string; lesson_id: string | null }[];
   submissions: {
     content_id: string;
@@ -119,8 +129,8 @@ export function summarizeSubmissions(input: SummarizeInput) {
     lessonCountBySubject.set(subjectId, (lessonCountBySubject.get(subjectId) || 0) + 1);
   }
 
-  // Nilai tertinggi per materi sampai akhir periode (untuk progres keseluruhan).
-  const bestScore = new Map<string, number>();
+  // Materi yang sudah selesai sampai akhir periode (untuk progres keseluruhan).
+  const completedLessons = new Set<string>();
   // Aktivitas bulan ini per materi + tipe.
   const monthly = new Map<string, ReportActivity & { subjectId: string }>();
   const touchedSubjects = new Set<string>();
@@ -134,8 +144,12 @@ export function summarizeSubmissions(input: SummarizeInput) {
     if (!lesson || !subjectId) continue;
 
     touchedSubjects.add(subjectId);
-    if (sub.score !== null) {
-      bestScore.set(lesson.id, Math.max(bestScore.get(lesson.id) ?? 0, sub.score));
+    // Nilai guru berupa XP masuk ke `xp`, bukan `score`, agar tidak dibaca sebagai nilai 0–100.
+    const xpGrade = isXpGrade(sub.type, lesson);
+    const score = xpGrade ? null : sub.score;
+    const xp = xpGrade ? sub.score : null;
+    if (xpGrade ? (xp ?? 0) > 0 : score !== null && score >= PASS_SCORE) {
+      completedLessons.add(lesson.id);
     }
 
     if (sub.submitted_at < start) continue;
@@ -147,15 +161,19 @@ export function summarizeSubmissions(input: SummarizeInput) {
         subject: subjectTitle.get(subjectId) || "",
         lesson: lesson.title,
         type: sub.type,
-        score: sub.score,
+        score,
+        xp,
         date: sub.submitted_at,
         feedback: sub.feedback || null,
       });
       continue;
     }
     // Simpan nilai tertinggi; tanggal & feedback mengikuti percobaan terbaru yang punya feedback.
-    if (sub.score !== null) {
-      prev.score = prev.score === null ? sub.score : Math.max(prev.score, sub.score);
+    if (score !== null) {
+      prev.score = prev.score === null ? score : Math.max(prev.score, score);
+    }
+    if (xp !== null) {
+      prev.xp = Math.max(prev.xp ?? 0, xp);
     }
     if (sub.submitted_at > prev.date) {
       prev.date = sub.submitted_at;
@@ -174,7 +192,7 @@ export function summarizeSubmissions(input: SummarizeInput) {
       const completed = input.lessons.filter(
         (l) =>
           subjectByModule.get(l.module_id) === s.id &&
-          (bestScore.get(l.id) ?? -1) >= PASS_SCORE,
+          completedLessons.has(l.id),
       ).length;
       const scored = activities.filter((a) => a.subjectId === s.id && a.score !== null);
       return {
@@ -224,7 +242,7 @@ export async function buildReportSnapshot(
         .lt("submitted_at", end),
       supabase.from("subjects").select("id, title").order("order_index"),
       supabase.from("modules").select("id, subject_id"),
-      supabase.from("lessons").select("id, module_id, title"),
+      supabase.from("lessons").select("id, module_id, title, xp_reward"),
       supabase.from("quizzes").select("id, lesson_id"),
       supabase
         .from("user_achievements")
