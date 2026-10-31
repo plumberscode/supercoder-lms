@@ -24,7 +24,7 @@ export async function fetchCatalog(supabase: SupabaseClient) {
     fetchAllRows((from, to) =>
       supabase
         .from("lessons")
-        .select("id, module_id, title, type, order_index")
+        .select("id, module_id, title, type, order_index, xp_reward")
         .order("id")
         .range(from, to),
     ),

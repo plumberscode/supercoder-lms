@@ -18,7 +18,7 @@ const catalog = {
   lessons: [
     { id: "l1", module_id: "m1", title: "Print", type: "code", order_index: 1 },
     { id: "l2", module_id: "m1", title: "Kuis Dasar", type: "quiz", order_index: 2 },
-    { id: "l3", module_id: "m2", title: "Fungsi", type: "code", order_index: 1 },
+    { id: "l3", module_id: "m2", title: "Fungsi", type: "code", order_index: 1, xp_reward: 40 },
     { id: "l4", module_id: "m3", title: "Tag", type: "html", order_index: 1 },
   ],
   quizzes: [{ id: "q2", lesson_id: "l2" }],
@@ -60,7 +60,7 @@ describe("summarizeStudents", () => {
     expect(a.total).toBe(3);
     expect(a.done).toBe(2);
     expect(a.pct).toBe(67);
-    expect(a.lastLesson).toEqual({ title: "Kuis Dasar", subject: "Python", source: "Kuis", score: 80 });
+    expect(a.lastLesson).toEqual({ title: "Kuis Dasar", subject: "Python", source: "Kuis", score: 80, xp: null });
     expect(a.avg30).toBe(85);
     expect(b.total).toBe(3);
     expect(b.done).toBe(1);
@@ -136,7 +136,8 @@ describe("buildStudentProfile", () => {
   it("groups scores by source", () => {
     const bySource = Object.fromEntries(profile.sources.map((s) => [s.type, s]));
     expect(bySource.code).toMatchObject({ lessons: 1, avg: 90, passed: 1 });
-    expect(bySource.lesson).toMatchObject({ lessons: 1, avg: 95, passed: 1 });
+    // l1 tidak punya bobot XP, jadi nilai guru 95 adalah XP, bukan nilai 0–100.
+    expect(bySource.lesson).toMatchObject({ lessons: 1, avg: null, passed: 1, xpLessons: 1, xp: 95 });
     expect(bySource.quiz).toMatchObject({ lessons: 1, avg: 65, passed: 0 });
     expect(bySource.project).toMatchObject({ lessons: 0, avg: null });
   });
@@ -160,6 +161,38 @@ describe("buildStudentProfile", () => {
     expect(profile.done).toBe(1);
     expect(profile.subjects.map((s) => [s.title, s.done, s.total])).toEqual([["Python", 1, 3]]);
     expect(profile.attempts).toBe(5);
+  });
+
+  it("treats teacher scores on lessons without an XP weight as XP, not grades", () => {
+    const p = buildStudentProfile({
+      ...catalog,
+      program: "supercoder",
+      now: NOW,
+      submissions: [
+        // Mis. "Figma Recipe Page (20 XP)": guru mengisi 20 = XP penuh, bukan nilai 20/100.
+        sub("a", "l1", "lesson", 20, daysAgo(2)),
+        // l3 punya bobot XP, jadi nilai guru berskala 0–100: 60 belum lulus.
+        sub("a", "l3", "lesson", 60, daysAgo(1)),
+      ],
+    });
+    expect(p.retry.map((r) => r.title)).toEqual(["Fungsi"]);
+    expect(p.done).toBe(1);
+    expect(p.avg).toBe(60);
+    expect(p.timeline.map((t) => [t.lesson, t.score, t.xp])).toEqual([
+      ["Fungsi", 60, null],
+      ["Print", null, 20],
+    ]);
+    const print = p.subjects[0].modules[0].lessons[0];
+    expect(print).toMatchObject({ title: "Print", passed: true, score: null, xp: 20 });
+
+    const [row] = summarizeStudents({
+      ...catalog,
+      now: NOW,
+      students: [student("a", "supercoder")],
+      submissions: [sub("a", "l1", "lesson", 20, daysAgo(1))],
+    });
+    expect(row).toMatchObject({ done: 1, avg30: null, failing: 0, attention: null });
+    expect(row.lastLesson).toMatchObject({ score: null, xp: 20 });
   });
 
   it("counts active WITA days and streaks this month", () => {

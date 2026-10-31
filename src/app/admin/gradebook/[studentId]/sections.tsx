@@ -1,5 +1,5 @@
 import { PASS_SCORE } from "@/lib/reports";
-import { formatWita, scoreTone, type StudentProfile } from "@/lib/gradebook";
+import { formatWita, scoreTone, type ProfileLesson, type StudentProfile } from "@/lib/gradebook";
 import styles from "../gradebook.module.css";
 
 const SOURCE_COLORS: Record<string, string> = {
@@ -25,6 +25,15 @@ function Score({ value, small }: { value: number | null; small?: boolean }) {
   return (
     <span className={`${styles.score} ${small ? styles.scoreSm : ""} ${styles[scoreTone(value)]}`}>
       {value ?? "–"}
+    </span>
+  );
+}
+
+// Nilai guru pada materi tanpa bobot XP adalah jumlah XP, artinya materi sudah selesai.
+function XpBadge({ xp }: { xp: number }) {
+  return (
+    <span className={`${styles.score} ${styles.scoreSm} ${styles.good}`} title="Nilai guru berupa XP">
+      +{xp} XP
     </span>
   );
 }
@@ -62,6 +71,12 @@ export function ScoreSources({ sources }: { sources: StudentProfile["sources"] }
                 {s.avg ?? "–"}
               </span>
             </span>
+            {s.xp > 0 && (
+              <span className={styles.muted} style={{ gridColumn: "2 / -1", marginTop: -10 }}>
+                {s.xpLessons} materi dinilai guru dalam bentuk XP (total +{s.xp} XP): dihitung lulus,
+                tidak masuk rata-rata
+              </span>
+            )}
             <span className={styles.sourceNum}>{s.lessons}</span>
             <span className={styles.sourceNum}>{s.lessons ? `${s.passed}/${s.lessons}` : "–"}</span>
           </div>
@@ -139,7 +154,9 @@ export function ActivityTimeline({ timeline }: { timeline: StudentProfile["timel
                   <span className={styles.tag}>{t.source}</span>
                 </span>
                 <span role="cell">
-                  {t.score === null ? (
+                  {t.xp !== null ? (
+                    <XpBadge xp={t.xp} />
+                  ) : t.score === null ? (
                     <span className={styles.muted}>Menunggu</span>
                   ) : (
                     <Score value={t.score} small />
@@ -161,8 +178,14 @@ export function ActivityTimeline({ timeline }: { timeline: StudentProfile["timel
 }
 
 export function SubjectProgress({ subjects }: { subjects: StudentProfile["subjects"] }) {
-  const squareClass = (score: number | null) =>
-    score === null ? styles.sqNone : score >= PASS_SCORE ? styles.sqGood : styles.sqWarn;
+  const squareClass = (l: ProfileLesson) =>
+    l.passed ? styles.sqGood : l.score !== null ? styles.sqWarn : styles.sqNone;
+  const lessonResult = (l: ProfileLesson) =>
+    l.passed && l.score === null && l.xp !== null
+      ? `selesai, +${l.xp} XP`
+      : l.score !== null
+        ? `nilai ${l.score}`
+        : "belum dikerjakan";
 
   return (
     <section className={`${styles.panel} ${styles.section}`}>
@@ -206,7 +229,7 @@ export function SubjectProgress({ subjects }: { subjects: StudentProfile["subjec
             </span>
             <div className={styles.stack} style={{ gap: 10 }}>
               {sub.modules.map((mod) => {
-                const passed = mod.lessons.filter((l) => (l.score ?? -1) >= PASS_SCORE).length;
+                const passed = mod.lessons.filter((l) => l.passed).length;
                 return (
                   <div key={mod.id} className={styles.moduleRow}>
                     <span className={styles.ellipsis} style={{ fontSize: "0.8125rem", color: "#334155" }}>
@@ -220,8 +243,8 @@ export function SubjectProgress({ subjects }: { subjects: StudentProfile["subjec
                       {mod.lessons.map((l) => (
                         <span
                           key={l.id}
-                          className={`${styles.sq} ${squareClass(l.score)}`}
-                          title={`${l.title}: ${l.score === null ? "belum dikerjakan" : `nilai ${l.score}`}`}
+                          className={`${styles.sq} ${squareClass(l)}`}
+                          title={`${l.title}: ${lessonResult(l)}`}
                         />
                       ))}
                     </span>
@@ -244,12 +267,14 @@ export function SubjectProgress({ subjects }: { subjects: StudentProfile["subjec
                             {l.attempts > 0 && ` · ${l.attempts} percobaan`}
                           </span>
                         </span>
-                        {l.score === null ? (
+                        {l.score !== null ? (
+                          <Score value={l.score} small />
+                        ) : l.xp !== null ? (
+                          <XpBadge xp={l.xp} />
+                        ) : (
                           <span className={styles.muted}>
                             {l.attempts > 0 ? "Menunggu nilai" : "Belum dikerjakan"}
                           </span>
-                        ) : (
-                          <Score value={l.score} small />
                         )}
                       </div>
                     ))}

@@ -406,9 +406,15 @@ function StudentRow({
       <span className={styles.lastLesson} role="cell">
         {r.lastLesson ? (
           <>
-            <span className={`${styles.score} ${styles[scoreTone(r.lastLesson.score)]}`}>
-              {r.lastLesson.score ?? "–"}
-            </span>
+            {r.lastLesson.xp !== null ? (
+              <span className={`${styles.score} ${styles.good}`} title="Nilai guru berupa XP">
+                +{r.lastLesson.xp} XP
+              </span>
+            ) : (
+              <span className={`${styles.score} ${styles[scoreTone(r.lastLesson.score)]}`}>
+                {r.lastLesson.score ?? "–"}
+              </span>
+            )}
             <span className={styles.stack}>
               <span className={`${styles.strong} ${styles.ellipsis}`} style={{ fontSize: "0.8125rem" }}>
                 {r.lastLesson.title}

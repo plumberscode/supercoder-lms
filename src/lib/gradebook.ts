@@ -34,6 +34,7 @@ export interface GbLesson {
   title: string;
   type: string;
   order_index: number;
+  xp_reward?: number | null;
 }
 export interface GbQuiz {
   id: string;
@@ -125,14 +126,41 @@ function average(values: number[]) {
   return Math.round(values.reduce((a, b) => a + b, 0) / values.length);
 }
 
-// Rata-rata nilai tertinggi per materi untuk submission dalam rentang [from, to).
-function windowAverage(
-  subs: { lessonId: string; score: number | null; at: number }[],
-  from: number,
-  to: number,
-) {
+// Satu percobaan yang sudah dinormalisasi: `score` hanya berisi nilai skala 0–100,
+// sedangkan nilai guru yang berupa jumlah XP masuk ke `xp`.
+interface Attempt {
+  lessonId: string;
+  score: number | null;
+  xp: number | null;
+  passed: boolean;
+  at: number;
+}
+
+// Nilai guru pada materi tanpa bobot XP diisi sebagai jumlah XP materi itu
+// (mis. "Figma Recipe Page (20 XP)" diberi 20), bukan skala 0–100. Nilai seperti ini
+// berarti materi sudah selesai dan tidak ikut dihitung dalam rata-rata nilai.
+export function isXpGrade(type: string, lesson: { xp_reward?: number | null }) {
+  return type === "lesson" && !((lesson.xp_reward ?? 0) > 0);
+}
+
+function toAttempt(sub: GbSubmission, lesson: CatalogLesson): Attempt {
+  const at = Date.parse(sub.submitted_at);
+  if (isXpGrade(sub.type, lesson)) {
+    return { lessonId: lesson.id, score: null, xp: sub.score, passed: (sub.score ?? 0) > 0, at };
+  }
+  return {
+    lessonId: lesson.id,
+    score: sub.score,
+    xp: null,
+    passed: sub.score !== null && sub.score >= PASS_SCORE,
+    at,
+  };
+}
+
+// Rata-rata nilai tertinggi per materi untuk percobaan dalam rentang [from, to).
+function windowAverage(attempts: Attempt[], from: number, to: number) {
   const best = new Map<string, number>();
-  for (const s of subs) {
+  for (const s of attempts) {
     if (s.score === null || s.at < from || s.at >= to) continue;
     best.set(s.lessonId, Math.max(best.get(s.lessonId) ?? 0, s.score));
   }
@@ -141,22 +169,31 @@ function windowAverage(
 
 interface LessonStats {
   best: number | null;
+  xp: number | null;
+  passed: boolean;
   firstPassAt: number | null;
   attempts: number;
   lastAt: number;
 }
 
-function lessonStats(subs: { lessonId: string; score: number | null; at: number }[]) {
+function lessonStats(attempts: Attempt[]) {
   const stats = new Map<string, LessonStats>();
-  for (const s of subs) {
-    const cur = stats.get(s.lessonId) ?? { best: null, firstPassAt: null, attempts: 0, lastAt: 0 };
+  for (const s of attempts) {
+    const cur = stats.get(s.lessonId) ?? {
+      best: null,
+      xp: null,
+      passed: false,
+      firstPassAt: null,
+      attempts: 0,
+      lastAt: 0,
+    };
     cur.attempts++;
     cur.lastAt = Math.max(cur.lastAt, s.at);
-    if (s.score !== null) {
-      cur.best = Math.max(cur.best ?? 0, s.score);
-      if (s.score >= PASS_SCORE && (cur.firstPassAt === null || s.at < cur.firstPassAt)) {
-        cur.firstPassAt = s.at;
-      }
+    if (s.score !== null) cur.best = Math.max(cur.best ?? 0, s.score);
+    if (s.xp !== null) cur.xp = Math.max(cur.xp ?? 0, s.xp);
+    if (s.passed) {
+      cur.passed = true;
+      if (cur.firstPassAt === null || s.at < cur.firstPassAt) cur.firstPassAt = s.at;
     }
     stats.set(s.lessonId, cur);
   }
@@ -172,7 +209,13 @@ export interface GradebookRow {
   xp: number;
   level: number;
   lastActivityAt: string | null;
-  lastLesson: { title: string; subject: string; source: string; score: number | null } | null;
+  lastLesson: {
+    title: string;
+    subject: string;
+    source: string;
+    score: number | null;
+    xp: number | null;
+  } | null;
   done: number;
   total: number;
   pct: number;
@@ -194,21 +237,20 @@ export function summarizeStudents(
   const catalog = buildCatalog(input);
   const now = input.now.getTime();
 
-  const byStudent = new Map<string, { lessonId: string; sub: GbSubmission; at: number }[]>();
+  const byStudent = new Map<string, { lessonId: string; sub: GbSubmission; attempt: Attempt; at: number }[]>();
   for (const sub of input.submissions) {
     const lesson = fullCatalog.resolve(sub);
     if (!lesson) continue;
     const list = byStudent.get(sub.student_id) ?? [];
-    list.push({ lessonId: lesson.id, sub, at: Date.parse(sub.submitted_at) });
+    const attempt = toAttempt(sub, lesson);
+    list.push({ lessonId: lesson.id, sub, attempt, at: attempt.at });
     byStudent.set(sub.student_id, list);
   }
 
   return input.students.map((student) => {
     const program = student.program || "supercoder";
     const entries = byStudent.get(student.id) ?? [];
-    const flat = entries
-      .filter((e) => catalog.lessonById.has(e.lessonId))
-      .map((e) => ({ lessonId: e.lessonId, score: e.sub.score, at: e.at }));
+    const flat = entries.filter((e) => catalog.lessonById.has(e.lessonId)).map((e) => e.attempt);
     const stats = lessonStats(flat);
     const total = catalog.totalFor(program);
 
@@ -217,7 +259,7 @@ export function summarizeStudents(
     let passedThisWeek = 0;
     for (const [lessonId, s] of stats) {
       const accessible = catalog.lessonById.get(lessonId)?.modulePrograms.includes(program);
-      if (s.best !== null && s.best >= PASS_SCORE) {
+      if (s.passed) {
         if (accessible) done++;
         if (s.firstPassAt !== null && s.firstPassAt >= now - INACTIVE_DAYS * DAY_MS) passedThisWeek++;
       } else if (s.best !== null) {
@@ -265,7 +307,8 @@ export function summarizeStudents(
               title: lastLesson.title,
               subject: lastLesson.subjectTitle,
               source: SOURCE_LABELS[last.sub.type] || last.sub.type,
-              score: last.sub.score,
+              score: last.attempt.score,
+              xp: last.attempt.xp,
             }
           : null,
       done,
@@ -291,6 +334,8 @@ export interface ProfileLesson {
   title: string;
   type: string;
   score: number | null;
+  xp: number | null;
+  passed: boolean;
   attempts: number;
 }
 
@@ -307,13 +352,23 @@ export interface StudentProfile {
   activeDaysThisMonth: number;
   longestStreakThisMonth: number;
   lastActivity: { at: string; lesson: string } | null;
-  sources: { type: string; label: string; lessons: number; avg: number | null; passed: number }[];
+  sources: {
+    type: string;
+    label: string;
+    lessons: number;
+    avg: number | null;
+    passed: number;
+    // Materi dan total XP dari nilai guru yang diisi sebagai XP (lihat isXpGrade).
+    xpLessons: number;
+    xp: number;
+  }[];
   timeline: {
     at: string;
     lesson: string;
     subject: string;
     source: string;
     score: number | null;
+    xp: number | null;
     attempt: number;
     feedback: string | null;
   }[];
@@ -342,10 +397,14 @@ export function buildStudentProfile(
   const now = input.now.getTime();
 
   const entries = input.submissions
-    .map((sub) => ({ sub, lesson: catalog.resolve(sub), at: Date.parse(sub.submitted_at) }))
-    .filter((e): e is { sub: GbSubmission; lesson: CatalogLesson; at: number } => !!e.lesson)
+    .flatMap((sub) => {
+      const lesson = catalog.resolve(sub);
+      if (!lesson) return [];
+      const attempt = toAttempt(sub, lesson);
+      return [{ sub, lesson, attempt, at: attempt.at }];
+    })
     .sort((a, b) => a.at - b.at);
-  const flat = entries.map((e) => ({ lessonId: e.lesson.id, score: e.sub.score, at: e.at }));
+  const flat = entries.map((e) => e.attempt);
   const stats = lessonStats(flat);
 
   // Percobaan ke-n dihitung per materi + sumber, urut waktu.
@@ -354,24 +413,27 @@ export function buildStudentProfile(
     const key = `${e.lesson.id}:${e.sub.type}`;
     const n = (attemptCounter.get(key) ?? 0) + 1;
     attemptCounter.set(key, n);
-    return { ...e, attempt: n };
+    return { ...e, nth: n };
   });
 
-  const sourceBest = new Map<string, Map<string, number>>();
-  for (const e of entries) {
-    if (e.sub.score === null) continue;
-    const perType = sourceBest.get(e.sub.type) ?? new Map<string, number>();
-    perType.set(e.lesson.id, Math.max(perType.get(e.lesson.id) ?? 0, e.sub.score));
-    sourceBest.set(e.sub.type, perType);
+  // Statistik per sumber nilai: materi yang punya nilai/XP dari sumber itu.
+  const bySource = new Map<string, Map<string, LessonStats>>();
+  for (const type of SCORED_TYPES) {
+    const attempts = entries
+      .filter((e) => e.sub.type === type && (e.attempt.score !== null || e.attempt.xp !== null))
+      .map((e) => e.attempt);
+    bySource.set(type, lessonStats(attempts));
   }
   const sources = SCORED_TYPES.map((type) => {
-    const scores = [...(sourceBest.get(type)?.values() ?? [])];
+    const perLesson = [...bySource.get(type)!.values()];
     return {
       type,
       label: SOURCE_LABELS[type],
-      lessons: scores.length,
-      avg: average(scores),
-      passed: scores.filter((s) => s >= PASS_SCORE).length,
+      lessons: perLesson.length,
+      avg: average(perLesson.filter((s) => s.best !== null).map((s) => s.best as number)),
+      passed: perLesson.filter((s) => s.passed).length,
+      xpLessons: perLesson.filter((s) => s.xp !== null).length,
+      xp: perLesson.reduce((n, s) => n + (s.xp ?? 0), 0),
     };
   });
 
@@ -381,6 +443,8 @@ export function buildStudentProfile(
     title: l.title,
     type: l.type,
     score: stats.get(l.id)?.best ?? null,
+    xp: stats.get(l.id)?.xp ?? null,
+    passed: stats.get(l.id)?.passed ?? false,
     attempts: stats.get(l.id)?.attempts ?? 0,
   });
 
@@ -401,7 +465,7 @@ export function buildStudentProfile(
         }))
         .filter((m) => m.lessons.length > 0);
       const lessons = modules.flatMap((m) => m.lessons);
-      const done = lessons.filter((l) => (l.score ?? -1) >= PASS_SCORE).length;
+      const done = lessons.filter((l) => l.passed).length;
       return {
         id: s.id,
         title: s.title,
@@ -416,10 +480,11 @@ export function buildStudentProfile(
     .sort((a, b) => Number(b.attempted) - Number(a.attempted));
 
   const total = accessible.length;
-  const done = accessible.filter((l) => (stats.get(l.id)?.best ?? -1) >= PASS_SCORE).length;
+  const done = accessible.filter((l) => stats.get(l.id)?.passed).length;
 
+  // Materi dengan nilai 0–100 di bawah batas lulus, dan belum diselesaikan lewat sumber lain.
   const retry = [...stats.entries()]
-    .filter(([, s]) => s.best !== null && s.best < PASS_SCORE)
+    .filter(([, s]) => !s.passed && s.best !== null)
     .map(([id, s]) => {
       const l = catalog.lessonById.get(id)!;
       return {
@@ -471,8 +536,9 @@ export function buildStudentProfile(
         lesson: e.lesson.title,
         subject: e.lesson.subjectTitle,
         source: SOURCE_LABELS[e.sub.type] || e.sub.type,
-        score: e.sub.score,
-        attempt: e.attempt,
+        score: e.attempt.score,
+        xp: e.attempt.xp,
+        attempt: e.nth,
         feedback: e.sub.feedback || null,
       })),
     retry,
