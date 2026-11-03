@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient, getSessionUser } from "@/utils/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -8,9 +8,7 @@ export default async function LeaderboardPage() {
   const supabase = await createClient();
 
   // Peringkat per program: siswa MINAS hanya dibandingkan dengan sesama MINAS.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
   const { data: viewer } = await supabase
     .from("profiles")

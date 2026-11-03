@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./admin.module.css";
-import { createClient } from "@/utils/supabase/server";
+import { createClient, getSessionUser } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/auth/actions";
 
@@ -11,9 +11,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
 
   if (!user) redirect("/login");
 

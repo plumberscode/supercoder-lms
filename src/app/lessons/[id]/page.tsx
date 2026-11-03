@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient, getSessionUser } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import {
   blockedStudentPath,
@@ -30,27 +30,18 @@ export default async function LessonPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
 
   if (!user) redirect("/login");
 
-  const { data: viewer } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const [{ data: viewer }, { data: lesson }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase.from("lessons").select("*, module_id(*)").eq("id", id).single(),
+  ]);
   if (!viewer) redirect("/login");
   if (!isStaff(viewer.role) && viewer.status !== "approved") {
     redirect(blockedStudentPath(viewer.status));
   }
-
-  const { data: lesson } = await supabase
-    .from("lessons")
-    .select("*, module_id(*)")
-    .eq("id", id)
-    .single();
 
   if (!lesson) {
     return (
@@ -86,101 +77,59 @@ export default async function LessonPage({
     redirect(`/subjects/${(lesson.module_id as any).subject_id}`);
   }
 
-  let lessonScore = null;
-  let codeSubmission = null;
-  let cssSubmission: { score: number; data: any } | null = null;
-  let webSubmission: { score: number; data: any } | null = null;
-  if (user) {
-    const { data } = await supabase
+  const submissionOf = (type: string, columns: string) =>
+    supabase
       .from("submissions")
-      .select("score, feedback, graded_at")
+      .select(columns)
       .eq("student_id", user.id)
       .eq("content_id", id)
-      .eq("type", "lesson")
-      .maybeSingle();
-    if (data) lessonScore = data;
-
-    const { data: codeSub } = await supabase
-      .from("submissions")
-      .select("score, data")
-      .eq("student_id", user.id)
-      .eq("content_id", id)
-      .eq("type", "code")
-      .maybeSingle();
-    if (codeSub) {
-      codeSubmission = codeSub;
-    }
-
-    const { data: cssSub } = await supabase
-      .from("submissions")
-      .select("score, data")
-      .eq("student_id", user.id)
-      .eq("content_id", id)
-      .eq("type", "css")
-      .maybeSingle();
-    if (cssSub) {
-      cssSubmission = cssSub;
-    }
-
-    const { data: webSub } = await supabase
-      .from("submissions")
-      .select("score, data")
-      .eq("student_id", user.id)
-      .eq("content_id", id)
-      .eq("type", "web")
-      .maybeSingle();
-    if (webSub) {
-      webSubmission = webSub;
-    }
-  }
-
-  // Fetch coding challenge if lesson type is 'code'
-  let codingChallenge = null;
-  let testCases: any[] = [];
-  if (lesson.type === "code") {
-    const { data: challenge } = await supabase
-      .from("coding_challenges")
-      .select("*")
-      .eq("lesson_id", id)
-      .single();
-    if (challenge) {
-      codingChallenge = {
-        ...challenge,
-        description: prepareChallengeDescription(challenge.description),
-      };
-      const { data: cases } = await supabase
-        .from("test_cases")
-        .select("*")
-        .eq("challenge_id", challenge.id)
-        .order("order_index");
-      testCases = cases || [];
-    }
-  }
+      .eq("type", type)
+      .maybeSingle<any>();
 
   // Soal CSS & Web: tabelnya hanya bisa dibaca staf (kunci jawaban ada di sana), jadi
   // diambil lewat service role setelah akses materi dicek di atas. Kolom reference_*
   // (kunci jawaban) tidak dikirim ke browser; penilaian AI mengambilnya sendiri di server.
   const admin = createAdminClient();
 
+  // Fetch coding challenge if lesson type is 'code'
+  const fetchCodingChallenge = async () => {
+    if (lesson.type !== "code") return { challenge: null, cases: [] as any[] };
+    const { data: challenge } = await supabase
+      .from("coding_challenges")
+      .select("*")
+      .eq("lesson_id", id)
+      .single();
+    if (!challenge) return { challenge: null, cases: [] as any[] };
+    const { data: cases } = await supabase
+      .from("test_cases")
+      .select("*")
+      .eq("challenge_id", challenge.id)
+      .order("order_index");
+    return {
+      challenge: {
+        ...challenge,
+        description: prepareChallengeDescription(challenge.description),
+      },
+      cases: cases || [],
+    };
+  };
+
   // Fetch CSS challenge if lesson type is 'css-challenge'
-  let cssChallenge = null;
-  if (lesson.type === "css-challenge") {
+  const fetchCssChallenge = async () => {
+    if (lesson.type !== "css-challenge") return null;
     const { data: challenge } = await admin
       .from("css_challenges")
       .select("id, lesson_id, title, description, starter_html, starter_css, max_score, max_attempts")
       .eq("lesson_id", id)
       .single();
-    if (challenge) {
-      cssChallenge = {
-        ...challenge,
-        description: prepareChallengeDescription(challenge.description),
-      };
-    }
-  }
+    return challenge
+      ? { ...challenge, description: prepareChallengeDescription(challenge.description) }
+      : null;
+  };
 
   // Fetch Web challenge if lesson type is 'web-challenge'
-  let webChallenge = null;
-  if (lesson.type === "web-challenge") {
+  const fetchWebChallenge = async () => {
+    if (lesson.type !== "web-challenge") return null;
     const { data: challenge } = await admin
       .from("web_challenges")
       .select(
@@ -188,13 +137,29 @@ export default async function LessonPage({
       )
       .eq("lesson_id", id)
       .single();
-    if (challenge) {
-      webChallenge = {
-        ...challenge,
-        description: prepareChallengeDescription(challenge.description),
-      };
-    }
-  }
+    return challenge
+      ? { ...challenge, description: prepareChallengeDescription(challenge.description) }
+      : null;
+  };
+
+  // Semua pengambilan di bawah tidak saling bergantung, jadi dijalankan bersamaan.
+  const [
+    { data: lessonScore },
+    { data: codeSubmission },
+    { data: cssSubmission },
+    { data: webSubmission },
+    { challenge: codingChallenge, cases: testCases },
+    cssChallenge,
+    webChallenge,
+  ] = await Promise.all([
+    submissionOf("lesson", "score, feedback, graded_at"),
+    submissionOf("code", "score, data"),
+    submissionOf("css", "score, data"),
+    submissionOf("web", "score, data"),
+    fetchCodingChallenge(),
+    fetchCssChallenge(),
+    fetchWebChallenge(),
+  ]);
 
   const subjectId = (lesson.module_id as any).subject_id;
   const moduleTitle = (lesson.module_id as any).title;

@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient, getSessionUser } from "@/utils/supabase/server";
 import {
   blockedStudentPath,
   canAccessModule,
@@ -42,9 +42,7 @@ function xpIcon(type: string): string {
 export default async function DashboardPage() {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -57,13 +55,74 @@ export default async function DashboardPage() {
     redirect(blockedStudentPath(profile?.status));
   }
 
-  // Subjects yang punya modul terbuka untuk program siswa ini. Teaser juga melihat kursus
-  // yang hanya berisi modul terkunci (isLocked) sebagai ajakan ke kelas Supercoder.
-  const { data: allSubjects } = await supabase
-    .from("subjects")
-    .select("*, modules(*, lessons(id))")
-    .eq("is_active", true)
-    .order("order_index", { ascending: true });
+  // Leaderboard & testimoni terpisah per program: siswa MINAS hanya bersaing sesama MINAS,
+  // dan testimoni (dipakai di situs publik) hanya dari siswa Supercoder.
+  const program = profile.program ?? "supercoder";
+  const isMinas = program === "minas";
+  const canWriteTestimonial = program === "supercoder";
+
+  // Query yang tidak saling bergantung dijalankan bersamaan.
+  const [
+    // Subjects yang punya modul terbuka untuk program siswa ini. Teaser juga melihat kursus
+    // yang hanya berisi modul terkunci (isLocked) sebagai ajakan ke kelas Supercoder.
+    { data: allSubjects },
+    // Recent activity from submissions (lesson + quiz)
+    { data: recentActivity },
+    // Determine if student has previous learning activity and find last lesson
+    { data: latestSubmission },
+    // Top leaderboard
+    { data: leaderboard },
+    // Stats
+    { count: completedModules },
+    // Kuis unik: mengulang kuis yang sama tidak menambah hitungan.
+    { data: quizSubmissions },
+  ] = await Promise.all([
+    supabase
+      .from("subjects")
+      .select("*, modules(*, lessons(id))")
+      .eq("is_active", true)
+      .order("order_index", { ascending: true }),
+    supabase
+      .from("submissions")
+      .select(
+        `
+      id,
+      type,
+      score,
+      submitted_at,
+      lessons ( title, modules ( subjects ( title ) ) )
+    `
+      )
+      .eq("student_id", user.id)
+      .order("submitted_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("submissions")
+      .select("id, type, content_id, submitted_at")
+      .eq("student_id", user.id)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("id, full_name, xp, level")
+      .eq("status", "approved")
+      .eq("role", "student")
+      .eq("program", program)
+      .order("xp", { ascending: false })
+      .limit(5),
+    supabase
+      .from("submissions")
+      .select("*", { count: "exact", head: true })
+      .eq("student_id", user.id)
+      .eq("type", "lesson"),
+    supabase
+      .from("submissions")
+      .select("content_id")
+      .eq("student_id", user.id)
+      .eq("type", "quiz"),
+  ]);
+
   const subjects = (allSubjects ?? [])
     .map((s) => {
       const visibility = (s.modules ?? []).map((m: any) =>
@@ -101,37 +160,12 @@ export default async function DashboardPage() {
     teaserProgress = { done: done.size, total: openLessonIds.length };
   }
 
-  // Recent activity from submissions (lesson + quiz)
-  const { data: recentActivity } = await supabase
-    .from("submissions")
-    .select(
-      `
-      id,
-      type,
-      score,
-      submitted_at,
-      lessons ( title, modules ( subjects ( title ) ) )
-    `
-    )
-    .eq("student_id", user.id)
-    .order("submitted_at", { ascending: false })
-    .limit(5);
-
   // Find HTML & CSS subject for new students
   const openSubjects = subjects.filter((s) => !s.isLocked);
   const htmlCssSubject =
     openSubjects.find((s) => s.title.toLowerCase().includes("html")) ||
     openSubjects.find((s) => s.order_index === 1) ||
     openSubjects[0];
-
-  // Determine if student has previous learning activity and find last lesson
-  const { data: latestSubmission } = await supabase
-    .from("submissions")
-    .select("id, type, content_id, submitted_at")
-    .eq("student_id", user.id)
-    .order("submitted_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
 
   let continueLearningUrl = htmlCssSubject ? `/subjects/${htmlCssSubject.id}` : "#";
   let isReturningStudent = false;
@@ -165,35 +199,6 @@ export default async function DashboardPage() {
     }
   }
 
-  // Leaderboard & testimoni terpisah per program: siswa MINAS hanya bersaing sesama MINAS,
-  // dan testimoni (dipakai di situs publik) hanya dari siswa Supercoder.
-  const program = profile.program ?? "supercoder";
-  const isMinas = program === "minas";
-  const canWriteTestimonial = program === "supercoder";
-
-  // Top leaderboard
-  const { data: leaderboard } = await supabase
-    .from("profiles")
-    .select("id, full_name, xp, level")
-    .eq("status", "approved")
-    .eq("role", "student")
-    .eq("program", program)
-    .order("xp", { ascending: false })
-    .limit(5);
-
-  // Stats
-  const { count: completedModules } = await supabase
-    .from("submissions")
-    .select("*", { count: "exact", head: true })
-    .eq("student_id", user.id)
-    .eq("type", "lesson");
-
-  // Kuis unik: mengulang kuis yang sama tidak menambah hitungan.
-  const { data: quizSubmissions } = await supabase
-    .from("submissions")
-    .select("content_id")
-    .eq("student_id", user.id)
-    .eq("type", "quiz");
   const completedQuizzes = new Set(
     (quizSubmissions ?? []).map((s) => s.content_id),
   ).size;

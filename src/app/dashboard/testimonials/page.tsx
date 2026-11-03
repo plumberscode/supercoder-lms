@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient, getSessionUser } from "@/utils/supabase/server";
 import { blockedStudentPath } from "@/lib/student-access";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -13,9 +13,7 @@ export const metadata = {
 export default async function StudentTestimonialsPage() {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
 
   if (!user) redirect("/login");
 

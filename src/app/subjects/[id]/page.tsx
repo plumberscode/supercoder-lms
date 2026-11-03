@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient, getSessionUser } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import {
   blockedStudentPath,
@@ -31,22 +31,11 @@ export default async function SubjectPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
   if (!user) redirect("/login");
 
-  const { data: viewer } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-  if (!viewer) redirect("/login");
-  if (!isStaff(viewer.role) && viewer.status !== "approved") {
-    redirect(blockedStudentPath(viewer.status));
-  }
-
-  const [{ data: subject }, { data: activeSubjects }] = await Promise.all([
+  const [{ data: viewer }, { data: subject }, { data: activeSubjects }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase
       .from("subjects")
       .select(
@@ -67,6 +56,10 @@ export default async function SubjectPage({
       .eq("is_active", true)
       .order("order_index", { ascending: true }),
   ]);
+  if (!viewer) redirect("/login");
+  if (!isStaff(viewer.role) && viewer.status !== "approved") {
+    redirect(blockedStudentPath(viewer.status));
+  }
 
   // Modul terbuka bisa dikerjakan; modul terkunci (khusus teaser) hanya tampil judulnya.
   const modules = (subject?.modules ?? [])

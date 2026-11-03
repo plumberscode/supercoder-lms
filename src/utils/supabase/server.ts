@@ -27,3 +27,18 @@ export async function createClient() {
     },
   );
 }
+
+/**
+ * Identitas pengguna untuk render halaman. Memakai `getClaims()` yang memverifikasi
+ * JWT secara lokal (dengan kunci JWKS yang di-cache) bila proyek memakai asymmetric
+ * signing key, jadi tidak perlu bolak-balik ke server Auth seperti `getUser()`.
+ * Server action yang mengubah data tetap memakai `getUser()`.
+ */
+export async function getSessionUser(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<{ id: string; email?: string } | null> {
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  if (!claims?.sub) return null;
+  return { id: claims.sub, email: claims.email };
+}

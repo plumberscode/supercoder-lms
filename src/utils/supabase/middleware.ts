@@ -29,8 +29,9 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // refreshing the auth token
-  await supabase.auth.getUser();
+  // Menyegarkan token bila hampir kedaluwarsa. getClaims() memverifikasi JWT secara
+  // lokal sehingga proxy tidak menambah satu request ke server Auth per navigasi.
+  await supabase.auth.getClaims();
 
   return supabaseResponse;
 }
