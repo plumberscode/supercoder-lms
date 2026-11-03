@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ToastProvider";
+import NavigationProgress from "@/components/skeleton/NavigationProgress";
 import { SITE_URL, HOME_TITLE, HOME_DESCRIPTION } from "@/lib/site";
 
 const inter = Inter({
@@ -90,6 +92,9 @@ export default function RootLayout({
   return (
     <html lang="id" className="font-sans">
       <body className={`${inter.variable} ${poppins.variable}`}>
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

@@ -1,0 +1,103 @@
+/* Blok abu-abu berkilau sebagai pengganti konten yang sedang dimuat. */
+.bone {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.18) 0%,
+    rgba(148, 163, 184, 0.32) 50%,
+    rgba(148, 163, 184, 0.18) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.circle {
+  border-radius: 50%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bone {
+    animation: none;
+  }
+}
+
+/* ── Admin ─────────────────────────────────────────────────────────────── */
+
+.adminStack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.adminStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.adminCard {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adminRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+
+.adminRow:first-of-type {
+  border-top: none;
+}
+
+/* ── Siswa ─────────────────────────────────────────────────────────────── */
+
+.heroText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+}
+
+/* ── Progress bar navigasi ─────────────────────────────────────────────── */
+
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, #f97316, var(--primary));
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  transform-origin: left;
+  pointer-events: none;
+  transition:
+    transform 0.25s ease,
+    opacity 0.3s ease;
+}
