@@ -238,7 +238,7 @@ export default async function LessonScoresPage({
                 required
               />
             </div>
-            <button type="submit" className="btn">
+            <button type="submit" className="btn btn-secondary">
               Simpan Bobot
             </button>
             <p
