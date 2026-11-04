@@ -18,6 +18,15 @@ interface StudentProject {
 
 const projects: StudentProject[] = [
   {
+    name: "Nararya Riffat",
+    school: "Kelas 9, SMP IT Al-Firdaus Samarinda",
+    project: "Website Sekolah",
+    desc: "Riffat mengembangkan website sekolah yang sekaligus juga diikutsertakan dalam lomba M-One Telkomsel Coding Competition.",
+    url: "https://smpit-al-firdaus.vercel.app/",
+    gradient: "from-emerald-600 via-green-500 to-emerald-400",
+    image: "/images/karya/riffat-mockup.webp",
+  },
+  {
     name: "Rig Marjanul",
     school: "Kelas 8 SMP, KPS Balikpapan",
     project: "Landing Page Matematika",
