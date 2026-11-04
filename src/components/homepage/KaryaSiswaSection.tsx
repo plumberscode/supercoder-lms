@@ -132,11 +132,10 @@ export default function KaryaSiswaSection() {
             Dari Belajar <span className="text-orange-500">Jadi Membangun</span>
           </h2>
           <p className="font-sans text-base sm:text-lg text-slate-600">
-            Suatu hari, kami memberikan tugas yang sama ke seluruh siswa,
-            membangun website Kursus Matematika, dan mereka mengembangkan
-            dengan &lsquo;style&rsquo; yang berbeda-beda. Ada juga seorang
-            karyawan non-IT yang telah berhasil membangun beberapa aplikasi
-            yang digunakan sebagai internal tool di perusahaannya.
+            Siswa Supercoder tidak hanya belajar, tapi juga membangun karya
+            nyata. Mulai dari landing page dengan &lsquo;style&rsquo; masing-masing,
+            website sekolah yang ikut lomba coding, sampai aplikasi internal
+            yang dipakai sehari-hari di perusahaan.
           </p>
         </div>
 
