@@ -71,6 +71,7 @@ export async function submitLessonScore(formData: FormData) {
   if (!lessonId || !studentId || isNaN(score)) {
     throw new Error("Data tidak lengkap");
   }
+  if (score < 0 || score > 100) throw new Error("Nilai harus 0–100");
 
   // Cek apakah sudah ada nilai sebelumnya untuk lesson ini oleh student ini
   const { data: existing } = await supabase
