@@ -249,8 +249,10 @@ export default async function LessonScoresPage({
                 color: "var(--text-muted)",
               }}
             >
-              Nilai siswa diisi dengan skala 0–100. Siswa mendapat XP ini sekali,
-              saat nilainya pertama kali mencapai 70 atau lebih.
+              Klik &quot;Simpan Bobot&quot; dulu — tombol Simpan di tiap siswa tidak
+              ikut menyimpan bobot. Nilai siswa diisi dengan skala 0–100. Siswa
+              mendapat XP ini sekali, saat nilainya mencapai 70 atau lebih
+              (siswa yang sudah lulus langsung mendapat XP saat bobot disimpan).
             </p>
           </form>
 

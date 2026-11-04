@@ -7,6 +7,8 @@ import { currentUserIsStaff } from "@/lib/staff";
 import { awardXp } from "@/lib/xp";
 
 export async function saveLessonXpReward(formData: FormData) {
+  // Menyimpan bobot juga memberi XP susulan lewat service role.
+  if (!(await currentUserIsStaff())) throw new Error("Hanya admin atau guru.");
   const supabase = await createClient();
 
   const lessonId = formData.get("lessonId") as string;
@@ -28,7 +30,32 @@ export async function saveLessonXpReward(formData: FormData) {
     );
   }
 
+  // Siswa yang sudah lulus sebelum bobot diisi tetap mendapat XP, sekali saja.
+  if (xpReward > 0) {
+    const { data: passed } = await supabase
+      .from("submissions")
+      .select("id, student_id, data")
+      .eq("content_id", lessonId)
+      .eq("type", "lesson")
+      .gte("score", PASS_SCORE);
+
+    for (const sub of passed || []) {
+      if (sub.data?.xp_awarded) continue;
+      const { error: flagError } = await supabase
+        .from("submissions")
+        .update({ data: { ...(sub.data || {}), xp_awarded: xpReward } })
+        .eq("id", sub.id);
+      if (flagError) {
+        console.error("Error flagging xp_awarded:", flagError);
+        continue;
+      }
+      await awardXp(sub.student_id, xpReward);
+    }
+  }
+
   revalidatePath("/admin/lesson-scores");
+  revalidatePath("/leaderboard");
+  revalidatePath("/dashboard");
 }
 
 export async function submitLessonScore(formData: FormData) {
