@@ -9,7 +9,7 @@ export default function JsonLd() {
     "@type": ["EducationalOrganization", "LocalBusiness"],
     "@id": `${siteUrl}/#organization`,
     name: "Supercoder",
-    alternateName: ["Supercoder Balikpapan", "Supercoder Coding School"],
+    alternateName: ["Super Coder", "Supercoder Balikpapan", "Supercoder Coding School"],
     url: siteUrl,
     logo: `${siteUrl}/images/Logo%20transparent%20orange.webp`,
     image: `${siteUrl}/images/hero-image-supercoder.webp`,
@@ -39,6 +39,19 @@ export default function JsonLd() {
         closes: "10:30",
       },
     ],
+  };
+
+  // WebSite: sumber utama "site name" di hasil Google. alternateName menangkap ejaan
+  // "Super Coder" (pakai spasi) yang di GSC mendarat di halaman non-homepage.
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${siteUrl}/#website`,
+    name: "Supercoder",
+    alternateName: ["Super Coder", "Supercoder Balikpapan", "supercoder.id"],
+    url: `${siteUrl}/`,
+    inLanguage: "id-ID",
+    publisher: { "@id": `${siteUrl}/#organization` },
   };
 
   const faqSchema = {
@@ -99,6 +112,10 @@ export default function JsonLd() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
       />
       <script
         type="application/ld+json"

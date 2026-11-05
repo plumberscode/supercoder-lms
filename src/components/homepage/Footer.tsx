@@ -3,8 +3,9 @@ import Link from "next/link";
 import { MapPin, Clock, Phone } from "lucide-react";
 import { BUSINESS, BUSINESS_MAPS_EMBED_URL } from "@/lib/site";
 
-// showLocalLinks: tautan ke halaman lokal (/kursus-coding-balikpapan, /kursus-komputer-balikpapan). Sengaja tidak aktif di
-// homepage (default) supaya halaman itu tidak ditautkan dari "/".
+// showLocalLinks: tautan ke /kursus-coding-balikpapan dan "Kontak & Lokasi" internal. Sengaja tidak aktif di
+// homepage (default) karena "/" sendiri menargetkan "kursus coding balikpapan". Tautan /kursus-komputer-balikpapan
+// selalu tampil (keyword berbeda, tidak bersaing dengan homepage).
 export default function Footer({ showLocalLinks = false }: { showLocalLinks?: boolean }) {
   return (
     <footer
@@ -279,16 +280,16 @@ export default function Footer({ showLocalLinks = false }: { showLocalLinks?: bo
                     </Link>
                   </li>
                 )}
-                {showLocalLinks && (
-                  <li>
-                    <Link
-                      href="/kursus-komputer-balikpapan"
-                      className="hover:text-red-600 transition-colors"
-                    >
-                      Kursus Komputer Balikpapan
-                    </Link>
-                  </li>
-                )}
+                {/* Selalu tampil, termasuk di homepage: halaman ini sudah posisi ~4,9 untuk
+                    "kursus komputer balikpapan" dan butuh tautan internal dari "/" untuk naik. */}
+                <li>
+                  <Link
+                    href="/kursus-komputer-balikpapan"
+                    className="hover:text-red-600 transition-colors"
+                  >
+                    Kursus Komputer Balikpapan
+                  </Link>
+                </li>
                 <li>
                   {showLocalLinks ? (
                     <Link
