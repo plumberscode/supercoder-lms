@@ -303,7 +303,11 @@ export default function KursusCodingBalikpapanPage() {
               ))}
             </div>
             <p className={`${pClass} mt-6`}>
-              Untuk orang tua, ada{" "}
+              Untuk anak usia SMP, lihat detail kelas, materi, dan karya siswanya di halaman{" "}
+              <Link href="/kursus-coding-smp" className={linkClass}>
+                kursus coding untuk anak SMP
+              </Link>
+              . Untuk orang tua, ada{" "}
               <Link href="/blog/belajar-coding-untuk-anak-smp-sma" className={linkClass}>
                 panduan belajar coding untuk SMP &amp; SMA
               </Link>{" "}
