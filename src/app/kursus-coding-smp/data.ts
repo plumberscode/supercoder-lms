@@ -56,10 +56,6 @@ export const faqs: { q: string; a: string; link?: { text: string; href: string }
     a: "Kelas ini dirancang untuk anak SMP, sekitar usia 12–15 tahun atau kelas 7 sampai 9. Di usia ini anak sudah siap belajar bahasa pemrograman sungguhan, seperti HTML, CSS, dan JavaScript.",
   },
   {
-    q: "Kursus coding SMP berapa lama?",
-    a: "Kurikulum intinya 12 pertemuan, atau sekitar 3 bulan jika belajar seminggu sekali. Di kelas online, durasinya bisa menyesuaikan jadwal anak. Di akhir tahap ini, anak sudah punya website buatannya sendiri.",
-  },
-  {
     q: "Apakah anak SMP sudah bisa belajar coding dari nol?",
     a: "Bisa. Tidak ada syarat pengalaman coding sebelumnya. Yang dibutuhkan hanya kemampuan dasar memakai komputer dan rasa ingin tahu.",
   },
