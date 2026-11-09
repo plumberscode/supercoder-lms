@@ -419,8 +419,6 @@ export default function KursusCodingSmpPage() {
               </Link>
               .
             </p>
-            {/* TODO FOTO: suasana kelas atau karya siswa SMP. JANGAN pakai foto Rig.
-                alt="Siswa SMP belajar coding di kelas tatap muka Supercoder Balikpapan" */}
           </section>
 
           {/* FAQ: <details> agar jawaban sudah ada di HTML sejak load awal; teks identik dengan FAQPage JSON-LD */}
