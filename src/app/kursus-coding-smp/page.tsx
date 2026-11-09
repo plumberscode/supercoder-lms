@@ -274,6 +274,14 @@ export default function KursusCodingSmpPage() {
               runtut, seperti saat praktikum IPA.
             </p>
             <p className={pClass}>
+              Sejak tahun ajaran 2025/2026, sebagian SMP juga membuka mapel pilihan Koding dan
+              Kecerdasan Artifisial. Baca{" "}
+              <Link href="/blog/mapel-koding-dan-kecerdasan-artifisial-smp" className={linkClass}>
+                penjelasan mapel KKA di SMP
+              </Link>{" "}
+              untuk tahu apa yang dipelajari dan pilihannya kalau sekolah anak belum membukanya.
+            </p>
+            <p className={pClass}>
               Satu hal lagi: anak SMP sudah cukup mandiri untuk mengerjakan proyek di rumah. Mereka
               bisa melanjutkan latihan sendiri di antara pertemuan, sehingga kemajuannya lebih cepat
               dibanding anak yang lebih kecil.
