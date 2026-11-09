@@ -1,84 +1,94 @@
-import { BUSINESS } from "@/lib/site";
+import { FALLBACK_TOTAL, PAGE_PATH as FREE_PATH } from "@/app/belajar-gratis/data";
 
 export const PAGE_PATH = "/kursus-coding-smp";
 
-// Target query GSC: "coding untuk anak smp", "coding anak smp", "belajar coding untuk anak smp".
-// Niat komersial (orang tua mencari tempat kursus). Artikel /blog/belajar-coding-untuk-anak-smp-sma
-// tetap menjawab niat informasional; halaman ini tempat konversi. Jangan menargetkan "kursus coding
-// balikpapan" umum di sini — itu milik /kursus-coding-balikpapan.
-export const PAGE_TITLE = "Kursus Coding untuk Anak SMP di Balikpapan – Supercoder";
+// Target: "kursus coding smp", "coding anak smp", "coding untuk anak smp" (niat komersial).
+// Artikel /blog/belajar-coding-untuk-anak-smp-sma menjawab niat informasional; jangan salin isinya ke sini.
+// Jadwal & harga mengikuti revisi pemilik 9 Nov 2026: tatap muka Sabtu/Minggu 90 menit Rp 399.000,
+// online one-on-one fleksibel Rp 449.000.
+export const PAGE_TITLE = "Kursus Coding SMP Balikpapan – Kelas Tatap Muka | Supercoder";
 
-export const PAGE_DESCRIPTION =
-  "Kursus coding untuk anak SMP di Balikpapan: dari nol sampai bikin website sendiri. Kelas maks. 6 siswa, rapor bulanan, Rp399rb/bulan. Ada kelas online.";
+export const PAGE_DESCRIPTION = `Kursus coding untuk anak SMP di Balikpapan. Belajar bikin website & aplikasi nyata, kelas tatap muka akhir pekan. Rp 399.000/bulan, coba ${FALLBACK_TOTAL} latihan gratis.`;
 
-export const PAGE_H1_LEAD = "Kursus Coding untuk Anak SMP:";
-export const PAGE_H1_REST = "Dari Nol sampai Bikin Website Sendiri";
+export const PAGE_H1 = "Kursus Coding SMP di Balikpapan";
 
-export const whySmp = [
+export const FREE_HREF = FREE_PATH;
+export const FREE_LABEL = `${FALLBACK_TOTAL} latihan coding gratis`;
+
+export const OFFLINE_CLASS = "Weekend Coding Class";
+export const ONLINE_CLASS = "Premium Online Class";
+
+// TODO: kolom "output" masih contoh dari brief, sesuaikan dengan kurikulum asli.
+export const curriculum = [
   {
-    title: "Sudah siap berpikir logis bertahap",
-    body: "Anak usia SMP sudah lancar memakai komputer dan mulai mampu berpikir abstrak. Pas untuk belajar memecah masalah besar menjadi langkah-langkah kecil, yang juga terpakai di matematika dan sains.",
+    stage: "Pertemuan 1–4",
+    topic: "HTML dan CSS: struktur halaman, teks, gambar, warna, tata letak",
+    output: "Halaman profil pribadi yang rapi",
   },
   {
-    title: "Dari pemakai menjadi pembuat",
-    body: "Daripada hanya scroll dan main game, anak mulai bertanya \"gimana cara bikin ini?\" lalu benar-benar membuatnya. Rasa bangga saat karyanya jalan di browser sangat baik untuk kepercayaan diri.",
+    stage: "Pertemuan 5–8",
+    topic: "JavaScript dasar: variabel, kondisi, perulangan, tombol interaktif",
+    output: "Kuis atau kalkulator sederhana di browser",
   },
   {
-    title: "Bekal sebelum masuk SMA",
-    body: "Anak yang sudah punya portofolio website sejak SMP datang ke SMA dengan modal nyata: untuk lomba, ekstrakurikuler, sampai memilih jurusan dengan lebih yakin.",
+    stage: "Pertemuan 9–12",
+    topic: "Proyek website: menggabungkan HTML, CSS, dan JavaScript",
+    output: "Website sendiri yang bisa dibuka dan dibagikan ke orang lain",
   },
 ];
 
-export const parentBenefits = [
+export const comparison = [
   {
-    title: "Kelas kecil, maksimal 6 siswa",
-    body: "Setiap error dibimbing satu per satu, jadi anak tidak tertinggal dan tidak mudah menyerah.",
+    label: "Cocok untuk",
+    offline: "Anak yang lebih fokus jika didampingi langsung",
+    online: "Anak yang butuh perhatian penuh atau jadwalnya padat",
   },
   {
-    title: "Rapor bulanan untuk orang tua",
-    body: "Orang tua bisa memantau perkembangan anak dari bulan ke bulan, bukan hanya menunggu proyek akhir.",
+    label: "Interaksi",
+    offline: "Bertanya dan dibantu langsung di samping laptop",
+    online: "One-on-one: satu anak, satu mentor",
   },
   {
-    title: "Jadwal tidak bentrok sekolah",
-    body: "Kelas tatap muka setiap Minggu pagi, 90 menit, 1x seminggu. Ringan di sela jadwal sekolah dan les lain.",
+    label: "Teman belajar",
+    offline: "Belajar bersama teman sebaya di kelas",
+    online: "Belajar dari rumah, materi mengikuti kecepatan anak",
   },
+  { label: "Lokasi", offline: "Balikpapan, Jl. Syarifuddin Yoes", online: "Dari mana saja" },
   {
-    title: "Latihan di portal belajar",
-    body: "Di luar kelas, anak mengerjakan latihan coding yang dinilai otomatis dan mengumpulkan XP di leaderboard.",
+    label: "Jadwal",
+    offline: "Sabtu atau Minggu, 90 menit per pertemuan",
+    online: "Fleksibel, disepakati bersama mentor",
   },
+  { label: "Biaya", offline: "Rp 399.000 per bulan", online: "Rp 449.000 per bulan" },
 ];
 
-export const faqs = [
+// Teks `a` dipakai apa adanya di halaman dan FAQPage JSON-LD (harus identik).
+// `link` opsional: potongan teks di dalam `a` yang dijadikan tautan di halaman.
+export const faqs: { q: string; a: string; link?: { text: string; href: string } }[] = [
   {
-    q: "Berapa biaya kursus coding untuk anak SMP di Supercoder?",
-    a: "Weekend Coding Class (tatap muka di Balikpapan) Rp 399.000 per bulan, Premium Online Class (privat 1-on-1) Rp 449.000 per bulan. Keduanya 1x seminggu, 90 menit per sesi.",
+    q: "Berapa biaya les coding anak SMP di Supercoder?",
+    a: `Rp 399.000 per bulan untuk kelas tatap muka di akhir pekan (Sabtu atau Minggu), 90 menit per pertemuan. Kelas online one-on-one dengan mentor Rp 449.000 per bulan, jadwal fleksibel. Sebelum mendaftar, anak bisa mencoba ${FREE_LABEL}.`,
+    link: { text: FREE_LABEL, href: FREE_PATH },
   },
   {
-    q: "Anak saya kelas 7 dan belum pernah coding, apakah bisa ikut?",
-    a: "Bisa. Materi dimulai dari dasar HTML dan CSS dan dibimbing langkah demi langkah. Tidak perlu pengalaman coding sebelumnya.",
+    q: "Les coding SMP mulai umur berapa?",
+    a: "Kelas ini dirancang untuk anak SMP, sekitar usia 12–15 tahun atau kelas 7 sampai 9. Di usia ini anak sudah siap belajar bahasa pemrograman sungguhan, seperti HTML, CSS, dan JavaScript.",
   },
   {
-    q: "Apakah anak harus pintar matematika untuk belajar coding?",
-    a: "Tidak harus. Dasar web seperti HTML dan CSS hampir tidak memakai matematika. Justru banyak anak yang merasa logikanya ikut terasah setelah belajar coding.",
+    q: "Kursus coding SMP berapa lama?",
+    a: "Kurikulum intinya 12 pertemuan, atau sekitar 3 bulan jika belajar seminggu sekali. Di kelas online, durasinya bisa menyesuaikan jadwal anak. Di akhir tahap ini, anak sudah punya website buatannya sendiri.",
   },
   {
-    q: "Apakah perlu laptop dengan spesifikasi tinggi?",
-    a: "Tidak. Untuk belajar HTML, CSS, dan JavaScript, laptop standar yang bisa menjalankan browser modern sudah cukup.",
+    q: "Apakah anak SMP sudah bisa belajar coding dari nol?",
+    a: "Bisa. Tidak ada syarat pengalaman coding sebelumnya. Yang dibutuhkan hanya kemampuan dasar memakai komputer dan rasa ingin tahu.",
   },
   {
-    q: "Apakah kursus ini mengganggu waktu belajar di sekolah?",
-    a: "Tidak. Kelas tatap muka hanya 1x seminggu, setiap Minggu pukul 09.00–10.30 WITA. Kelas online jadwalnya fleksibel menyesuaikan jadwal sekolah anak.",
+    q: "Apa manfaat les coding untuk anak SMP?",
+    a: "Coding melatih logika, ketelitian, dan cara memecahkan masalah langkah demi langkah. Kemampuan ini membantu di pelajaran matematika dan IPA. Anak juga belajar membuat karya nyata, bukan hanya memakai teknologi.",
   },
   {
-    q: "Kami tinggal di luar Balikpapan, apakah tetap bisa ikut?",
-    a: "Bisa. Premium Online Class berlangsung privat 1-on-1 lewat Google Meet, sehingga bisa diikuti dari kota mana pun.",
-  },
-  {
-    q: "Bisakah anak mencoba dulu sebelum mendaftar?",
-    a: "Bisa. Anak dapat mencoba latihan coding gratis di halaman Belajar Gratis Supercoder, atau orang tua bisa konsultasi gratis lewat WhatsApp untuk menentukan level yang cocok.",
-  },
-  {
-    q: "Di mana lokasi kelas tatap mukanya?",
-    a: `Di ${BUSINESS.fullAddress}. Weekend Coding Class berlangsung setiap Minggu pukul 09.00–10.30 WITA.`,
+    q: "Bagaimana cara mendaftar kursus coding SMP di Balikpapan?",
+    a: "Hubungi WhatsApp 0816-331-126 atau isi formulir di halaman Daftar. Tim kami akan mengonfirmasi jadwal dan kelas yang paling cocok untuk anak Anda.",
+    link: { text: "Daftar", href: "/daftar" },
   },
 ];
