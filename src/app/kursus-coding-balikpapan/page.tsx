@@ -141,7 +141,7 @@ export default function KursusCodingBalikpapanPage() {
                   web lengkap dengan bantuan AI.
                 </p>
                 <p className={pClass}>
-                  Kelas tatap muka berlangsung setiap Minggu di {BUSINESS.fullAddress}, dengan maksimal 6 siswa per sesi. Bagi yang
+                  Kelas tatap muka berlangsung setiap akhir pekan (Sabtu atau Minggu) di {BUSINESS.fullAddress}, dengan maksimal 6 siswa per sesi. Bagi yang
                   jadwalnya padat atau tinggal di luar kota, ada kelas online privat 1-on-1.
                 </p>
                 <p className={`${pClass} mb-8`}>

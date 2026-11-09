@@ -116,7 +116,7 @@ export default function KursusKomputerBalikpapanPage() {
                   komputer: website, aplikasi web, sampai tools kerja sendiri, dengan bantuan AI.
                 </p>
                 <p className={pClass}>
-                  Kelas tatap muka berlangsung setiap Minggu di {BUSINESS.fullAddress}. Ada juga kelas online privat 1-on-1 yang
+                  Kelas tatap muka berlangsung setiap akhir pekan (Sabtu atau Minggu) di {BUSINESS.fullAddress}. Ada juga kelas online privat 1-on-1 yang
                   jadwalnya fleksibel. Pesertanya mulai dari siswa SMP, SMA, mahasiswa, sampai
                   karyawan yang sama sekali belum pernah coding.
                 </p>
@@ -397,8 +397,8 @@ export default function KursusKomputerBalikpapanPage() {
               <address className="not-italic">
                 <ul className="font-sans text-base text-slate-600 space-y-3 list-disc pl-6">
                   <li>
-                    <strong className="text-slate-900">Weekend Class (tatap muka):</strong> Minggu,
-                    09.00–10.30 WITA
+                    <strong className="text-slate-900">Weekend Class (tatap muka):</strong> Sabtu atau
+                    Minggu, 90 menit
                   </li>
                   <li>
                     <strong className="text-slate-900">Online Class:</strong> jadwal fleksibel, dari

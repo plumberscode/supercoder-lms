@@ -33,7 +33,7 @@ const programs = [
       {
         icon: Calendar,
         label: "Frekuensi",
-        value: "1x seminggu (Minggu: 09.00 - 10.30)",
+        value: "1x seminggu (Sabtu atau Minggu)",
       },
       { icon: MapPin, label: "Lokasi", value: BUSINESS.fullAddress },
       { icon: Sparkles, label: "Investasi", value: "Rp 399.000 / bulan" },
