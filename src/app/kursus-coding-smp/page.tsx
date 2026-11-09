@@ -241,8 +241,16 @@ export default function KursusCodingSmpPage() {
               <WhatsAppButton label={`Tanya Jadwal: ${BUSINESS.phoneDisplay}`} />
               <DaftarButton />
             </div>
-            {/* TODO FOTO: suasana kelas tatap muka siswa SMP (BUKAN foto Rig).
-                alt="Siswa SMP belajar coding di kelas tatap muka Supercoder Balikpapan" */}
+            {/* Bisa terlihat di layar pertama desktop: jangan lazy-load */}
+            <Image
+              src="/images/kursus-coding-smp-balikpapan.webp"
+              alt="Siswa SMP belajar coding di laptop pada kelas tatap muka Supercoder Balikpapan"
+              width={1920}
+              height={1080}
+              sizes="(min-width: 896px) 856px, 100vw"
+              loading="eager"
+              className="mt-10 w-full h-auto rounded-3xl object-cover shadow-xl"
+            />
           </div>
         </section>
 
