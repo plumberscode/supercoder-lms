@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { BUSINESS, BUSINESS_MAPS_EMBED_URL, DEFAULT_OG_IMAGE, ORG_ID, SITE_URL } from "@/lib/site";
 import {
   comparison,
-  curriculum,
   faqs,
   FREE_HREF,
   FREE_LABEL,
@@ -277,31 +276,10 @@ export default function KursusCodingSmpPage() {
             <h2 className={h2Class}>Apa yang Dipelajari di Kelas Coding SMP</h2>
             <p className={pClass}>
               Target akhirnya jelas: anak bisa membuat dan mempublikasikan website buatannya sendiri.
-              Materinya disusun bertahap, dari tampilan halaman sampai halaman yang bisa merespons
-              klik dan input.
+              Materinya disusun bertahap. Anak mulai dari HTML dan CSS untuk menyusun dan mempercantik
+              halaman. Lalu belajar JavaScript agar halamannya bisa merespons klik dan input. Terakhir,
+              semuanya digabung menjadi proyek website sendiri.
             </p>
-            <div className={tableWrapClass}>
-              <table className={tableClass}>
-                <thead>
-                  <tr>
-                    <th scope="col" className={thClass}>Tahap</th>
-                    <th scope="col" className={thClass}>Materi</th>
-                    <th scope="col" className={thClass}>Hasil yang dibawa pulang</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {curriculum.map((c) => (
-                    <tr key={c.stage}>
-                      <th scope="row" className={`${tdClass} font-semibold text-slate-900 whitespace-nowrap`}>
-                        {c.stage}
-                      </th>
-                      <td className={tdClass}>{c.topic}</td>
-                      <td className={tdClass}>{c.output}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
             <p className={pClass}>
               Setiap pertemuan selalu ada praktik langsung, bukan hanya teori. Anak menulis kode
               sendiri di laptop, lalu melihat hasilnya saat itu juga. Cara ini membuat anak cepat

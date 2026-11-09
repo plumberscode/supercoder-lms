@@ -18,25 +18,6 @@ export const FREE_LABEL = `${FALLBACK_TOTAL} latihan coding gratis`;
 export const OFFLINE_CLASS = "Weekend Coding Class";
 export const ONLINE_CLASS = "Premium Online Class";
 
-// TODO: kolom "output" masih contoh dari brief, sesuaikan dengan kurikulum asli.
-export const curriculum = [
-  {
-    stage: "Pertemuan 1–4",
-    topic: "HTML dan CSS: struktur halaman, teks, gambar, warna, tata letak",
-    output: "Halaman profil pribadi yang rapi",
-  },
-  {
-    stage: "Pertemuan 5–8",
-    topic: "JavaScript dasar: variabel, kondisi, perulangan, tombol interaktif",
-    output: "Kuis atau kalkulator sederhana di browser",
-  },
-  {
-    stage: "Pertemuan 9–12",
-    topic: "Proyek website: menggabungkan HTML, CSS, dan JavaScript",
-    output: "Website sendiri yang bisa dibuka dan dibagikan ke orang lain",
-  },
-];
-
 export const comparison = [
   {
     label: "Cocok untuk",
