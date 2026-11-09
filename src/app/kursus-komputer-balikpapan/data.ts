@@ -35,14 +35,14 @@ export const programs = [
   {
     title: "Weekend Coding Class",
     format: "Tatap muka, maks. 6 siswa per sesi",
-    schedule: "1x seminggu, Minggu 09.00–10.30 WITA",
+    schedule: "1x seminggu, Sabtu atau Minggu, 90 menit",
     priceLabel: "Rp 399.000 / bulan",
     price: "399000" as string | null,
     cta: "Amankan seat",
     image: "/images/weekend-coding-class-offline.webp",
     alt: "Weekend Coding Class tatap muka di Balikpapan, kelas kursus komputer Supercoder",
     schemaDescription:
-      "Kelas coding dan AI tatap muka di Balikpapan, maksimal 6 siswa per sesi, 1x seminggu setiap Minggu 09.00–10.30 WITA.",
+      "Kelas coding dan AI tatap muka di Balikpapan, maksimal 6 siswa per sesi, 1x seminggu di akhir pekan (Sabtu atau Minggu), 90 menit per pertemuan.",
   },
   {
     title: "Premium Online Class",
@@ -105,7 +105,7 @@ export const faqs = [
   },
   {
     q: "Di mana lokasi kelas tatap mukanya?",
-    a: `Di ${BUSINESS.fullAddress}. Kelas berlangsung setiap Minggu pukul 09.00–10.30 WITA.`,
+    a: `Di ${BUSINESS.fullAddress}. Kelas tatap muka berlangsung setiap akhir pekan (Sabtu atau Minggu), 90 menit per pertemuan.`,
   },
 ];
 

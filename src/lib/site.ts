@@ -38,7 +38,7 @@ export const BUSINESS = {
   mapsUrl: "https://maps.app.goo.gl/8oPmkj8JoWeqFB5V7",
   geo: { lat: -1.2286878, lng: 116.8824992 },
   schedule: [
-    { label: "Weekend Class (tatap muka)", value: "Minggu, 09.00 - 10.30 WITA" },
+    { label: "Weekend Class (tatap muka)", value: "Sabtu atau Minggu, 90 menit" },
     { label: "Online Class", value: "Jadwal fleksibel" },
   ],
 } as const;

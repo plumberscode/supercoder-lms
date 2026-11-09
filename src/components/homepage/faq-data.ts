@@ -35,7 +35,7 @@ export const faqs: Faq[] = [
   },
   {
     q: "Di mana lokasi kelas coding Supercoder di Balikpapan?",
-    a: `Kelas tatap muka Supercoder berlokasi di ${BUSINESS.fullAddress}. Weekend Coding Class berlangsung setiap Minggu pukul 09.00 - 10.30 WITA.`,
+    a: `Kelas tatap muka Supercoder berlokasi di ${BUSINESS.fullAddress}. Weekend Coding Class berlangsung setiap akhir pekan (Sabtu atau Minggu), 90 menit per pertemuan.`,
   },
   {
     q: "Berapa biaya kursus coding di Supercoder?",
