@@ -17,3 +17,4 @@ ALTER TABLE public.web_challenges
 SELECT conname, pg_get_constraintdef(oid) AS definisi
 FROM pg_constraint
 WHERE conrelid = 'public.web_challenges'::regclass AND contype = 'c';
+

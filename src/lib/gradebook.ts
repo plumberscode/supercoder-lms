@@ -41,6 +41,8 @@ export interface GbQuiz {
   lesson_id: string | null;
 }
 export interface GbSubmission {
+  // Hanya diambil untuk profil satu siswa (lihat fetchSubmissions).
+  id?: string;
   student_id: string;
   content_id: string;
   type: string;
@@ -364,6 +366,9 @@ export interface StudentProfile {
     xp: number | null;
     attempt: number;
     feedback: string | null;
+    // Tipe submission mentah (code, css, web, project, ...) untuk menampilkan kiriman siswa.
+    type: string;
+    submissionId: string | null;
   }[];
   retry: { id: string; title: string; subject: string; score: number; attempts: number; lastAt: string }[];
   subjects: {
@@ -533,6 +538,8 @@ export function buildStudentProfile(
         xp: e.attempt.xp,
         attempt: e.nth,
         feedback: e.sub.feedback || null,
+        type: e.sub.type,
+        submissionId: e.sub.id ?? null,
       })),
     retry,
     subjects,

@@ -1,6 +1,10 @@
 import { PASS_SCORE } from "@/lib/reports";
 import { formatWita, scoreTone, type ProfileLesson, type StudentProfile } from "@/lib/gradebook";
 import styles from "../gradebook.module.css";
+import StudentCodeButton from "./StudentCodeButton";
+
+// Tipe kiriman yang menyimpan kode (atau tautan) buatan siswa.
+const CODE_TYPES = new Set(["code", "css", "web", "project"]);
 
 const SOURCE_COLORS: Record<string, string> = {
   code: "#2563eb",
@@ -137,7 +141,7 @@ export function ActivityTimeline({ timeline }: { timeline: StudentProfile["timel
               <span role="columnheader">Sumber</span>
               <span role="columnheader">Nilai</span>
               <span role="columnheader">Percobaan</span>
-              <span role="columnheader">Feedback guru</span>
+              <span role="columnheader">Kode siswa</span>
             </div>
             {timeline.map((t, i) => (
               <div key={i} className={styles.timelineRow} role="row">
@@ -165,8 +169,16 @@ export function ActivityTimeline({ timeline }: { timeline: StudentProfile["timel
                 <span role="cell" style={{ color: "#475569" }}>
                   ke-{t.attempt}
                 </span>
-                <span role="cell" className={styles.feedback}>
-                  {t.feedback || "–"}
+                <span role="cell">
+                  {t.submissionId && CODE_TYPES.has(t.type) ? (
+                    <StudentCodeButton
+                      submissionId={t.submissionId}
+                      lesson={t.lesson}
+                      submittedAt={formatWita(t.at)}
+                    />
+                  ) : (
+                    <span className={styles.muted}>–</span>
+                  )}
                 </span>
               </div>
             ))}

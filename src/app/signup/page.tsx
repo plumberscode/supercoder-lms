@@ -21,10 +21,11 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           full_name: fullName,
         },
@@ -33,6 +34,10 @@ export default function SignupPage() {
 
     if (error) {
       setError(error.message);
+    } else if (data.user && data.user.identities?.length === 0) {
+      // Supabase tidak mengembalikan error untuk email yang sudah terdaftar
+      // (dan tidak mengirim email), tapi identities-nya kosong.
+      setError("Email ini sudah terdaftar. Silakan masuk atau reset kata sandi.");
     } else {
       setSuccess(true);
     }

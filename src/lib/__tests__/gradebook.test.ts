@@ -126,7 +126,7 @@ describe("buildStudentProfile", () => {
     now: NOW,
     submissions: [
       sub("a", "l1", "code", 40, daysAgo(3)),
-      { ...sub("a", "l1", "code", 90, daysAgo(2)), feedback: "Bagus" },
+      { ...sub("a", "l1", "code", 90, daysAgo(2)), id: "s-90", feedback: "Bagus" },
       sub("a", "l1", "lesson", 95, daysAgo(2, -1)),
       sub("a", "q2", "quiz", 60, daysAgo(1)),
       sub("a", "q2", "quiz", 65, daysAgo(0, 1)),
@@ -150,7 +150,8 @@ describe("buildStudentProfile", () => {
       ["Print", "Coding", 2],
       ["Print", "Coding", 1],
     ]);
-    expect(profile.timeline[3].feedback).toBe("Bagus");
+    expect(profile.timeline[3]).toMatchObject({ feedback: "Bagus", type: "code", submissionId: "s-90" });
+    expect(profile.timeline[4].submissionId).toBeNull();
   });
 
   it("lists lessons to retry and progress per subject", () => {

@@ -33,7 +33,7 @@ export function fetchSubmissions(supabase: SupabaseClient, studentId?: string) {
   return fetchAllRows<GbSubmission>((from, to) => {
     let query = supabase
       .from("submissions")
-      .select(`student_id, content_id, type, score, submitted_at${studentId ? ", feedback" : ""}`)
+      .select(`student_id, content_id, type, score, submitted_at${studentId ? ", id, feedback" : ""}`)
       .in("type", [...SCORED_TYPES]);
     if (studentId) query = query.eq("student_id", studentId);
     return query.order("id").range(from, to) as unknown as PromiseLike<{

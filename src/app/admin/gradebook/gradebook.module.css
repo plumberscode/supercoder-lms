@@ -755,7 +755,7 @@ button.kpi:hover {
 
 .timelineRow {
   display: grid;
-  grid-template-columns: 140px minmax(200px, 1.4fr) 150px 100px 80px 90px minmax(180px, 1.4fr);
+  grid-template-columns: 140px minmax(200px, 1.4fr) 150px 100px 80px 90px minmax(120px, 1fr);
   gap: 14px;
   padding: 12px;
   font-size: 0.8125rem;
@@ -778,9 +778,113 @@ button.kpi:hover {
   color: #334155;
 }
 
-.feedback {
+.codeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: #1e293b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.codeBtn:hover:not(:disabled) {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.codeBtn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.codeDialog {
+  width: min(860px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.25);
+}
+
+.codeDialog::backdrop {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.codeDialogInner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+.codeDialogHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.codeClose {
+  display: inline-flex;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
   color: #475569;
-  font-style: italic;
+  cursor: pointer;
+}
+
+.codeClose:hover {
+  background: #f1f5f9;
+}
+
+.codeTabs {
+  display: flex;
+  gap: 6px;
+}
+
+.codeTab {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+}
+
+.codeTabActive {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #fff;
+}
+
+.codeBlock {
+  margin: 0;
+  padding: 16px;
+  max-height: 60vh;
+  overflow: auto;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  white-space: pre;
+  tab-size: 4;
+}
+
+.codeLink {
+  color: #2563eb;
+  font-size: 0.875rem;
+  word-break: break-all;
 }
 
 .subjects {
