@@ -61,6 +61,15 @@ export default function CssChallengeComponent({
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Pesan & hasil nilai tampil di bawah deskripsi soal yang panjang; tanpa digulir,
+  // siswa tidak melihat apa-apa setelah menekan "Nilai Kodeku".
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (outputError || gradeResult) {
+      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [outputError, gradeResult]);
 
   // Live preview with 300ms debounce
   useEffect(() => {
@@ -200,6 +209,7 @@ export default function CssChallengeComponent({
             className={styles.description}
           />
 
+          <div ref={resultRef} style={{ scrollMarginTop: 16 }} />
           {outputError && (
             <div
               style={{
