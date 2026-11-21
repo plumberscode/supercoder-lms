@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import CodeEditor from "./CodeEditor";
+import { formatHtml } from "@/lib/format-html";
 import ChallengeDescription from "./ChallengeDescription";
 import Celebration, { PASSING_SCORE } from "./Celebration";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
@@ -52,7 +53,7 @@ export default function HtmlJsChallenge({
   const descPanel = usePanelSize("lms:panel:desc-w");
   const bottomPanel = usePanelSize("lms:panel:bottom-h");
   const initialHtml =
-    existingSubmission?.data?.html || challenge.starter_html || "";
+    existingSubmission?.data?.html || formatHtml(challenge.starter_html || "");
   const initialJs =
     existingSubmission?.data?.code || challenge.starter_code || "";
 
@@ -197,7 +198,7 @@ export default function HtmlJsChallenge({
   };
 
   const handleReset = () => {
-    setHtmlCode(challenge.starter_html || "");
+    setHtmlCode(formatHtml(challenge.starter_html || ""));
     setJsCode(challenge.starter_code || "");
     setOutput("");
     setOutputError(null);

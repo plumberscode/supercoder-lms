@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import CodeEditor from "./CodeEditor";
+import { formatHtml } from "@/lib/format-html";
 import ChallengeDescription from "./ChallengeDescription";
 import Celebration, { PASSING_SCORE } from "./Celebration";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
@@ -44,7 +45,7 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
   const jsOnly = challenge.mode === "js";
 
   const initialHtml =
-    existingSubmission?.data?.html || challenge.starter_html || "";
+    existingSubmission?.data?.html || formatHtml(challenge.starter_html || "");
   const initialCss =
     existingSubmission?.data?.css || challenge.starter_css || "";
   const initialJs = existingSubmission?.data?.js || challenge.starter_js || "";
@@ -202,7 +203,7 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
   };
 
   const handleReset = () => {
-    setHtmlCode(challenge.starter_html || "");
+    setHtmlCode(formatHtml(challenge.starter_html || ""));
     setCssCode(challenge.starter_css || "");
     setJsCode(challenge.starter_js || "");
     setOutputError(null);

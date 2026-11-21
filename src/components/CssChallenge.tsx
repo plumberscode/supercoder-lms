@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import CodeEditor from "./CodeEditor";
+import { formatHtml } from "@/lib/format-html";
 import styles from "./CssChallenge.module.css";
 import { submitCssSolution, getCssHint } from "@/app/lessons/css-actions";
 import { buildCssPreview } from "@/lib/css-preview";
@@ -34,7 +35,7 @@ export default function CssChallengeComponent({
   const [cssCode, setCssCode] = useState(
     existingSubmission?.data?.css || challenge.starter_css || "",
   );
-  const [htmlCode, setHtmlCode] = useState(challenge.starter_html || "");
+  const [htmlCode, setHtmlCode] = useState(formatHtml(challenge.starter_html || ""));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [celebration, setCelebration] = useState<{
     score: number;
@@ -154,7 +155,7 @@ export default function CssChallengeComponent({
 
   const handleReset = () => {
     setCssCode(challenge.starter_css || "");
-    setHtmlCode(challenge.starter_html || "");
+    setHtmlCode(formatHtml(challenge.starter_html || ""));
     setOutputError(null);
     setGradeResult(null);
     setHint("");
