@@ -142,6 +142,23 @@ export default async function LessonPage({
       : null;
   };
 
+  // Materi berikutnya di modul yang sama (untuk tombol "Next" setelah soal selesai).
+  // Kosong jika ini materi terakhir modul.
+  const fetchNextLessonId = async () => {
+    if (!["code", "css-challenge", "web-challenge"].includes(lesson.type)) {
+      return null;
+    }
+    const { data } = await supabase
+      .from("lessons")
+      .select("id")
+      .eq("module_id", (lesson.module_id as any).id)
+      .gt("order_index", lesson.order_index)
+      .order("order_index", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    return (data?.id as string | undefined) ?? null;
+  };
+
   // Semua pengambilan di bawah tidak saling bergantung, jadi dijalankan bersamaan.
   const [
     { data: lessonScore },
@@ -151,6 +168,7 @@ export default async function LessonPage({
     { challenge: codingChallenge, cases: testCases },
     cssChallenge,
     webChallenge,
+    nextLessonId,
   ] = await Promise.all([
     submissionOf("lesson", "score, feedback, graded_at"),
     submissionOf("code", "score, data, attempts_reset_at"),
@@ -159,6 +177,7 @@ export default async function LessonPage({
     fetchCodingChallenge(),
     fetchCssChallenge(),
     fetchWebChallenge(),
+    fetchNextLessonId(),
   ]);
 
   const subjectId = (lesson.module_id as any).subject_id;
@@ -200,6 +219,7 @@ export default async function LessonPage({
               challenge={codingChallenge}
               testCases={testCases}
               existingSubmission={codeSubmission}
+              nextLessonId={nextLessonId}
             />
           )}
           {lesson.type === "code" && !codingChallenge && (
@@ -212,6 +232,7 @@ export default async function LessonPage({
             <CssChallenge
               challenge={cssChallenge}
               existingSubmission={cssSubmission}
+              nextLessonId={nextLessonId}
             />
           )}
           {lesson.type === "css-challenge" && !cssChallenge && (
@@ -224,6 +245,7 @@ export default async function LessonPage({
             <WebChallenge
               challenge={webChallenge}
               existingSubmission={webSubmission}
+              nextLessonId={nextLessonId}
             />
           )}
           {lesson.type === "web-challenge" && !webChallenge && (

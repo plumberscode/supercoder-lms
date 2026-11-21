@@ -9,6 +9,7 @@ import { runTestCases, type GradingResult } from "@/lib/test-runner";
 import HtmlJsChallenge from "./HtmlJsChallenge";
 import ChallengeDescription from "./ChallengeDescription";
 import Celebration, { PASSING_SCORE } from "./Celebration";
+import NextLessonButton from "./NextLessonButton";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 
 interface CodingChallenge {
@@ -36,12 +37,15 @@ interface Props {
   challenge: CodingChallenge;
   testCases: TestCase[];
   existingSubmission?: { score: number; data: any } | null;
+  /** Materi berikutnya di modul ini; null jika ini materi terakhir modul. */
+  nextLessonId?: string | null;
 }
 
 export default function CodeChallenge({
   challenge,
   testCases,
   existingSubmission,
+  nextLessonId,
 }: Props) {
   if (challenge.language === "html-js") {
     return (
@@ -49,6 +53,7 @@ export default function CodeChallenge({
         challenge={{ ...challenge, language: "html-js" }}
         testCases={testCases}
         existingSubmission={existingSubmission}
+        nextLessonId={nextLessonId}
       />
     );
   }
@@ -58,6 +63,7 @@ export default function CodeChallenge({
       challenge={challenge}
       testCases={testCases}
       existingSubmission={existingSubmission}
+      nextLessonId={nextLessonId}
     />
   );
 }
@@ -66,6 +72,7 @@ function StandardCodeChallenge({
   challenge,
   testCases,
   existingSubmission,
+  nextLessonId,
 }: Props) {
   const descPanel = usePanelSize("lms:panel:desc-w");
   const bottomPanel = usePanelSize("lms:panel:bottom-h");
@@ -133,7 +140,7 @@ function StandardCodeChallenge({
       setAttemptCount((prev) => prev + 1);
 
       if (result.score >= PASSING_SCORE) {
-        setFinalScore(result.score);
+        setFinalScore((prev) => Math.max(prev ?? 0, result.score));
         const saved = await submitCodeSolution({
           challengeId: challenge.id,
           lessonId: challenge.lesson_id,
@@ -281,6 +288,32 @@ function StandardCodeChallenge({
                 </div>
               ))}
             </>
+          )}
+
+          {/* Success panel */}
+          {finalScore !== null && finalScore >= PASSING_SCORE && (
+            <div
+              style={{
+                marginTop: "16px",
+                padding: "16px",
+                backgroundColor: "#F0FDF4",
+                borderRadius: "8px",
+                border: "1px solid #BBF7D0",
+                textAlign: "center",
+              }}
+            >
+              <span
+                style={{ fontSize: "2rem", display: "block", marginBottom: "8px" }}
+              >
+                🎉
+              </span>
+              <h3 style={{ color: "#166534", marginBottom: "6px", fontSize: "1rem" }}>Selamat!</h3>
+              <p style={{ color: "#15803D", margin: 0, fontSize: "0.8rem" }}>
+                Kamu telah menyelesaikan soal ini dengan skor terbaik{" "}
+                {finalScore}/100.
+              </p>
+              {nextLessonId && <NextLessonButton lessonId={nextLessonId} />}
+            </div>
           )}
         </div>
 

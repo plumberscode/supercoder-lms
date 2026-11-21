@@ -9,6 +9,7 @@ import { submitCssSolution, getCssHint } from "@/app/lessons/css-actions";
 import { buildCssPreview } from "@/lib/css-preview";
 import ChallengeDescription from "./ChallengeDescription";
 import Celebration, { PASSING_SCORE } from "./Celebration";
+import NextLessonButton from "./NextLessonButton";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 
 interface CssChallenge {
@@ -25,11 +26,14 @@ interface CssChallenge {
 interface Props {
   challenge: CssChallenge;
   existingSubmission?: { score: number; data: any; attempts_reset_at?: string | null } | null;
+  /** Materi berikutnya di modul ini; null jika ini materi terakhir modul. */
+  nextLessonId?: string | null;
 }
 
 export default function CssChallengeComponent({
   challenge,
   existingSubmission,
+  nextLessonId,
 }: Props) {
   const descPanel = usePanelSize("lms:panel:desc-w");
   const bottomPanel = usePanelSize("lms:panel:bottom-h");
@@ -324,6 +328,7 @@ export default function CssChallengeComponent({
                   !isMaxedOut &&
                   " Kamu masih bisa mencoba untuk skor lebih tinggi!"}
               </p>
+              {nextLessonId && <NextLessonButton lessonId={nextLessonId} />}
             </div>
           )}
         </div>

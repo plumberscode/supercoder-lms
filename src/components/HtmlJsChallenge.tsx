@@ -6,6 +6,7 @@ import { formatHtml } from "@/lib/format-html";
 import { MAX_ATTEMPTS, attemptsSinceReset, totalAttempts } from "@/lib/attempts";
 import ChallengeDescription from "./ChallengeDescription";
 import Celebration, { PASSING_SCORE } from "./Celebration";
+import NextLessonButton from "./NextLessonButton";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 import styles from "./code-challenge.module.css";
 import {
@@ -44,12 +45,15 @@ interface Props {
   challenge: CodingChallenge;
   testCases: TestCase[];
   existingSubmission?: { score: number; data: any; attempts_reset_at?: string | null } | null;
+  /** Materi berikutnya di modul ini; null jika ini materi terakhir modul. */
+  nextLessonId?: string | null;
 }
 
 export default function HtmlJsChallenge({
   challenge,
   testCases,
   existingSubmission,
+  nextLessonId,
 }: Props) {
   const descPanel = usePanelSize("lms:panel:desc-w");
   const bottomPanel = usePanelSize("lms:panel:bottom-h");
@@ -496,6 +500,7 @@ export default function HtmlJsChallenge({
               !isMaxedOut &&
               " Kamu masih bisa mencoba untuk skor lebih tinggi!"}
           </p>
+          {nextLessonId && <NextLessonButton lessonId={nextLessonId} />}
         </div>
       )}
     </div>

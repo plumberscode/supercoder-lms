@@ -6,6 +6,7 @@ import { formatHtml } from "@/lib/format-html";
 import { MAX_ATTEMPTS, attemptsSinceReset, totalAttempts } from "@/lib/attempts";
 import ChallengeDescription from "./ChallengeDescription";
 import Celebration, { PASSING_SCORE } from "./Celebration";
+import NextLessonButton from "./NextLessonButton";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
 import styles from "./WebChallenge.module.css";
 import {
@@ -32,9 +33,11 @@ interface WebChallengeData {
 interface Props {
   challenge: WebChallengeData;
   existingSubmission?: { score: number; data: any; attempts_reset_at?: string | null } | null;
+  /** Materi berikutnya di modul ini; null jika ini materi terakhir modul. */
+  nextLessonId?: string | null;
 }
 
-export default function WebChallenge({ challenge, existingSubmission }: Props) {
+export default function WebChallenge({ challenge, existingSubmission, nextLessonId }: Props) {
   const descPanel = usePanelSize("lms:panel:desc-w");
   const bottomPanel = usePanelSize("lms:panel:bottom-h");
   // Percobaan sebelum reset jatah terakhir: tidak memakai jatah, tetapi tetap dihitung
@@ -382,6 +385,7 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
                   !isMaxedOut &&
                   " Kamu masih bisa mencoba untuk skor lebih tinggi!"}
               </p>
+              {nextLessonId && <NextLessonButton lessonId={nextLessonId} />}
             </div>
           )}
         </div>
