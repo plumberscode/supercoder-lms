@@ -153,9 +153,9 @@ export default async function LessonPage({
     webChallenge,
   ] = await Promise.all([
     submissionOf("lesson", "score, feedback, graded_at"),
-    submissionOf("code", "score, data"),
-    submissionOf("css", "score, data"),
-    submissionOf("web", "score, data"),
+    submissionOf("code", "score, data, attempts_reset_at"),
+    submissionOf("css", "score, data, attempts_reset_at"),
+    submissionOf("web", "score, data, attempts_reset_at"),
     fetchCodingChallenge(),
     fetchCssChallenge(),
     fetchWebChallenge(),

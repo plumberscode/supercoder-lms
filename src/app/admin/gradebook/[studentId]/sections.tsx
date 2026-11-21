@@ -1,7 +1,9 @@
 import { PASS_SCORE } from "@/lib/reports";
 import { formatWita, scoreTone, type ProfileLesson, type StudentProfile } from "@/lib/gradebook";
 import styles from "../gradebook.module.css";
+import { MAX_ATTEMPTS, type AttemptQuotaRow } from "@/lib/attempts";
 import StudentCodeButton from "./StudentCodeButton";
+import ResetAttemptsButton from "./ResetAttemptsButton";
 
 // Tipe kiriman yang menyimpan kode (atau tautan) buatan siswa.
 const CODE_TYPES = new Set(["code", "css", "web", "project"]);
@@ -116,6 +118,57 @@ export function RetryList({ retry }: { retry: StudentProfile["retry"] }) {
         </div>
       ))}
       {retry.length > 6 && <span className={styles.muted}>+{retry.length - 6} materi lainnya</span>}
+    </section>
+  );
+}
+
+export function AttemptQuota({
+  rows,
+  studentName,
+  canReset,
+}: {
+  rows: AttemptQuotaRow[];
+  studentName: string;
+  canReset: boolean;
+}) {
+  return (
+    <section className={`${styles.panel} ${styles.section}`}>
+      <div className={styles.sectionHead}>
+        <h2 className={styles.sectionTitle}>Jatah penilaian soal coding</h2>
+        <span className={styles.sectionHint}>
+          Soal CSS, Web &amp; HTML+JS dibatasi {MAX_ATTEMPTS} kali penilaian
+        </span>
+      </div>
+      {rows.length === 0 ? (
+        <span className={styles.muted} style={{ fontSize: "0.8125rem" }}>
+          Belum ada soal coding yang dikirim.
+        </span>
+      ) : (
+        rows.map((r) => {
+          const full = r.used >= MAX_ATTEMPTS;
+          return (
+            <div key={r.submissionId} className={styles.retryItem} style={{ flexWrap: "wrap" }}>
+              <span className={styles.stack} style={{ flex: "1 1 220px" }}>
+                <span className={styles.strong}>{r.lessonTitle}</span>
+                <span className={styles.muted}>
+                  {r.source} · {r.used}/{MAX_ATTEMPTS} terpakai
+                  {full && <strong style={{ color: "#b91c1c" }}> · Habis</strong>}
+                  {r.resetCount > 0 &&
+                    ` · direset ${r.resetCount}x${r.resetAt ? ` (terakhir ${formatWita(r.resetAt)})` : ""} · total ${r.total} percobaan`}
+                </span>
+              </span>
+              {canReset && (
+                <ResetAttemptsButton
+                  submissionId={r.submissionId}
+                  studentName={studentName}
+                  lesson={r.lessonTitle}
+                  disabled={r.used === 0}
+                />
+              )}
+            </div>
+          );
+        })
+      )}
     </section>
   );
 }

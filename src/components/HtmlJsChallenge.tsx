@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import CodeEditor from "./CodeEditor";
 import { formatHtml } from "@/lib/format-html";
+import { MAX_ATTEMPTS, attemptsSinceReset, totalAttempts } from "@/lib/attempts";
 import ChallengeDescription from "./ChallengeDescription";
 import Celebration, { PASSING_SCORE } from "./Celebration";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
@@ -42,7 +43,7 @@ interface TestCase {
 interface Props {
   challenge: CodingChallenge;
   testCases: TestCase[];
-  existingSubmission?: { score: number; data: any } | null;
+  existingSubmission?: { score: number; data: any; attempts_reset_at?: string | null } | null;
 }
 
 export default function HtmlJsChallenge({
@@ -52,6 +53,11 @@ export default function HtmlJsChallenge({
 }: Props) {
   const descPanel = usePanelSize("lms:panel:desc-w");
   const bottomPanel = usePanelSize("lms:panel:bottom-h");
+  // Percobaan sebelum reset jatah terakhir: tidak memakai jatah, tetapi tetap dihitung
+  // untuk tingkat detail petunjuk AI.
+  const priorAttempts =
+    totalAttempts(existingSubmission?.data?.attempts) -
+    attemptsSinceReset(existingSubmission?.data?.attempts, existingSubmission?.attempts_reset_at);
   const initialHtml =
     existingSubmission?.data?.html || formatHtml(challenge.starter_html || "");
   const initialJs =
@@ -79,7 +85,7 @@ export default function HtmlJsChallenge({
     existingSubmission?.score || 0,
   );
   const [attemptsUsed, setAttemptsUsed] = useState<number>(
-    existingSubmission?.data?.attempts?.length || 0,
+    attemptsSinceReset(existingSubmission?.data?.attempts, existingSubmission?.attempts_reset_at),
   );
   const [lastSubmittedHtml, setLastSubmittedHtml] =
     useState<string>(initialHtml);
@@ -187,7 +193,7 @@ export default function HtmlJsChallenge({
         description: challenge.description,
         studentHtml: htmlCode,
         studentJs: jsCode,
-        attemptNumber: attemptsUsed,
+        attemptNumber: priorAttempts + attemptsUsed,
       });
       setHint(hintText);
     } catch {
@@ -208,7 +214,7 @@ export default function HtmlJsChallenge({
     setPreviewActive(false);
   };
 
-  const maxAttempts = challenge.max_attempts || 3;
+  const maxAttempts = MAX_ATTEMPTS;
   const remainingAttempts = maxAttempts - attemptsUsed;
   const isMaxedOut = attemptsUsed >= maxAttempts;
 

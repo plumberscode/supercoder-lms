@@ -10,6 +10,7 @@ import {
   LESSON_ACCESS_DENIED,
 } from "@/lib/lesson-access";
 import { revalidatePath } from "next/cache";
+import { MAX_ATTEMPTS, attemptLimitMessage, attemptsSinceReset } from "@/lib/attempts";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { awardXp } from "@/lib/xp";
 import OpenAI from "openai";
@@ -39,17 +40,23 @@ export async function submitWebChallengeSolution(params: {
   const mode = challenge.mode as WebMode;
 
   // Fetch existing submission
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("submissions")
-    .select("id, score, data")
+    .select("id, score, data, attempts_reset_at")
     .eq("student_id", user.id)
     .eq("content_id", params.lessonId)
     .eq("type", "web")
     .maybeSingle();
+  // Gagal tertutup: tanpa data kiriman lama, batas jatah tidak bisa dicek.
+  if (existingError) {
+    console.error("Fetch web submission failed:", existingError);
+    return { error: "Gagal memuat kiriman sebelumnya. Silakan coba lagi." };
+  }
 
   const existingAttempts: any[] = existing?.data?.attempts || [];
-  if (existingAttempts.length >= 3) {
-    return { error: "Batas submit sudah tercapai (3/3)" };
+  const usedAttempts = attemptsSinceReset(existingAttempts, existing?.attempts_reset_at);
+  if (usedAttempts >= MAX_ATTEMPTS) {
+    return { error: attemptLimitMessage() };
   }
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
@@ -233,7 +240,8 @@ ${KAKAK_STYLE_JSON}`;
     score,
     feedback,
     bestScore,
-    attemptsUsed: newAttempts.length,
+    attemptsUsed: usedAttempts + 1,
+    totalAttempts: newAttempts.length,
     xpEarned,
   };
 }

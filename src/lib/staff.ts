@@ -16,3 +16,19 @@ export async function currentUserIsStaff() {
     .single();
   return isStaff(profile?.role);
 }
+
+// Untuk aksi yang hanya boleh dilakukan admin (bukan guru). Mengembalikan id admin,
+// atau null bila pemanggil bukan admin.
+export async function currentAdminId(): Promise<string | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  return profile?.role === "admin" ? user.id : null;
+}

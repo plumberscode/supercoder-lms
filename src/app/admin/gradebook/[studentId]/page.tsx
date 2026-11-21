@@ -6,7 +6,8 @@ import { fetchCatalog, fetchSubmissions } from "@/lib/gradebook-data";
 import { INACTIVE_DAYS, buildStudentProfile, formatWita, relativeTime } from "@/lib/gradebook";
 import { PROGRAMS } from "@/lib/student-access";
 import { buildWaLink } from "@/lib/whatsapp";
-import { ActivityTimeline, RetryList, ScoreSources, SubjectProgress } from "./sections";
+import { LIMITED_SUBMISSION_TYPES, buildAttemptQuota } from "@/lib/attempts";
+import { ActivityTimeline, AttemptQuota, RetryList, ScoreSources, SubjectProgress } from "./sections";
 import styles from "../gradebook.module.css";
 
 export default async function StudentGradebookPage({
@@ -20,7 +21,11 @@ export default async function StudentGradebookPage({
   const { back } = await searchParams;
   const supabase = await createClient();
 
-  const [studentRes, catalog, submissions] = await Promise.all([
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [studentRes, catalog, submissions, quotaRes, viewerRes] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, full_name, username, email, role, program, xp, level, created_at, parent_name, parent_whatsapp")
@@ -28,9 +33,21 @@ export default async function StudentGradebookPage({
       .maybeSingle(),
     fetchCatalog(supabase),
     fetchSubmissions(supabase, studentId),
+    supabase
+      .from("submissions")
+      .select("id, content_id, type, attempts:data->attempts, attempts_reset_at, attempts_reset_count")
+      .eq("student_id", studentId)
+      .in("type", [...LIMITED_SUBMISSION_TYPES]),
+    user
+      ? supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
   const student = studentRes.data;
   if (!student || student.role !== "student") notFound();
+  if (quotaRes.error) console.error("Fetch attempt quota failed:", quotaRes.error);
+  const quotaRows = buildAttemptQuota((quotaRes.data ?? []) as any[], catalog.lessons as any[]);
+  // Tombol reset hanya untuk admin; server action-nya juga menolak selain admin.
+  const canReset = viewerRes.data?.role === "admin";
 
   const now = new Date();
   const profile = buildStudentProfile({
@@ -176,6 +193,8 @@ export default async function StudentGradebookPage({
         <ScoreSources sources={profile.sources} />
         <RetryList retry={profile.retry} />
       </div>
+
+      <AttemptQuota rows={quotaRows} studentName={name} canReset={canReset} />
 
       <ActivityTimeline timeline={profile.timeline} />
       <SubjectProgress subjects={profile.subjects} />

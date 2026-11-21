@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import CodeEditor from "./CodeEditor";
 import { formatHtml } from "@/lib/format-html";
+import { MAX_ATTEMPTS, attemptsSinceReset, totalAttempts } from "@/lib/attempts";
 import styles from "./CssChallenge.module.css";
 import { submitCssSolution, getCssHint } from "@/app/lessons/css-actions";
 import { buildCssPreview } from "@/lib/css-preview";
@@ -23,7 +24,7 @@ interface CssChallenge {
 
 interface Props {
   challenge: CssChallenge;
-  existingSubmission?: { score: number; data: any } | null;
+  existingSubmission?: { score: number; data: any; attempts_reset_at?: string | null } | null;
 }
 
 export default function CssChallengeComponent({
@@ -32,6 +33,11 @@ export default function CssChallengeComponent({
 }: Props) {
   const descPanel = usePanelSize("lms:panel:desc-w");
   const bottomPanel = usePanelSize("lms:panel:bottom-h");
+  // Percobaan sebelum reset jatah terakhir: tidak memakai jatah, tetapi tetap dihitung
+  // untuk tingkat detail petunjuk AI.
+  const priorAttempts =
+    totalAttempts(existingSubmission?.data?.attempts) -
+    attemptsSinceReset(existingSubmission?.data?.attempts, existingSubmission?.attempts_reset_at);
   const [cssCode, setCssCode] = useState(
     existingSubmission?.data?.css || challenge.starter_css || "",
   );
@@ -50,7 +56,7 @@ export default function CssChallengeComponent({
     existingSubmission?.score || 0,
   );
   const [attemptsUsed, setAttemptsUsed] = useState<number>(
-    existingSubmission?.data?.attempts?.length || 0,
+    attemptsSinceReset(existingSubmission?.data?.attempts, existingSubmission?.attempts_reset_at),
   );
   const [lastSubmittedCss, setLastSubmittedCss] = useState<string>(
     existingSubmission?.data?.css || challenge.starter_css || "",
@@ -143,7 +149,7 @@ export default function CssChallengeComponent({
         description: challenge.description,
         studentCss: cssCode,
         starterHtml: htmlCode,
-        attemptNumber: attemptsUsed,
+        attemptNumber: priorAttempts + attemptsUsed,
       });
       setHint(hintText);
     } catch {
@@ -162,8 +168,8 @@ export default function CssChallengeComponent({
     setPreviewKey((prev) => prev + 1);
   };
 
-  const remainingAttempts = challenge.max_attempts - attemptsUsed;
-  const isMaxedOut = attemptsUsed >= challenge.max_attempts;
+  const remainingAttempts = MAX_ATTEMPTS - attemptsUsed;
+  const isMaxedOut = attemptsUsed >= MAX_ATTEMPTS;
 
   const getScoreClass = (score: number) => {
     if (score >= 70) return "";
@@ -257,7 +263,7 @@ export default function CssChallengeComponent({
                 {gradeResult.feedback}
               </div>
               <div className={styles.attemptsInfo}>
-                Percobaan terpakai: {attemptsUsed}/{challenge.max_attempts}
+                Percobaan terpakai: {attemptsUsed}/{MAX_ATTEMPTS}
               </div>
             </div>
           )}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import CodeEditor from "./CodeEditor";
 import { formatHtml } from "@/lib/format-html";
+import { MAX_ATTEMPTS, attemptsSinceReset, totalAttempts } from "@/lib/attempts";
 import ChallengeDescription from "./ChallengeDescription";
 import Celebration, { PASSING_SCORE } from "./Celebration";
 import ResizeHandle, { usePanelSize } from "./ResizeHandle";
@@ -30,12 +31,17 @@ interface WebChallengeData {
 
 interface Props {
   challenge: WebChallengeData;
-  existingSubmission?: { score: number; data: any } | null;
+  existingSubmission?: { score: number; data: any; attempts_reset_at?: string | null } | null;
 }
 
 export default function WebChallenge({ challenge, existingSubmission }: Props) {
   const descPanel = usePanelSize("lms:panel:desc-w");
   const bottomPanel = usePanelSize("lms:panel:bottom-h");
+  // Percobaan sebelum reset jatah terakhir: tidak memakai jatah, tetapi tetap dihitung
+  // untuk tingkat detail petunjuk AI.
+  const priorAttempts =
+    totalAttempts(existingSubmission?.data?.attempts) -
+    attemptsSinceReset(existingSubmission?.data?.attempts, existingSubmission?.attempts_reset_at);
   const {
     html: includeHtml,
     css: includeCss,
@@ -79,7 +85,7 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
     existingSubmission?.score || 0,
   );
   const [attemptsUsed, setAttemptsUsed] = useState<number>(
-    existingSubmission?.data?.attempts?.length || 0,
+    attemptsSinceReset(existingSubmission?.data?.attempts, existingSubmission?.attempts_reset_at),
   );
   const [lastSubmittedHtml, setLastSubmittedHtml] = useState<string>(initialHtml);
   const [lastSubmittedCss, setLastSubmittedCss] = useState<string>(initialCss);
@@ -186,7 +192,7 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
         studentHtml: htmlCode,
         studentCss: cssCode,
         studentJs: jsCode,
-        attemptNumber: attemptsUsed,
+        attemptNumber: priorAttempts + attemptsUsed,
       });
       setHint(hintText);
     } catch {
@@ -213,8 +219,8 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
     setPreviewKey((prev) => prev + 1);
   };
 
-  const remainingAttempts = challenge.max_attempts - attemptsUsed;
-  const isMaxedOut = attemptsUsed >= challenge.max_attempts;
+  const remainingAttempts = MAX_ATTEMPTS - attemptsUsed;
+  const isMaxedOut = attemptsUsed >= MAX_ATTEMPTS;
 
   const getScoreClass = (score: number) => {
     if (score >= 70) return "";
@@ -315,7 +321,7 @@ export default function WebChallenge({ challenge, existingSubmission }: Props) {
                 {gradeResult.feedback}
               </div>
               <div className={styles.attemptsInfo}>
-                Percobaan terpakai: {attemptsUsed}/{challenge.max_attempts}
+                Percobaan terpakai: {attemptsUsed}/{MAX_ATTEMPTS}
               </div>
             </div>
           )}
